@@ -21,7 +21,6 @@ public:
 	BitmapClass(std::shared_ptr<DeviceResources> deviceResources, int screenWidth, int screenHeight, CHAR* textureFilename, int bitmapWidth, int bitmapHeight, int locationX, int locationY);
 	~BitmapClass();
 
-	//bool Initialize(ID3D10Device*, int, int, CHAR*, int, int, int, int);
 	void Shutdown();
 	bool Render(int, int);
 

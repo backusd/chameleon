@@ -30,46 +30,6 @@ BitmapClass::~BitmapClass()
 	this->Shutdown();
 }
 
-/*
-bool BitmapClass::Initialize(ID3D10Device* device, int screenWidth, int screenHeight, CHAR* textureFilename, int bitmapWidth, int bitmapHeight, int locationX, int locationY)
-{
-	bool result;
-
-
-	// Store the location to render the bitmap to.
-	m_locX = locationX;
-	m_locY = locationY;
-
-	// Store the screen size.
-	m_screenWidth = screenWidth;
-	m_screenHeight = screenHeight;
-
-	// Store the size in pixels that this bitmap should be rendered at.
-	m_bitmapWidth = bitmapWidth;
-	m_bitmapHeight = bitmapHeight;
-
-	// Initialize the previous rendering position to negative one.
-	m_previousPosX = -1;
-	m_previousPosY = -1;
-
-	// Initialize the vertex and index buffer that hold the geometry for the triangle.
-	result = InitializeBuffers(device);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Load the texture for this model.
-	result = LoadTexture(device, textureFilename);
-	if (!result)
-	{
-		return false;
-	}
-
-	return true;
-}
-*/
-
 
 void BitmapClass::Shutdown()
 {

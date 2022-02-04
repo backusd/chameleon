@@ -5,7 +5,6 @@
 
 #include <memory>
 
-//#pragma comment(lib, "D3DX11")
 #include <D3DX11tex.h>
 
 

@@ -42,6 +42,7 @@ UserInterfaceClass::UserInterfaceClass(std::shared_ptr<DeviceResources> deviceRe
 		return false;
 	}
 	*/
+	
 
 	//
 	m_talkBarPosition = 0;
