@@ -138,30 +138,33 @@ int NetworkClass::GetLatency()
 
 bool NetworkClass::InitializeWinSock()
 {
-	unsigned short version;
 	WSADATA wsaData;
-	int error;
-	unsigned long bufferSize;
-	//WSAPROTOCOL_INFOW* protocolBuffer;
-	WSAPROTOCOL_INFOA* protocolBuffer;
-	int protocols[2];
 
-
-	// Create a 2.0 macro to check versions.
-	version = MAKEWORD(2, 0);
-
-	// Get the data to see if it handles the version we want.
-	error = WSAStartup(version, &wsaData);
+	// Get the data to see if it handles version 2.2
+	int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (error != 0)
 	{
 		return false;
 	}
 
-	// Check to see if the winsock dll is version 2.0.
-	if ((LOBYTE(wsaData.wVersion) != 2) || (HIBYTE(wsaData.wVersion) != 0))
+	// Check to see if the winsock dll is version 2.2
+	if ((LOBYTE(wsaData.wVersion) != 2) || (HIBYTE(wsaData.wVersion) != 2))
 	{
 		return false;
 	}
+
+	/*
+		The code below is used to verify that TCP & UDP are supported by the system.
+		For now, just assume that they are supported. In the future, this should be added
+		back, however, WSAPROTOCOL_INFOA is deprecated, so implement this in a different 
+		way. See: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaenumprotocolsa
+	
+	unsigned long bufferSize = 0;
+	//WSAPROTOCOL_INFOW* protocolBuffer;
+	WSAPROTOCOL_INFOA* protocolBuffer;
+	int protocols[2];
+
+
 
 	// Request the buffer size needed for holding the protocols available.
 	WSAEnumProtocols(NULL, NULL, &bufferSize);
@@ -188,6 +191,8 @@ bool NetworkClass::InitializeWinSock()
 	// Release the protocol buffer.
 	delete[] protocolBuffer;
 	protocolBuffer = 0;
+
+	*/
 
 	return true;
 }
@@ -231,8 +236,20 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	// Save the size of the server address structure.
 	m_addressLength = sizeof(m_serverAddress);
 
-	// Setup the address of the server we are sending data to.
-	inetAddress = inet_addr(ipAddress);
+	// Convert the string representation of the IP address to a numeric binary representation
+	// See: https://docs.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-inet_pton
+	int result = inet_pton(AF_INET, ipAddress, &inetAddress);
+	if (result == 0)
+	{
+		// A 0 result means a non-valid string representation was passed in
+		return false;
+	}
+	else if (result < 0)
+	{
+		// A -1 value means an internal error occurred and it can be retrieved via WSAGetLastError()
+		return false;
+	}
+	
 	memset((char*)&m_serverAddress, 0, m_addressLength);
 	m_serverAddress.sin_family = AF_INET;
 	m_serverAddress.sin_port = htons(portNumber);

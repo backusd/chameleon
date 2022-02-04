@@ -5,11 +5,10 @@
 const int MAX_MESSAGE_SIZE = 512;
 const int MAX_QUEUE_SIZE = 200;
 
+#pragma comment(lib, "Ws2_32.lib")
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-
-#pragma comment(lib, "ws2_32.lib")
-#include <winsock2.h>
 #include <memory>
 
 #include "NetworkMessages.h"
