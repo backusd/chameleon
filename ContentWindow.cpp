@@ -47,7 +47,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	m_blackForest = std::make_shared<BlackForestClass>();
 
-	m_userInterface = std::make_shared<UserInterfaceClass>();
+	m_userInterface = std::make_shared<UserInterfaceClass>(m_deviceResources, m_hWnd, m_width, m_height);
 
 	m_network = std::make_unique<NetworkClass>();
 	m_network->SetZonePointer(m_blackForest);

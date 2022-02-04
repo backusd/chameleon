@@ -49,6 +49,15 @@
     <Filter Include="Source Files\BlackForest">
       <UniqueIdentifier>{ecad4088-a8e1-4a1d-b540-f90f5d343c97}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{4151d4f6-9d00-4b3a-9479-9f9e8ab50f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{feef3fe1-65d6-4abe-84ee-735614cb268e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{a9030e2a-0170-4eb3-95d4-c967c430e330}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -97,7 +106,13 @@
       <Filter>Source Files\Misc</Filter>
     </ClCompile>
     <ClCompile Include="UserInterfaceClass.cpp">
-      <Filter>Source Files\Misc</Filter>
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="BitmapClass.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureClass.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -156,7 +171,47 @@
       <Filter>Header Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="UserInterfaceClass.h">
-      <Filter>Header Files\Misc</Filter>
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="BitmapClass.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureClass.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="blackforest_cm.bmp">
+      <Filter>Data</Filter>
+    </Image>
+    <Image Include="blackforest_hm.bmp">
+      <Filter>Data</Filter>
+    </Image>
+    <Image Include="char1.dds">
+      <Filter>Data</Filter>
+    </Image>
+    <Image Include="char2.dds">
+      <Filter>Data</Filter>
+    </Image>
+    <Image Include="chat.dds">
+      <Filter>Data</Filter>
+    </Image>
+    <Image Include="font.dds">
+      <Filter>Data</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="cube.txt">
+      <Filter>Data</Filter>
+    </Text>
+    <Text Include="fontdata.txt">
+      <Filter>Data</Filter>
+    </Text>
+    <Text Include="skydome.txt">
+      <Filter>Data</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -94,18 +94,4 @@ private:
 
 
 	std::unique_ptr<NetworkClass> m_network;
-
-	/*
-	InputClass* m_Input;
-	D3DClass* m_D3D;
-	NetworkClass* m_Network;
-
-	TimerClass* m_Timer;
-	FpsClass* m_Fps;
-	CpuClass* m_Cpu;
-	UserInterfaceClass* m_UserInterface;
-
-	StateClass* m_State;
-	BlackForestClass* m_BlackForest;
-	*/
 };

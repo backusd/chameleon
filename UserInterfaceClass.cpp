@@ -4,12 +4,56 @@
 #include "userinterfaceclass.h"
 
 
-UserInterfaceClass::UserInterfaceClass() : 
+UserInterfaceClass::UserInterfaceClass(std::shared_ptr<DeviceResources> deviceResources, HWND hwnd, int screenWidth, int screenHeight) :
+	m_deviceResources(deviceResources),
 	m_newMessage(false),
-	m_serverMessage{0}
+	m_serverMessage{0},
+	m_ChatWindow(nullptr)
+	// m_Text(nullptr)
 {
-	// m_ChatWindow = 0;
-	// m_Text = 0;
+	// Set the location of the chat window based on the resolution the application is running at.
+	m_chatWindowX = ((screenWidth / 2) - 300);
+	m_chatWindowY = (screenHeight - 215);
+
+	// Create the chat window bitmap object.
+	CHAR file[] = "chat.dds";
+	m_ChatWindow = new BitmapClass(deviceResources, screenWidth, screenHeight, file, 600, 200, m_chatWindowX, m_chatWindowY);
+
+	/*
+	// Create the text object.
+	m_Text = new TextClass;
+	if (!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text->Initialize(Direct3D->GetDevice(), hwnd, screenWidth, screenHeight);
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the text object.", "Error", MB_OK);
+		return false;
+	}
+
+	result = SetupTextStrings(Direct3D);
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the text strings.", "Error", MB_OK);
+		return false;
+	}
+	*/
+
+	//
+	m_talkBarPosition = 0;
+
+	m_chatBarString[0] = '\0';
+	m_chatString1[0] = '\0';
+	m_chatString2[0] = '\0';
+	m_chatString3[0] = '\0';
+	m_chatString4[0] = '\0';
+	m_chatString5[0] = '\0';
+	m_chatString6[0] = '\0';
+	m_chatString7[0] = '\0';
 }
 
 UserInterfaceClass::~UserInterfaceClass()
@@ -27,6 +71,7 @@ void UserInterfaceClass::Shutdown()
 		delete m_Text;
 		m_Text = 0;
 	}
+	*/
 
 	// Release the chat window object.
 	if (m_ChatWindow)
@@ -35,8 +80,6 @@ void UserInterfaceClass::Shutdown()
 		delete m_ChatWindow;
 		m_ChatWindow = 0;
 	}
-
-	*/
 }
 /*
 bool UserInterfaceClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int screenHeight)
@@ -152,7 +195,12 @@ bool UserInterfaceClass::Render(D3DClass* Direct3D, TextureShaderClass* TextureS
 
 
 	// Render the chat window using the texture shader.
-	result = m_ChatWindow->Render(Direct3D->GetDevice(), m_ChatWindow->GetLocationX(), m_ChatWindow->GetLocationY());  if (!result) { return false; }
+	result = m_ChatWindow->Render(Direct3D->GetDevice(), m_ChatWindow->GetLocationX(), m_ChatWindow->GetLocationY());  
+	if (!result) 
+	{ 
+		return false; 
+	}
+
 	TextureShader->Render(Direct3D->GetDevice(), m_ChatWindow->GetIndexCount(), worldMatrix, baseViewMatrix, orthoMatrix, m_ChatWindow->GetTexture());
 
 	// Render the text strings.

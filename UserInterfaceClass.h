@@ -2,6 +2,11 @@
 #include "pch.h"
 
 
+#include "DeviceResources.h"
+#include "BitmapClass.h"
+
+#include <memory>
+
 
 
 ///////////////////////
@@ -18,7 +23,7 @@
 class UserInterfaceClass
 {
 public:
-	UserInterfaceClass();
+	UserInterfaceClass(std::shared_ptr<DeviceResources> deviceResources, HWND hwnd, int screenWidth, int screenHeight);
 	~UserInterfaceClass();
 
 
@@ -36,11 +41,10 @@ public:
 	*/
 
 private:
+	std::shared_ptr<DeviceResources> m_deviceResources;
 
 
 
-	bool m_newMessage;
-	char m_serverMessage[50];
 	/*
 	
 	bool SetupTextStrings(D3DClass*);
@@ -57,11 +61,13 @@ private:
 	bool UpdateChatBar(ID3D10Device*);
 	bool AddChatMessage();
 	void AddChatMessageForServer();
+	*/
 
 	BitmapClass* m_ChatWindow;
 	int m_chatWindowX, m_chatWindowY;
-	TextClass* m_Text;
-	int m_talkBarPosition;
+	// TextClass* m_Text;
+	bool m_newMessage;
+	int  m_talkBarPosition;
 	char m_chatBarString[50];
 	char m_chatString1[50];
 	char m_chatString2[50];
@@ -71,6 +77,4 @@ private:
 	char m_chatString6[50];
 	char m_chatString7[50];
 	char m_serverMessage[50];
-	
-	*/
 };

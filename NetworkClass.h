@@ -75,11 +75,8 @@ private:
 private:
 	std::shared_ptr<StepTimer> m_timer;
 
-	// unsigned long m_pingTime;
 	double m_pingTime;
 
-	//BlackForestClass* m_ZonePtr;
-	//UserInterfaceClass* m_UserInterfacePtr;
 	std::shared_ptr<BlackForestClass> m_zone;
 	std::shared_ptr<UserInterfaceClass> m_userInterface;
 
