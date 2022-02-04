@@ -6,7 +6,7 @@ App::App()
 	{
 		// All other hard coded pixel values will be in DIPS. However, because we don't have access to the D2DFactory
 		// at the time of window creation (that could probably be changed), these values are physical pixels for the window size
-		std::shared_ptr<ContentWindow> main = std::make_shared<ContentWindow>(2000, 1200, "Main Window");
+		std::shared_ptr<ContentWindow> main = std::make_shared<ContentWindow>(1000, 800, "Main Window");
 
 		WindowManager::AddWindow(main);
 

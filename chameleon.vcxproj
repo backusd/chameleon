@@ -158,9 +158,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="BlackForestClass.cpp" />
     <ClCompile Include="ChameleonException.cpp" />
     <ClCompile Include="ContentWindow.cpp" />
+    <ClCompile Include="CPUStatistics.cpp" />
+    <ClCompile Include="DeviceResources.cpp" />
+    <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="StateClass.cpp" />
     <ClCompile Include="WindowBase.cpp" />
     <ClCompile Include="WindowException.cpp" />
     <ClCompile Include="WindowManager.cpp" />
@@ -169,9 +174,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="BlackForestClass.h" />
     <ClInclude Include="ChameleonException.h" />
     <ClInclude Include="ContentWindow.h" />
+    <ClInclude Include="CPUStatistics.h" />
+    <ClInclude Include="DeviceResources.h" />
+    <ClInclude Include="DirectXHelper.h" />
+    <ClInclude Include="InputClass.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="StateClass.h" />
+    <ClInclude Include="StepTimer.h" />
     <ClInclude Include="WindowBase.h" />
     <ClInclude Include="WindowBaseTemplate.h" />
     <ClInclude Include="WindowException.h" />

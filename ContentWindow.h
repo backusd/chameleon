@@ -4,11 +4,18 @@
 
 #include "WindowBase.h"
 #include "ChameleonException.h"
+#include "DeviceResources.h"
+#include "StepTimer.h"
 
 #include <memory>
 #include <map>
 #include <string>
 
+
+#include "CPUStatistics.h"
+#include "InputClass.h"
+#include "StateClass.h"
+#include "BlackForestClass.h"
 
 
 ///////////////////////
@@ -69,6 +76,18 @@ protected:
 private:
 	void DiscardGraphicsResources();
 
+	Microsoft::WRL::ComPtr<ID2D1DrawingStateBlock1> m_stateBlock;
+	
+	std::shared_ptr<DeviceResources> m_deviceResources;
+	StepTimer m_timer;
+
+
+
+	std::unique_ptr<CPUStatistics> m_cpuStatistics;
+	std::unique_ptr<InputClass> m_inputClass;
+
+	std::unique_ptr<StateClass> m_stateClass;
+	std::unique_ptr<BlackForestClass> m_blackForest;
 
 	/*
 	InputClass* m_Input;

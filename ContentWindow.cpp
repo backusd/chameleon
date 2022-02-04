@@ -15,9 +15,33 @@ const float SCREEN_NEAR = 0.1f;
 
 
 ContentWindow::ContentWindow(int width, int height, const char* name) :
-	WindowBase(width, height, name)
+	WindowBase(width, height, name),
+	m_stateBlock(nullptr),
+	m_cpuStatistics(nullptr),
+	m_inputClass(nullptr),
+	m_stateClass(nullptr),
+	m_blackForest(nullptr)
 {
-	bool result;
+
+	// Create the device resources
+	m_deviceResources = std::make_shared<DeviceResources>(m_hWnd);
+	m_deviceResources->OnResize(); // Calling OnResize will create the render target, etc.
+
+	// Create the state block 
+	ThrowIfFailed(
+		m_deviceResources->D2DFactory()->CreateDrawingStateBlock(m_stateBlock.GetAddressOf())
+	);
+
+
+
+	m_cpuStatistics = std::make_unique<CPUStatistics>();
+
+	m_inputClass = std::make_unique<InputClass>();
+	m_inputClass->Initialize(m_hInst, m_hWnd, m_width, m_height);
+
+	m_stateClass = std::make_unique<StateClass>();
+
+	m_blackForest = std::make_unique<BlackForestClass>();
 
 	/*
 	
@@ -153,11 +177,92 @@ ContentWindow::~ContentWindow()
 
 void ContentWindow::Update()
 {
+	std::ostringstream oss;
+	oss << "Time: " << m_timer.GetTotalSeconds();
+	SetWindowText(m_hWnd, oss.str().c_str());
 
+	m_timer.Tick([&]()
+		{
+			m_cpuStatistics->Update(m_timer);
+
+
+			m_inputClass->Frame();
+
+
+			switch (m_stateClass->GetCurrentState())
+			{
+			case STATE_BLACKFOREST:
+				/*
+				result = m_BlackForest->Frame(m_D3D, m_Input, m_Timer->GetTime(), m_UserInterface);
+
+				// Check for state changes.
+				if (m_BlackForest->GetStateChange(state) == true)
+				{
+					m_Network->SendStateChange(state);
+				}
+
+				// Check for position updates.
+				if (m_BlackForest->PositionUpdate(posX, posY, posZ, rotX, rotY, rotZ) == true)
+				{
+					m_Network->SendPositionUpdate(posX, posY, posZ, rotX, rotY, rotZ);
+				}
+				*/
+				break;
+
+			default:
+				break;
+			}
+		}
+	);
 }
 
 bool ContentWindow::Render()
 {
+	// Don't try to render anything before the first Update.
+	if (m_timer.GetFrameCount() == 0)
+		return false;
+
+	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
+
+	m_deviceResources->ResetViewport();
+
+	FLOAT background[4] = { 45.0f / 255.0f, 45.0f / 255.0f, 48.0f / 255.0f };
+	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), background);
+	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	ID3D11RenderTargetView* const targets[1] = { m_deviceResources->GetBackBufferRenderTargetView() };
+	context->OMSetRenderTargets(1, targets, m_deviceResources->GetDepthStencilView());
+
+
+
+	// Draw all 3D simulation controls first
+	//m_layout->Render3DControls();
+
+
+
+	// Draw all 2D / Menu controls next
+	m_deviceResources->ResetViewport();
+
+	ID2D1DeviceContext* context2 = m_deviceResources->D2DDeviceContext();
+	context2->SaveDrawingState(m_stateBlock.Get());
+	context2->BeginDraw();
+	context2->SetTransform(m_deviceResources->OrientationTransform2D());
+
+	//m_layout->Render2DControls();
+
+	// re-render the captured control to make sure it is on top of the UI
+	//m_layout->Render2DCapturedControl();
+
+
+	HRESULT hr = context2->EndDraw();
+	if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+	{
+		DiscardGraphicsResources();
+	}
+
+	context2->RestoreDrawingState(m_stateBlock.Get());
+
+	return true;
 	/*
 	bool result;
 	char state;
@@ -229,7 +334,8 @@ bool ContentWindow::Render()
 
 void ContentWindow::Present()
 {
-
+	// Present the render target to the screen
+	m_deviceResources->Present();
 }
 
 void ContentWindow::Destroy()

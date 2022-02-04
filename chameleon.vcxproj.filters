@@ -25,6 +25,30 @@
     <Filter Include="Source Files\Window">
       <UniqueIdentifier>{b4c50c35-b3ce-41bb-a5f4-48c63229f1a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{d9a56c59-44e8-4f08-97fb-8d9a221753ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{019fd7fe-78c9-46e0-ab2e-6d3192d00135}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Misc">
+      <UniqueIdentifier>{adf2ed3f-82a9-463e-aec1-01b2da613bde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Misc">
+      <UniqueIdentifier>{d35e2169-7d43-40d6-b025-095ec54cf226}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Input">
+      <UniqueIdentifier>{89fc3f41-7b3c-4429-8276-11bb7308b7ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input">
+      <UniqueIdentifier>{d18af5ac-afc1-4f5e-8211-bde4ef36cf18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\BlackForest">
+      <UniqueIdentifier>{e948c553-737d-439a-a4cc-3de0c90293b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BlackForest">
+      <UniqueIdentifier>{ecad4088-a8e1-4a1d-b540-f90f5d343c97}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -54,6 +78,21 @@
     <ClCompile Include="ContentWindow.cpp">
       <Filter>Source Files\Window</Filter>
     </ClCompile>
+    <ClCompile Include="DeviceResources.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="CPUStatistics.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="InputClass.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="StateClass.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="BlackForestClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -82,6 +121,27 @@
     </ClInclude>
     <ClInclude Include="ContentWindow.h">
       <Filter>Header Files\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceResources.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXHelper.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="StepTimer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="CPUStatistics.h">
+      <Filter>Header Files\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="InputClass.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="StateClass.h">
+      <Filter>Header Files\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="BlackForestClass.h">
+      <Filter>Header Files\BlackForest</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
