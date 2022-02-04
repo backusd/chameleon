@@ -5,6 +5,7 @@
 
 #pragma comment(lib, "pdh.lib")
 #include <pdh.h>
+#include <memory>
 
 class CPUStatistics
 {
@@ -13,7 +14,7 @@ public:
 	~CPUStatistics();
 
 	void Shutdown();
-	void Update(StepTimer const& timer);
+	void Update(std::shared_ptr<StepTimer> timer);
 	int GetCpuPercentage() { return static_cast<int>(m_cpuUsage); }
 
 private:

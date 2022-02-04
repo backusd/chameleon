@@ -17,10 +17,13 @@ const float SCREEN_NEAR = 0.1f;
 ContentWindow::ContentWindow(int width, int height, const char* name) :
 	WindowBase(width, height, name),
 	m_stateBlock(nullptr),
+	m_timer(nullptr),
 	m_cpuStatistics(nullptr),
 	m_inputClass(nullptr),
+	m_userInterface(nullptr),
 	m_stateClass(nullptr),
-	m_blackForest(nullptr)
+	m_blackForest(nullptr),
+	m_network(nullptr)
 {
 
 	// Create the device resources
@@ -32,6 +35,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 		m_deviceResources->D2DFactory()->CreateDrawingStateBlock(m_stateBlock.GetAddressOf())
 	);
 
+	m_timer = std::make_shared<StepTimer>();
 
 
 	m_cpuStatistics = std::make_unique<CPUStatistics>();
@@ -41,133 +45,16 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	m_stateClass = std::make_unique<StateClass>();
 
-	m_blackForest = std::make_unique<BlackForestClass>();
+	m_blackForest = std::make_shared<BlackForestClass>();
 
-	/*
-	
-	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
-	m_Input = new InputClass;
-	if (!m_Input)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
+	m_userInterface = std::make_shared<UserInterfaceClass>();
 
-	// Initialize the input object.
-	result = m_Input->Initialize(m_hInst, m_hWnd, width, height);
-	if (!result)
-	{
-		MessageBox(m_hWnd, "Could not initialize the input object.", "Error", MB_OK);
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Create the Direct3D object.
-	m_D3D = new D3DClass;
-	if (!m_D3D)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Initialize the Direct3D object.
-	result = m_D3D->Initialize(width, height, VSYNC_ENABLED, m_hWnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
-	if (!result)
-	{
-		MessageBox(m_hWnd, "Could not initialize Direct3D.", "Error", MB_OK);
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Create the timer object.
-	m_Timer = new TimerClass;
-	if (!m_Timer)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Initialize the timer object.
-	result = m_Timer->Initialize();
-	if (!result)
-	{
-		MessageBox(m_hWnd, "Could not initialize the timer object.", "Error", MB_OK);
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Create the fps object.
-	m_Fps = new FpsClass;
-	if (!m_Fps)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Initialize the fps object.
-	m_Fps->Initialize();
-
-	// Create the cpu object.
-	m_Cpu = new CpuClass;
-	if (!m_Cpu)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Initialize the cpu object.
-	m_Cpu->Initialize();
-
-	// Create the user interface object.
-	m_UserInterface = new UserInterfaceClass;
-	if (!m_UserInterface)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Initialize the user interface object.
-	result = m_UserInterface->Initialize(m_D3D, m_hWnd, width, height);
-	if (!result)
-	{
-		MessageBox(m_hWnd, "Could not initialize the user interface object.", "Error", MB_OK);
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Create the StateClass object.
-	m_State = new StateClass;
-	if (!m_State)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Create the black forest object.
-	m_BlackForest = new BlackForestClass;
-	if (!m_BlackForest)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Initialize the black forest object.
-	result = m_BlackForest->Initialize(m_D3D, m_hWnd, width, height, SCREEN_DEPTH, SCREEN_NEAR);
-	if (!result)
-	{
-		MessageBox(m_hWnd, "Could not initialize the black forest object.", "Error", MB_OK);
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Create the network object.
-	m_Network = new NetworkClass;
-	if (!m_Network)
-	{
-		throw new ChameleonException(0, nullptr);
-	}
-
-	// Set the zone and UI pointer before initializing.
-	m_Network->SetZonePointer(m_BlackForest);
-	m_Network->SetUIPointer(m_UserInterface);
-
-	// Initialize the network object.
+	m_network = std::make_unique<NetworkClass>();
+	m_network->SetZonePointer(m_blackForest);
+	m_network->SetUIPointer(m_userInterface);
 	char ip[] = "155.248.215.180";
-	result = m_Network->Initialize(ip, 7000);
-	if (!result)
-	{
-		MessageBox(m_hWnd, "Could not initialize the network.", "Error", MB_OK);
-		throw new ChameleonException(0, nullptr);
-	}
-
-	*/
+	bool success = m_network->Initialize(ip, 7000, m_timer);
+	int iii = 0;
 }
 
 ContentWindow::~ContentWindow()
@@ -178,16 +65,27 @@ ContentWindow::~ContentWindow()
 void ContentWindow::Update()
 {
 	std::ostringstream oss;
-	oss << "Time: " << m_timer.GetTotalSeconds();
+	oss << "Time: " << m_timer->GetTotalSeconds();
 	SetWindowText(m_hWnd, oss.str().c_str());
 
-	m_timer.Tick([&]()
+	m_timer->Tick([&]()
 		{
 			m_cpuStatistics->Update(m_timer);
 
-
 			m_inputClass->Frame();
 
+
+
+			// Do the network frame processing.
+			m_network->Frame();
+
+
+			// Do the UI frame processing.
+			//result = m_UserInterface->Frame(m_D3D, m_Input, m_Fps->GetFps(), m_Cpu->GetCpuPercentage(), m_Network->GetLatency());
+			//if (!result)
+			//{
+			//	return false;
+			//}
 
 			switch (m_stateClass->GetCurrentState())
 			{
@@ -219,7 +117,7 @@ void ContentWindow::Update()
 bool ContentWindow::Render()
 {
 	// Don't try to render anything before the first Update.
-	if (m_timer.GetFrameCount() == 0)
+	if (m_timer->GetFrameCount() == 0)
 		return false;
 
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();

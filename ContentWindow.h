@@ -16,6 +16,8 @@
 #include "InputClass.h"
 #include "StateClass.h"
 #include "BlackForestClass.h"
+#include "UserInterfaceClass.h"
+#include "NetworkClass.h"
 
 
 ///////////////////////
@@ -79,15 +81,19 @@ private:
 	Microsoft::WRL::ComPtr<ID2D1DrawingStateBlock1> m_stateBlock;
 	
 	std::shared_ptr<DeviceResources> m_deviceResources;
-	StepTimer m_timer;
+	std::shared_ptr<StepTimer> m_timer;
 
 
 
 	std::unique_ptr<CPUStatistics> m_cpuStatistics;
 	std::unique_ptr<InputClass> m_inputClass;
+	std::shared_ptr<UserInterfaceClass> m_userInterface;
 
 	std::unique_ptr<StateClass> m_stateClass;
-	std::unique_ptr<BlackForestClass> m_blackForest;
+	std::shared_ptr<BlackForestClass> m_blackForest;
+
+
+	std::unique_ptr<NetworkClass> m_network;
 
 	/*
 	InputClass* m_Input;

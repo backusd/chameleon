@@ -40,14 +40,14 @@ void CPUStatistics::Shutdown()
 }
 
 
-void CPUStatistics::Update(StepTimer const& timer)
+void CPUStatistics::Update(std::shared_ptr<StepTimer> timer)
 {
 	PDH_FMT_COUNTERVALUE value;
 
 	if (m_canReadCpu)
 	{
 		// Only update the cpu usage once every second
-		double totalSeconds = timer.GetTotalSeconds();
+		double totalSeconds = timer->GetTotalSeconds();
 		if (totalSeconds - m_lastSampleTimeInSeconds > 1.0)
 		{
 			m_lastSampleTimeInSeconds = totalSeconds;

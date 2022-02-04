@@ -581,12 +581,12 @@ bool BlackForestClass::Render(D3DClass* Direct3D, UserInterfaceClass* UserInterf
 
 	return true;
 }
-
+*/
 
 void BlackForestClass::AddEntity(unsigned short entityId, char entityType, float positionX, float positionY, float positionZ, float rotationX, float rotationY, float rotationZ)
 {
+	/*
 	int i;
-
 
 	// Loop through the entity list and find a free spot.
 	i = 0;
@@ -608,13 +608,13 @@ void BlackForestClass::AddEntity(unsigned short entityId, char entityType, float
 		m_EntityList[i].SetPosition(positionX, positionY, positionZ);
 		m_EntityList[i].SetRotation(rotationX, rotationY, rotationZ);
 	}
-
-	return;
+	*/
 }
 
 
 void BlackForestClass::RemoveEntity(unsigned short entityId)
 {
+	/*
 	int i;
 	bool found;
 
@@ -633,11 +633,10 @@ void BlackForestClass::RemoveEntity(unsigned short entityId)
 			i++;
 		}
 	}
-
-	return;
+	*/	
 }
 
-
+/*
 bool BlackForestClass::GetStateChange(char& state)
 {
 	// Determine if there was a state change based on the movement input of the client.
@@ -652,13 +651,13 @@ bool BlackForestClass::GetStateChange(char& state)
 		return false;
 	}
 }
-
+*/
 
 void BlackForestClass::UpdateEntityState(unsigned short entityId, char state)
 {
+	/*
 	int i;
 	bool found;
-
 
 	// Find the entity in the entity list.
 	i = 0;
@@ -678,10 +677,10 @@ void BlackForestClass::UpdateEntityState(unsigned short entityId, char state)
 	// Update their current state.
 	m_EntityList[i].UpdateState(state);
 
-	return;
+	*/
 }
 
-
+/*
 bool BlackForestClass::PositionUpdate(float& posX, float& posY, float& posZ, float& rotX, float& rotY, float& rotZ)
 {
 	// Check if it is time to send the server an update of our position in the zone.
@@ -698,10 +697,11 @@ bool BlackForestClass::PositionUpdate(float& posX, float& posY, float& posZ, flo
 		return false;
 	}
 }
-
+*/
 
 void BlackForestClass::UpdateEntityPosition(unsigned short entityId, float positionX, float positionY, float positionZ, float rotationX, float rotationY, float rotationZ)
 {
+	/*
 	int i;
 	bool found;
 
@@ -724,12 +724,12 @@ void BlackForestClass::UpdateEntityPosition(unsigned short entityId, float posit
 	// Update their position in the zone.
 	m_EntityList[i].UpdatePosition(positionX, positionY, positionZ, rotationX, rotationY, rotationZ);
 
-	return;
+	*/
 }
-
 
 void BlackForestClass::UpdateEntityRotate(unsigned short entityId, bool rotate)
 {
+	/*
 	int i;
 	bool found;
 
@@ -752,6 +752,5 @@ void BlackForestClass::UpdateEntityRotate(unsigned short entityId, bool rotate)
 	// Update the AI entity rotation state.
 	m_EntityList[i].UpdateRotateState(rotate);
 
-	return;
+	*/
 }
-*/

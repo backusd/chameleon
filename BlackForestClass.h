@@ -32,18 +32,21 @@ public:
 	BlackForestClass();
 	~BlackForestClass();
 
+	void AddEntity(unsigned short, char, float, float, float, float, float, float);
+	void RemoveEntity(unsigned short);
+	void UpdateEntityState(unsigned short, char);
+	void UpdateEntityPosition(unsigned short, float, float, float, float, float, float);
+	void UpdateEntityRotate(unsigned short, bool);
 	/*
 	bool Initialize(D3DClass*, HWND, int, int, float, float);
 	void Shutdown();
 	bool Frame(D3DClass*, InputClass*, float, UserInterfaceClass*);
 
-	void AddEntity(unsigned short, char, float, float, float, float, float, float);
-	void RemoveEntity(unsigned short);
+	
 	bool GetStateChange(char&);
-	void UpdateEntityState(unsigned short, char);
+	
 	bool PositionUpdate(float&, float&, float&, float&, float&, float&);
-	void UpdateEntityPosition(unsigned short, float, float, float, float, float, float);
-	void UpdateEntityRotate(unsigned short, bool);
+	
 	*/
 
 private:

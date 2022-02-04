@@ -164,8 +164,10 @@
     <ClCompile Include="CPUStatistics.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="InputClass.cpp" />
+    <ClCompile Include="NetworkClass.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="StateClass.cpp" />
+    <ClCompile Include="UserInterfaceClass.cpp" />
     <ClCompile Include="WindowBase.cpp" />
     <ClCompile Include="WindowException.cpp" />
     <ClCompile Include="WindowManager.cpp" />
@@ -181,9 +183,12 @@
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="InputClass.h" />
+    <ClInclude Include="NetworkClass.h" />
+    <ClInclude Include="NetworkMessages.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="StateClass.h" />
     <ClInclude Include="StepTimer.h" />
+    <ClInclude Include="UserInterfaceClass.h" />
     <ClInclude Include="WindowBase.h" />
     <ClInclude Include="WindowBaseTemplate.h" />
     <ClInclude Include="WindowException.h" />
