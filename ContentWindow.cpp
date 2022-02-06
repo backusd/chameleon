@@ -18,14 +18,20 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	WindowBase(width, height, name),
 	m_stateBlock(nullptr),
 	m_timer(nullptr),
+	m_cpu(nullptr),
+	m_keyboard(nullptr),
+	m_mouse(nullptr),
+	m_network(nullptr),
+	m_hud(nullptr),
+	m_scene(nullptr)
+	/*
 	m_cpuStatistics(nullptr),
 	m_inputClass(nullptr),
 	m_userInterface(nullptr),
 	m_stateClass(nullptr),
 	m_blackForest(nullptr),
-	m_network(nullptr)
+	*/
 {
-
 	// Create the device resources
 	m_deviceResources = std::make_shared<DeviceResources>(m_hWnd);
 	m_deviceResources->OnResize(); // Calling OnResize will create the render target, etc.
@@ -37,15 +43,25 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	m_timer = std::make_shared<StepTimer>();
 
+	m_cpu = std::make_shared<CPU>(m_timer);
 
+	m_keyboard = std::make_shared<Keyboard>();
+	m_mouse = std::make_shared<Mouse>();
+
+	// m_network = std::make_shared<Network>("155.248.215.180", 7000, m_timer);
+
+	m_hud = std::make_shared<HUD>();
+	m_scene = std::make_shared<Scene>();
+
+	/*
 	m_cpuStatistics = std::make_unique<CPUStatistics>();
 
-	m_inputClass = std::make_unique<InputClass>();
+	m_inputClass = std::shared_ptr<InputClass>();
 	m_inputClass->Initialize(m_hInst, m_hWnd, m_width, m_height);
 
 	m_stateClass = std::make_unique<StateClass>();
 
-	m_blackForest = std::make_shared<BlackForestClass>();
+	m_blackForest = std::make_shared<BlackForestClass>(m_deviceResources, m_hWnd, m_width, m_height, SCREEN_DEPTH, SCREEN_NEAR);
 
 	m_userInterface = std::make_shared<UserInterfaceClass>(m_deviceResources, m_hWnd, m_width, m_height);
 
@@ -55,6 +71,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	char ip[] = "155.248.215.180";
 	bool success = m_network->Initialize(ip, 7000, m_timer);
 	int iii = 0;
+	*/
 }
 
 ContentWindow::~ContentWindow()
@@ -64,17 +81,38 @@ ContentWindow::~ContentWindow()
 
 void ContentWindow::Update()
 {
+	// while (!m_keyboard->CharIsEmpty())
+	//	oss << m_keyboard->ReadChar();
+	// SetWindowText(m_hWnd, oss.str().c_str());
+
+	//std::ostringstream oss;
+	//oss << "Time: " << m_timer->GetTotalSeconds();
+	//SetWindowText(m_hWnd, oss.str().c_str());
+
 	std::ostringstream oss;
-	oss << "Time: " << m_timer->GetTotalSeconds();
+	if (m_mouse->LeftIsPressed())
+		oss << "Left";
+	else
+		oss << "(" << m_mouse->GetPosX() << ", " << m_mouse->GetPosY() << ")";
 	SetWindowText(m_hWnd, oss.str().c_str());
 
 	m_timer->Tick([&]()
 		{
+			m_cpu->Update();
+
+			// m_network->Update();
+
+			// Don't update keyboard or mouse because they get updated via windows messages
+
+			//m_network->Update();
+
+			//m_hud->Update();
+			//m_scene->Update();
+
+			/*
 			m_cpuStatistics->Update(m_timer);
 
 			m_inputClass->Frame();
-
-
 
 			// Do the network frame processing.
 			m_network->Frame();
@@ -90,7 +128,7 @@ void ContentWindow::Update()
 			switch (m_stateClass->GetCurrentState())
 			{
 			case STATE_BLACKFOREST:
-				/*
+				
 				result = m_BlackForest->Frame(m_D3D, m_Input, m_Timer->GetTime(), m_UserInterface);
 
 				// Check for state changes.
@@ -104,12 +142,13 @@ void ContentWindow::Update()
 				{
 					m_Network->SendPositionUpdate(posX, posY, posZ, rotX, rotY, rotZ);
 				}
-				*/
+				
 				break;
 
 			default:
 				break;
 			}
+			*/
 		}
 	);
 }
@@ -329,30 +368,69 @@ LRESULT ContentWindow::OnDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 LRESULT ContentWindow::OnLButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnLeftPressed(pt.x, pt.y);
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnLButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnLeftReleased(pt.x, pt.y);
+	// release mouse if outside of window
+	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+	{
+		ReleaseCapture();
+		m_mouse->OnMouseLeave();
+	}
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnLButtonDoubleClick(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnLeftDoubleClick(pt.x, pt.y);
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnMiddlePressed(pt.x, pt.y);
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnMiddleReleased(pt.x, pt.y);
+	// release mouse if outside of window
+	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+	{
+		ReleaseCapture();
+		m_mouse->OnMouseLeave();
+	}
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnRButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnRightPressed(pt.x, pt.y);
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnRButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnRightReleased(pt.x, pt.y);
+	// release mouse if outside of window
+	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+	{
+		ReleaseCapture();
+		m_mouse->OnMouseLeave();
+	}
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
@@ -364,6 +442,32 @@ LRESULT ContentWindow::OnResize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 LRESULT ContentWindow::OnMouseMove(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	// in client region -> log move, and log enter + capture mouse (if not previously in window)
+	if (pt.x >= 0 && pt.x < m_width && pt.y >= 0 && pt.y < m_height)
+	{
+		m_mouse->OnMouseMove(pt.x, pt.y);
+		if (!m_mouse->IsInWindow()) // IsInWindow() will tell you if it was PREVIOUSLY in the window or not
+		{
+			SetCapture(hWnd);
+			m_mouse->OnMouseEnter();
+		}
+	}
+	// not in client -> log move / maintain capture if button down
+	else
+	{
+		if (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON))
+		{
+			m_mouse->OnMouseMove(pt.x, pt.y);
+		}
+		// button up -> release capture / log event for leaving
+		else
+		{
+			ReleaseCapture();
+			m_mouse->OnMouseLeave();
+		}
+	}
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMouseLeave(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -372,6 +476,10 @@ LRESULT ContentWindow::OnMouseLeave(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 }
 LRESULT ContentWindow::OnMouseWheel(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	const POINTS pt = MAKEPOINTS(lParam);
+	const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+	m_mouse->OnWheelDelta(pt.x, pt.y, delta);
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
@@ -400,14 +508,34 @@ LRESULT ContentWindow::OnGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 LRESULT ContentWindow::OnChar(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	m_keyboard->OnChar(static_cast<unsigned char>(wParam));
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	m_keyboard->OnKeyReleased(static_cast<unsigned char>(wParam));
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	if (!(lParam & 0x40000000) || m_keyboard->AutorepeatIsEnabled()) // filter autorepeat
+	{
+		m_keyboard->OnKeyPressed(static_cast<unsigned char>(wParam));
+	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
+LRESULT ContentWindow::OnSysKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+{
+	return this->OnKeyUp(hWnd, msg, wParam, lParam);
+}
+LRESULT ContentWindow::OnSysKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+{
+	return this->OnKeyDown(hWnd, msg, wParam, lParam);
+}
 
+LRESULT ContentWindow::OnKillFocus(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+{
+	// clear keystate when window loses focus to prevent input getting "stuck"
+	m_keyboard->ClearState();
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}

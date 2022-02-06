@@ -34,8 +34,11 @@ LRESULT WindowBase::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEWHEEL:		return OnMouseWheel(hWnd, msg, wParam, lParam);
 	case WM_GETMINMAXINFO:	return OnGetMinMaxInfo(hWnd, msg, wParam, lParam);
 	case WM_CHAR:			return OnChar(hWnd, msg, wParam, lParam);
+	case WM_SYSKEYUP:		return OnSysKeyUp(hWnd, msg, wParam, lParam);
 	case WM_KEYUP:			return OnKeyUp(hWnd, msg, wParam, lParam);
+	case WM_SYSKEYDOWN:		return OnSysKeyDown(hWnd, msg, wParam, lParam);
 	case WM_KEYDOWN:		return OnKeyDown(hWnd, msg, wParam, lParam);
+	case WM_KILLFOCUS:		return OnKillFocus(hWnd, msg, wParam, lParam);
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -137,3 +140,17 @@ LRESULT WindowBase::OnKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
+LRESULT WindowBase::OnSysKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+{
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+LRESULT WindowBase::OnSysKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+{
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+LRESULT WindowBase::OnKillFocus(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+{
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}

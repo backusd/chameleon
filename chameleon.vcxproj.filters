@@ -31,12 +31,6 @@
     <Filter Include="Header Files\Rendering">
       <UniqueIdentifier>{019fd7fe-78c9-46e0-ab2e-6d3192d00135}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Misc">
-      <UniqueIdentifier>{adf2ed3f-82a9-463e-aec1-01b2da613bde}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Misc">
-      <UniqueIdentifier>{d35e2169-7d43-40d6-b025-095ec54cf226}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Input">
       <UniqueIdentifier>{89fc3f41-7b3c-4429-8276-11bb7308b7ff}</UniqueIdentifier>
     </Filter>
@@ -49,14 +43,32 @@
     <Filter Include="Source Files\BlackForest">
       <UniqueIdentifier>{ecad4088-a8e1-4a1d-b540-f90f5d343c97}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\UI">
-      <UniqueIdentifier>{4151d4f6-9d00-4b3a-9479-9f9e8ab50f4c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\UI">
-      <UniqueIdentifier>{feef3fe1-65d6-4abe-84ee-735614cb268e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Data">
       <UniqueIdentifier>{a9030e2a-0170-4eb3-95d4-c967c430e330}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\HUD">
+      <UniqueIdentifier>{4151d4f6-9d00-4b3a-9479-9f9e8ab50f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\HUD">
+      <UniqueIdentifier>{feef3fe1-65d6-4abe-84ee-735614cb268e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Global">
+      <UniqueIdentifier>{33949f96-35b5-49ef-854e-5cb2f0ff1223}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Global">
+      <UniqueIdentifier>{6c89e714-addd-4531-a3c9-f5368dbd4cdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Network">
+      <UniqueIdentifier>{7081c79b-b3c8-4fb0-bdf2-fb9cb912a507}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Network">
+      <UniqueIdentifier>{c1c5e7ac-e834-4740-9a2c-9efd9a50be64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{0398f780-1f07-4025-aa2c-aca9fa3afd36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{f6721527-3003-4ee7-89c4-98ca92384a7d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,38 +102,89 @@
     <ClCompile Include="DeviceResources.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="CPUStatistics.cpp">
-      <Filter>Source Files\Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="InputClass.cpp">
-      <Filter>Source Files\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="StateClass.cpp">
-      <Filter>Source Files\Misc</Filter>
-    </ClCompile>
     <ClCompile Include="BlackForestClass.cpp">
       <Filter>Source Files\BlackForest</Filter>
     </ClCompile>
-    <ClCompile Include="NetworkClass.cpp">
-      <Filter>Source Files\Misc</Filter>
+    <ClCompile Include="CameraClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
     </ClCompile>
-    <ClCompile Include="UserInterfaceClass.cpp">
-      <Filter>Source Files\UI</Filter>
+    <ClCompile Include="PositionClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="LightClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyDomeClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyDomeShaderClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
     </ClCompile>
     <ClCompile Include="BitmapClass.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureClass.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="TextClass.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files\BlackForest</Filter>
     </ClCompile>
     <ClCompile Include="FontClass.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files\BlackForest</Filter>
     </ClCompile>
     <ClCompile Include="FontShaderClass.cpp">
-      <Filter>Source Files\UI</Filter>
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="TextClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="UserInterfaceClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="CPUStatistics.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="StateClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="InputClass.cpp">
+      <Filter>Source Files\BlackForest</Filter>
+    </ClCompile>
+    <ClCompile Include="CharacterState.cpp">
+      <Filter>Source Files\Global</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectStore.cpp">
+      <Filter>Source Files\Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Network.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="CPU.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="HUD.cpp">
+      <Filter>Source Files\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderable.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveLookController.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source Files\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -161,41 +224,92 @@
     <ClInclude Include="StepTimer.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="CPUStatistics.h">
-      <Filter>Header Files\Misc</Filter>
-    </ClInclude>
-    <ClInclude Include="InputClass.h">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="StateClass.h">
-      <Filter>Header Files\Misc</Filter>
-    </ClInclude>
     <ClInclude Include="BlackForestClass.h">
       <Filter>Header Files\BlackForest</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkClass.h">
-      <Filter>Header Files\Misc</Filter>
+    <ClInclude Include="CameraClass.h">
+      <Filter>Header Files\BlackForest</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkMessages.h">
-      <Filter>Header Files\Misc</Filter>
+    <ClInclude Include="PositionClass.h">
+      <Filter>Header Files\BlackForest</Filter>
     </ClInclude>
-    <ClInclude Include="UserInterfaceClass.h">
-      <Filter>Header Files\UI</Filter>
+    <ClInclude Include="LightClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyDomeClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyDomeShaderClass.h">
+      <Filter>Header Files\BlackForest</Filter>
     </ClInclude>
     <ClInclude Include="BitmapClass.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureClass.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="TextClass.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files\BlackForest</Filter>
     </ClInclude>
     <ClInclude Include="FontClass.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files\BlackForest</Filter>
     </ClInclude>
     <ClInclude Include="FontShaderClass.h">
-      <Filter>Header Files\UI</Filter>
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="TextClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterfaceClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="CPUStatistics.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="StateClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="InputClass.h">
+      <Filter>Header Files\BlackForest</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterState.h">
+      <Filter>Header Files\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectStore.h">
+      <Filter>Header Files\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="CPU.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderable.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveLookController.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkMessages.h">
+      <Filter>Header Files\Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

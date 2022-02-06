@@ -4,27 +4,37 @@
 #include "blackforestclass.h"
 
 
-BlackForestClass::BlackForestClass() :
+BlackForestClass::BlackForestClass(std::shared_ptr<DeviceResources> deviceResources, HWND hwnd, int screenWidth, int screenHeight, float screenDepth, float screenNear) :
+	m_deviceResources(deviceResources),
+	m_screenDepth(screenDepth),
 	m_stateChange(false),
 	m_newState(0),
 	m_updateTime(0),
-	m_positionUpdateReady(true)
+	m_positionUpdateReady(true),
+	m_Camera(nullptr),
+	m_Position(nullptr),
+	m_Light(nullptr),
+	m_SkyDome(nullptr)
 {
-	/*
-	m_Camera = 0;
-	m_Position = 0;
-	m_Light = 0;
-	m_SkyDome = 0;
-	m_SkyDomeShader = 0;
-	m_Terrain = 0;
-	m_TerrainShader = 0;
-	m_TextureShader = 0;
-	m_CubeModel1 = 0;
-	m_CubeModel2 = 0;
-	m_EntityList = 0;
-	m_Frustum = 0;
-	m_QuadTree = 0;
-	*/
+	// Set the initial position of the camera.
+	m_Camera = std::make_shared<CameraClass>();	
+	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera->GenerateBaseViewMatrix();
+
+	// Position
+	m_Position = std::make_shared<PositionClass>();
+	m_Position->SetPosition(0.0f, 0.0f, 0.0f);
+
+	// Create the light object.
+	m_Light = std::make_shared<LightClass>();
+	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light->SetDirection(0.5f, -0.75f, 0.25f);
+
+	// Sky Dome
+	m_SkyDome = std::make_shared<SkyDomeClass>(m_deviceResources);
+
+	// Sky Dome Shader
+
 }
 
 

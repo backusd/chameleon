@@ -1,67 +1,30 @@
-#include "NetworkClass.h"
+#include "Network.h"
 
-NetworkClass::NetworkClass() : 
-	m_zone(nullptr),
-	m_userInterface(nullptr)
+Network::Network(const char* ipAddress, unsigned short serverPort, std::shared_ptr<StepTimer> timer) :
+	m_timer(timer),
+	m_latency(0),
+	m_networkMessageQueue(nullptr),
+	m_nextQueueLocation(0),
+	m_nextMessageForProcessing(0),
+	m_online(false)
 {
-	m_latency = 0;
-	m_networkMessageQueue = 0;
-}
-
-NetworkClass::~NetworkClass()
-{
-	this->Shutdown();
-}
-
-
-bool NetworkClass::Initialize(char* ipAddress, unsigned short serverPort, std::shared_ptr<StepTimer> timer)
-{
-	bool result;
-	int i;
-
-	m_timer = timer;
-
 	// Initialize the network message queue.
 	m_networkMessageQueue = new QueueType[MAX_QUEUE_SIZE];
-	if (!m_networkMessageQueue)
-	{
-		return false;
-	}
 
-	m_nextQueueLocation = 0;
-	m_nextMessageForProcessing = 0;
+	for (int iii = 0; iii < MAX_QUEUE_SIZE; iii++)
+		m_networkMessageQueue[iii].active = false;
 
-	for (i = 0; i < MAX_QUEUE_SIZE; i++)
-	{
-		m_networkMessageQueue[i].active = false;
-	}
+	// Initialize winsock for using window's sockets. Will throw on error
+	InitializeWinSock();
 
-	// Initialize winsock for using window's sockets.
-	result = InitializeWinSock();
-	if (!result)
-	{
-		return false;
-	}
-
-	// Connect to the server.
-	result = ConnectToServer(ipAddress, serverPort);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Send a request to the zone server for the list of user and non-user entities currently online as well as their status.
-	result = RequestEntityList();
-	if (!result)
-	{
-		return false;
-	}
-
-	return true;
+	// Connect to the server. Will throw on error
+	ConnectToServer(ipAddress, serverPort);
+		
+	// Send a request to the zone server for the list of user and non-user entities currently online as well as their status. Will throw on error
+	RequestEntityList();
 }
 
-
-void NetworkClass::Shutdown()
+Network::~Network()
 {
 	// Send a message to the server letting it know this client is disconnecting.
 	SendDisconnectMessage();
@@ -79,7 +42,7 @@ void NetworkClass::Shutdown()
 	closesocket(m_clientSocket);
 
 	// Shutdown winsock.
-	ShutdownWinsock();
+	WSACleanup();
 
 	// Release the network message queue.
 	if (m_networkMessageQueue)
@@ -87,18 +50,12 @@ void NetworkClass::Shutdown()
 		delete[] m_networkMessageQueue;
 		m_networkMessageQueue = 0;
 	}
-
-	// Release the zone and UI pointer.
-	m_zone = nullptr;
-	m_userInterface = nullptr;
-
-	return;
 }
 
 
-void NetworkClass::Frame()
+void Network::Update()
 {
-	bool newMessage;
+	//bool newMessage;
 
 
 	// Update the network latency.
@@ -108,35 +65,28 @@ void NetworkClass::Frame()
 	ProcessMessageQueue();
 
 	// Check if there is a chat message that this user wants to send to the server.
-	m_userInterface->CheckForChatMessage(m_uiMessage, newMessage);
-	if (newMessage)
-	{
-		SendChatMessage(m_uiMessage);
-	}
-
-	return;
+	// m_userInterface->CheckForChatMessage(m_uiMessage, newMessage);
+	// if (newMessage)
+	//{
+	//	SendChatMessage(m_uiMessage);
+	//}
 }
 
-
-void NetworkClass::SetZonePointer(std::shared_ptr<BlackForestClass> blackForest)
+/*
+void Network::SetZonePointer(std::shared_ptr<BlackForestClass> blackForest)
 {
 	m_zone = blackForest;
 }
 
 
-void NetworkClass::SetUIPointer(std::shared_ptr<UserInterfaceClass> userInterface)
+void Network::SetUIPointer(std::shared_ptr<UserInterfaceClass> userInterface)
 {
 	m_userInterface = userInterface;
 }
+*/
 
 
-int NetworkClass::GetLatency()
-{
-	return m_latency;
-}
-
-
-bool NetworkClass::InitializeWinSock()
+void Network::InitializeWinSock()
 {
 	WSADATA wsaData;
 
@@ -144,21 +94,21 @@ bool NetworkClass::InitializeWinSock()
 	int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (error != 0)
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 
 	// Check to see if the winsock dll is version 2.2
 	if ((LOBYTE(wsaData.wVersion) != 2) || (HIBYTE(wsaData.wVersion) != 2))
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 
 	/*
 		The code below is used to verify that TCP & UDP are supported by the system.
 		For now, just assume that they are supported. In the future, this should be added
-		back, however, WSAPROTOCOL_INFOA is deprecated, so implement this in a different 
+		back, however, WSAPROTOCOL_INFOA is deprecated, so implement this in a different
 		way. See: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaenumprotocolsa
-	
+
 	unsigned long bufferSize = 0;
 	//WSAPROTOCOL_INFOW* protocolBuffer;
 	WSAPROTOCOL_INFOA* protocolBuffer;
@@ -193,19 +143,11 @@ bool NetworkClass::InitializeWinSock()
 	protocolBuffer = 0;
 
 	*/
-
-	return true;
 }
 
 
-void NetworkClass::ShutdownWinsock()
-{
-	WSACleanup();
-	return;
-}
 
-
-bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
+void Network::ConnectToServer(const char* ipAddress, unsigned short portNumber)
 {
 	unsigned long setting, inetAddress, threadId;
 	int error, bytesSent, bytesRead;
@@ -222,7 +164,7 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	m_clientSocket = socket(AF_INET, SOCK_DGRAM, 0);
 	if (m_clientSocket == INVALID_SOCKET)
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 
 	// Set the client socket to non-blocking I/O.
@@ -230,7 +172,7 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	error = ioctlsocket(m_clientSocket, FIONBIO, &setting);
 	if (error == SOCKET_ERROR)
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 
 	// Save the size of the server address structure.
@@ -242,14 +184,14 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	if (result == 0)
 	{
 		// A 0 result means a non-valid string representation was passed in
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 	else if (result < 0)
 	{
 		// A -1 value means an internal error occurred and it can be retrieved via WSAGetLastError()
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
-	
+
 	memset((char*)&m_serverAddress, 0, m_addressLength);
 	m_serverAddress.sin_family = AF_INET;
 	m_serverAddress.sin_port = htons(portNumber);
@@ -262,7 +204,7 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	bytesSent = sendto(m_clientSocket, (char*)&connectMessage, sizeof(MSG_GENERIC_DATA), 0, (struct sockaddr*)&m_serverAddress, m_addressLength);
 	if (bytesSent < 0)
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 
 	// Record the time when the connect packet was sent.
@@ -301,7 +243,7 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	// If it didn't get an ID in 2 seconds then the server was not up.
 	if (!gotId)
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 
 	// Coerce the network message that was received into a new id message type.
@@ -310,7 +252,7 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	// Ensure it was a new id message.
 	if (message->type != MSG_NEWID)
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
 
 	// Store the ID number for this client for all future communication with the server.
@@ -324,22 +266,20 @@ bool NetworkClass::ConnectToServer(char* ipAddress, unsigned short portNumber)
 	m_threadActive = false;
 
 	// Create a thread to listen for network I/O from the server.
-	//threadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)NetworkReadFunction, (void*)this, 0, &threadId);
-	//if (threadHandle == NULL)
-	//{
-	//	return false;
-	//}
+	threadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)NetworkReadFunction, (void*)this, 0, &threadId);
+	if (threadHandle == NULL)
+	{
+		throw new ChameleonException(__LINE__, __FILE__);
+	}
 
 	// Initialize the network latency variables.
 	m_pingTime = m_timer->GetTotalSeconds();
-
-	return true;
 }
 
-/*
+
 void NetworkReadFunction(void* ptr)
 {
-	NetworkClass* networkClassPtr;
+	Network* NetworkPtr;
 	struct sockaddr_in serverAddress;
 	int addressLength;
 	int bytesRead;
@@ -347,63 +287,35 @@ void NetworkReadFunction(void* ptr)
 
 
 	// Get a pointer to the calling object.
-	networkClassPtr = (NetworkClass*)ptr;
+	NetworkPtr = (Network*)ptr;
 
 	// Notify parent object that this thread is now active.
-	networkClassPtr->SetThreadActive();
+	NetworkPtr->SetThreadActive();
 
 	// Set the size of the address.
 	addressLength = sizeof(serverAddress);
 
 	// Loop and read network messages while the client is online.
-	while (networkClassPtr->Online())
+	while (NetworkPtr->Online())
 	{
 		// Check if there is a message from the server.
-		bytesRead = recvfrom(networkClassPtr->GetClientSocket(), recvBuffer, 4096, 0, (struct sockaddr*)&serverAddress, &addressLength);
+		bytesRead = recvfrom(NetworkPtr->GetClientSocket(), recvBuffer, 4096, 0, (struct sockaddr*)&serverAddress, &addressLength);
 		if (bytesRead > 0)
 		{
-			networkClassPtr->ReadNetworkMessage(recvBuffer, bytesRead, serverAddress);
+			NetworkPtr->ReadNetworkMessage(recvBuffer, bytesRead, serverAddress);
 		}
 	}
 
 	// Notify parent object that this thread is now inactive.
-	networkClassPtr->SetThreadInactive();
+	NetworkPtr->SetThreadInactive();
 
 	// Release the pointer.
-	networkClassPtr = 0;
-
-	return;
-}
-*/
-
-
-void NetworkClass::SetThreadActive()
-{
-	m_threadActive = true;
-	return;
+	NetworkPtr = nullptr;
 }
 
 
-void NetworkClass::SetThreadInactive()
-{
-	m_threadActive = false;
-	return;
-}
 
-
-bool NetworkClass::Online()
-{
-	return m_online;
-}
-
-
-SOCKET NetworkClass::GetClientSocket()
-{
-	return m_clientSocket;
-}
-
-
-void NetworkClass::ReadNetworkMessage(char* recvBuffer, int bytesRead, struct sockaddr_in serverAddress)
+void Network::ReadNetworkMessage(char* recvBuffer, int bytesRead, struct sockaddr_in serverAddress)
 {
 	MSG_GENERIC_DATA* message;
 
@@ -433,15 +345,14 @@ void NetworkClass::ReadNetworkMessage(char* recvBuffer, int bytesRead, struct so
 }
 
 
-void NetworkClass::HandlePingMessage()
+void Network::HandlePingMessage()
 {
 	// Convert time delta to ms then cast to int
 	m_latency = static_cast<int>((m_timer->GetTotalSeconds() - m_pingTime) * 1000);
-	return;
 }
 
 
-void NetworkClass::ProcessLatency()
+void Network::ProcessLatency()
 {
 	// Ping the server every 5 seconds
 	if (m_timer->GetTotalSeconds() >= (m_pingTime + 5))
@@ -449,12 +360,10 @@ void NetworkClass::ProcessLatency()
 		m_pingTime = m_timer->GetTotalSeconds();
 		SendPing();
 	}
-
-	return;
 }
 
 
-void NetworkClass::SendPing()
+void Network::SendPing()
 {
 	MSG_PING_DATA message;
 	int bytesSent;
@@ -469,14 +378,12 @@ void NetworkClass::SendPing()
 	bytesSent = sendto(m_clientSocket, (char*)&message, sizeof(MSG_PING_DATA), 0, (struct sockaddr*)&m_serverAddress, m_addressLength);
 	if (bytesSent != sizeof(MSG_PING_DATA))
 	{
-
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
-
-	return;
 }
 
 
-void NetworkClass::SendDisconnectMessage()
+void Network::SendDisconnectMessage()
 {
 	MSG_DISCONNECT_DATA message;
 	int bytesSent;
@@ -491,14 +398,12 @@ void NetworkClass::SendDisconnectMessage()
 	bytesSent = sendto(m_clientSocket, (char*)&message, sizeof(MSG_DISCONNECT_DATA), 0, (struct sockaddr*)&m_serverAddress, m_addressLength);
 	if (bytesSent != sizeof(MSG_DISCONNECT_DATA))
 	{
-
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
-
-	return;
 }
 
 
-void NetworkClass::AddMessageToQueue(char* message, int messageSize, struct sockaddr_in serverAddress)
+void Network::AddMessageToQueue(char* message, int messageSize, struct sockaddr_in serverAddress)
 {
 	// Check for buffer overflow.
 	if (messageSize > MAX_MESSAGE_SIZE)
@@ -522,12 +427,10 @@ void NetworkClass::AddMessageToQueue(char* message, int messageSize, struct sock
 			m_nextQueueLocation = 0;
 		}
 	}
-
-	return;
 }
 
 
-void NetworkClass::ProcessMessageQueue()
+void Network::ProcessMessageQueue()
 {
 	MSG_GENERIC_DATA* message;
 
@@ -596,7 +499,7 @@ void NetworkClass::ProcessMessageQueue()
 }
 
 
-void NetworkClass::HandleChatMessage(int queuePosition)
+void Network::HandleChatMessage(int queuePosition)
 {
 	MSG_CHAT_DATA* msg;
 	unsigned short clientId;
@@ -613,13 +516,12 @@ void NetworkClass::HandleChatMessage(int queuePosition)
 	strcpy_s(m_chatMessage, 64, msg->text);
 
 	// If there was a new message then send it to the user interface.
-	m_userInterface->AddChatMessageFromServer(m_chatMessage, clientId);
-
-	return;
+	//m_userInterface->AddChatMessageFromServer(m_chatMessage, clientId);
 }
 
 
-void NetworkClass::HandleEntityInfoMessage(int queuePosition)
+
+void Network::HandleEntityInfoMessage(int queuePosition)
 {
 	MSG_ENTITY_INFO_DATA* message;
 	unsigned short entityId;
@@ -643,17 +545,15 @@ void NetworkClass::HandleEntityInfoMessage(int queuePosition)
 	rotationZ = message->rotationZ;
 
 	// Check that the zone pointer is set.
-	if (m_zone)
-	{
+	//if (m_zone)
+	//{
 		// Add the entity to the zone.
-		m_zone->AddEntity(entityId, entityType, positionX, positionY, positionZ, rotationX, rotationY, rotationZ);
-	}
-
-	return;
+	//	m_zone->AddEntity(entityId, entityType, positionX, positionY, positionZ, rotationX, rotationY, rotationZ);
+	//}
 }
 
 
-void NetworkClass::HandleNewUserLoginMessage(int queuePosition)
+void Network::HandleNewUserLoginMessage(int queuePosition)
 {
 	MSG_ENTITY_INFO_DATA* message;
 	unsigned short entityId;
@@ -677,17 +577,15 @@ void NetworkClass::HandleNewUserLoginMessage(int queuePosition)
 	rotationZ = message->rotationZ;
 
 	// Check that the zone pointer is set.
-	if (m_zone)
-	{
-		// Add the new user entity to the zone.
-		m_zone->AddEntity(entityId, entityType, positionX, positionY, positionZ, rotationX, rotationY, rotationZ);
-	}
-
-	return;
+	//if (m_zone)
+	//{
+	//	// Add the new user entity to the zone.
+	//	m_zone->AddEntity(entityId, entityType, positionX, positionY, positionZ, rotationX, rotationY, rotationZ);
+	//}
 }
 
 
-void NetworkClass::HandleUserDisconnectMessage(int queuePosition)
+void Network::HandleUserDisconnectMessage(int queuePosition)
 {
 	MSG_USER_DISCONNECT_DATA* message;
 	unsigned short entityId;
@@ -701,17 +599,15 @@ void NetworkClass::HandleUserDisconnectMessage(int queuePosition)
 	entityId = message->idNumber;
 
 	// Check that the zone pointer is set.
-	if (m_zone)
-	{
-		// Remove the user entity from the zone.
-		m_zone->RemoveEntity(entityId);
-	}
-
-	return;
+	///if (m_zone)
+	//{
+	//	// Remove the user entity from the zone.
+	//	m_zone->RemoveEntity(entityId);
+	//}
 }
 
 
-void NetworkClass::HandleStateChangeMessage(int queuePosition)
+void Network::HandleStateChangeMessage(int queuePosition)
 {
 	MSG_STATE_CHANGE_DATA* message;
 	unsigned short entityId;
@@ -727,17 +623,15 @@ void NetworkClass::HandleStateChangeMessage(int queuePosition)
 	state = message->state;
 
 	// Check that the zone pointer is set.
-	if (m_zone)
-	{
-		// Update the state of the entity.
-		m_zone->UpdateEntityState(entityId, state);
-	}
-
-	return;
+	//if (m_zone)
+	//{
+	//	// Update the state of the entity.
+	//	m_zone->UpdateEntityState(entityId, state);
+	//}
 }
 
 
-void NetworkClass::HandlePositionMessage(int queuePosition)
+void Network::HandlePositionMessage(int queuePosition)
 {
 	MSG_POSITION_DATA* message;
 	unsigned short entityId;
@@ -758,17 +652,15 @@ void NetworkClass::HandlePositionMessage(int queuePosition)
 	rotationZ = message->rotationZ;
 
 	// Check that the zone pointer is set.
-	if (m_zone)
-	{
-		// Update the position of the entity in the zone.
-		m_zone->UpdateEntityPosition(entityId, positionX, positionY, positionZ, rotationX, rotationY, rotationZ);
-	}
-
-	return;
+	//if (m_zone)
+	//{
+	//	// Update the position of the entity in the zone.
+	//	m_zone->UpdateEntityPosition(entityId, positionX, positionY, positionZ, rotationX, rotationY, rotationZ);
+	//}
 }
 
 
-void NetworkClass::HandleAIRotateMessage(int queuePosition)
+void Network::HandleAIRotateMessage(int queuePosition)
 {
 	MSG_AI_ROTATE_DATA* message;
 	unsigned short entityId;
@@ -783,17 +675,15 @@ void NetworkClass::HandleAIRotateMessage(int queuePosition)
 	rotate = message->rotate;
 
 	// Check that the zone pointer is set.
-	if (m_zone)
-	{
-		// Update the AI entity rotation.
-		m_zone->UpdateEntityRotate(entityId, rotate);
-	}
-
-	return;
+	///if (m_zone)
+	//{
+	//	// Update the AI entity rotation.
+	//	m_zone->UpdateEntityRotate(entityId, rotate);
+	//}
 }
 
 
-bool NetworkClass::SendChatMessage(char* inputMsg)
+void Network::SendChatMessage(char* inputMsg)
 {
 	MSG_CHAT_DATA message;
 	int bytesSent;
@@ -809,14 +699,12 @@ bool NetworkClass::SendChatMessage(char* inputMsg)
 	bytesSent = sendto(m_clientSocket, (char*)&message, sizeof(MSG_CHAT_DATA), 0, (struct sockaddr*)&m_serverAddress, m_addressLength);
 	if (bytesSent != sizeof(MSG_CHAT_DATA))
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
-
-	return true;
 }
 
 
-bool NetworkClass::RequestEntityList()
+void Network::RequestEntityList()
 {
 	MSG_SIMPLE_DATA message;
 	int bytesSent;
@@ -831,14 +719,12 @@ bool NetworkClass::RequestEntityList()
 	bytesSent = sendto(m_clientSocket, (char*)&message, sizeof(MSG_SIMPLE_DATA), 0, (struct sockaddr*)&m_serverAddress, m_addressLength);
 	if (bytesSent != sizeof(MSG_SIMPLE_DATA))
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
-
-	return true;
 }
 
 
-bool NetworkClass::SendStateChange(char state)
+void Network::SendStateChange(char state)
 {
 	MSG_STATE_CHANGE_DATA message;
 	int bytesSent;
@@ -853,14 +739,12 @@ bool NetworkClass::SendStateChange(char state)
 	bytesSent = sendto(m_clientSocket, (char*)&message, sizeof(MSG_STATE_CHANGE_DATA), 0, (struct sockaddr*)&m_serverAddress, m_addressLength);
 	if (bytesSent != sizeof(MSG_STATE_CHANGE_DATA))
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
-
-	return true;
 }
 
 
-bool NetworkClass::SendPositionUpdate(float positionX, float positionY, float positionZ, float rotationX, float rotationY, float rotationZ)
+void Network::SendPositionUpdate(float positionX, float positionY, float positionZ, float rotationX, float rotationY, float rotationZ)
 {
 	MSG_POSITION_DATA message;
 	int bytesSent;
@@ -881,8 +765,6 @@ bool NetworkClass::SendPositionUpdate(float positionX, float positionY, float po
 	bytesSent = sendto(m_clientSocket, (char*)&message, sizeof(MSG_POSITION_DATA), 0, (struct sockaddr*)&m_serverAddress, m_addressLength);
 	if (bytesSent != sizeof(MSG_POSITION_DATA))
 	{
-		return false;
+		throw new ChameleonException(__LINE__, __FILE__);
 	}
-
-	return true;
 }

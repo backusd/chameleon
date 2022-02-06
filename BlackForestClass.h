@@ -1,6 +1,16 @@
 #pragma once
 #include "pch.h"
 
+#include "DeviceResources.h"
+#include "CameraClass.h"
+#include "PositionClass.h"
+#include "LightClass.h"
+#include "SkyDomeClass.h"
+
+#include <memory>
+
+
+
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
@@ -29,7 +39,7 @@
 class BlackForestClass
 {
 public:
-	BlackForestClass();
+	BlackForestClass(std::shared_ptr<DeviceResources> deviceResources, HWND hwnd, int screenWidth, int screenHeight, float screenDepth, float screenNear);
 	~BlackForestClass();
 
 	void AddEntity(unsigned short, char, float, float, float, float, float, float);
@@ -50,14 +60,17 @@ public:
 	*/
 
 private:
+	std::shared_ptr<DeviceResources> m_deviceResources;
+
+	std::shared_ptr<CameraClass> m_Camera;
+	std::shared_ptr<PositionClass> m_Position;
+	std::shared_ptr<LightClass> m_Light;
+	std::shared_ptr<SkyDomeClass> m_SkyDome;
+
 	/*
 	void HandleMovementInput(InputClass*, float);
 	bool Render(D3DClass*, UserInterfaceClass*);
 
-	CameraClass* m_Camera;
-	PositionClass* m_Position;
-	LightClass* m_Light;
-	SkyDomeClass* m_SkyDome;
 	SkyDomeShaderClass* m_SkyDomeShader;
 	TerrainClass* m_Terrain;
 	TerrainShaderClass* m_TerrainShader;
@@ -65,9 +78,10 @@ private:
 	ModelClass* m_CubeModel1, * m_CubeModel2;
 	EntityListClass* m_EntityList;
 	FrustumClass* m_Frustum;
-	float m_screenDepth;
+	
 	QuadTreeClass* m_QuadTree;
 	*/
+	float m_screenDepth;
 	bool m_stateChange;
 	char m_newState;
 	unsigned long m_updateTime;

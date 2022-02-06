@@ -1,7 +1,6 @@
 #pragma once
 #include "pch.h"
 
-
 const int MAX_MESSAGE_SIZE = 512;
 const int MAX_QUEUE_SIZE = 200;
 
@@ -11,13 +10,13 @@ const int MAX_QUEUE_SIZE = 200;
 
 #include <memory>
 
+#include "ChameleonException.h"
 #include "NetworkMessages.h"
-#include "UserInterfaceClass.h"
-#include "BlackForestClass.h"
+//#include "UserInterfaceClass.h"
+//#include "BlackForestClass.h"
 #include "StepTimer.h"
 
-
-class NetworkClass
+class Network
 {
 private:
 	struct QueueType
@@ -29,31 +28,28 @@ private:
 	};
 
 public:
-	NetworkClass();
-	~NetworkClass();
+	Network(const char* ipAddress, unsigned short serverPort, std::shared_ptr<StepTimer> timer);
+	~Network();
 
-	bool Initialize(char*, unsigned short, std::shared_ptr<StepTimer> timer);
-	void Shutdown();
-	void Frame();
+	void Update();
 
-	void SetZonePointer(std::shared_ptr<BlackForestClass> blackForest);
-	void SetUIPointer(std::shared_ptr<UserInterfaceClass> userInterface);
-	int GetLatency();
-	void SetThreadActive();
-	void SetThreadInactive();
-	bool Online();
-	SOCKET GetClientSocket();
+	//void SetZonePointer(std::shared_ptr<BlackForestClass> blackForest);
+	//void SetUIPointer(std::shared_ptr<UserInterfaceClass> userInterface);
+	int GetLatency() { return m_latency; }
+	void SetThreadActive() { m_threadActive = true; }
+	void SetThreadInactive() { m_threadActive = false; }
+	bool Online() { return m_online; }
+	SOCKET GetClientSocket() { return m_clientSocket; }
 
 	void ReadNetworkMessage(char*, int, struct sockaddr_in);
 
-	bool SendStateChange(char);
-	bool SendPositionUpdate(float, float, float, float, float, float);
+	void SendStateChange(char);
+	void SendPositionUpdate(float, float, float, float, float, float);
 
 private:
-	bool InitializeWinSock();
-	void ShutdownWinsock();
+	void InitializeWinSock();
 
-	bool ConnectToServer(char*, unsigned short);
+	void ConnectToServer(const char*, unsigned short);
 	void HandlePingMessage();
 	void ProcessLatency();
 	void SendPing();
@@ -69,15 +65,15 @@ private:
 	void HandlePositionMessage(int);
 	void HandleAIRotateMessage(int);
 
-	bool SendChatMessage(char*);
-	bool RequestEntityList();
+	void SendChatMessage(char*);
+	void RequestEntityList();
 
 	std::shared_ptr<StepTimer> m_timer;
 
 	double m_pingTime;
 
-	std::shared_ptr<BlackForestClass> m_zone;
-	std::shared_ptr<UserInterfaceClass> m_userInterface;
+	//std::shared_ptr<BlackForestClass> m_zone;
+	//std::shared_ptr<UserInterfaceClass> m_userInterface;
 
 	int m_latency;
 	SOCKET m_clientSocket;
@@ -85,15 +81,14 @@ private:
 	struct sockaddr_in m_serverAddress;
 	unsigned short m_idNumber, m_sessionId;
 	bool m_online, m_threadActive;
-	
+
 	QueueType* m_networkMessageQueue;
 	int m_nextQueueLocation, m_nextMessageForProcessing;
 	char m_chatMessage[64];
 	char m_uiMessage[50];
 };
 
-
 /////////////////////////
 // FUNCTION PROTOTYPES //
 /////////////////////////
-// void NetworkReadFunction(void*);
+void NetworkReadFunction(void*);
