@@ -70,6 +70,15 @@
     <Filter Include="Source Files\Scene">
       <UniqueIdentifier>{f6721527-3003-4ee7-89c4-98ca92384a7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{012a96f8-e101-440e-af2d-e0e8a936bab5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ObjectStore">
+      <UniqueIdentifier>{07521d5d-62b4-4b00-858d-3c8f9aff3c8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ObjectStore">
+      <UniqueIdentifier>{5266aac1-3e0a-449d-8ef6-d438b5ac45a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -153,9 +162,6 @@
     <ClCompile Include="CharacterState.cpp">
       <Filter>Source Files\Global</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectStore.cpp">
-      <Filter>Source Files\Global</Filter>
-    </ClCompile>
     <ClCompile Include="Keyboard.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
@@ -190,6 +196,12 @@
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
     <ClCompile Include="DxgiInfoManager.cpp">
+      <Filter>Source Files\Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectStore.cpp">
+      <Filter>Source Files\ObjectStore</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectStoreException.cpp">
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
   </ItemGroup>
@@ -281,9 +293,6 @@
     <ClInclude Include="CharacterState.h">
       <Filter>Header Files\Global</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectStore.h">
-      <Filter>Header Files\Global</Filter>
-    </ClInclude>
     <ClInclude Include="Keyboard.h">
       <Filter>Header Files\Input</Filter>
     </ClInclude>
@@ -323,6 +332,12 @@
     <ClInclude Include="DxgiInfoManager.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectStore.h">
+      <Filter>Header Files\ObjectStore</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectStoreException.h">
+      <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -357,5 +372,13 @@
     <Text Include="skydome.txt">
       <Filter>Data</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

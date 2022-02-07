@@ -36,6 +36,17 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	m_deviceResources = std::make_shared<DeviceResources>(m_hWnd);
 	m_deviceResources->OnResize(); // Calling OnResize will create the render target, etc.
 
+	// We now have access to the device, so we now need to initialize the object store before creating the scene
+	ObjectStore::Initialize(m_deviceResources);
+	ObjectStore::AddVertexShader(L"VertexShader.cso", "basic-cube-vertex-shader");
+	ObjectStore::AddPixelShader(L"PixelShader.cso", "basic-cube-pixel-shader");
+
+
+
+
+
+
+
 	// Create the state block 
 	HRESULT hr;
 	GFX_THROW_NOINFO(
@@ -52,32 +63,17 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	// m_network = std::make_shared<Network>("155.248.215.180", 7000, m_timer);
 
 	m_hud = std::make_shared<HUD>();
-	m_scene = std::make_shared<Scene>();
+	m_scene = std::make_shared<Scene>(m_deviceResources);
 
-	/*
-	m_cpuStatistics = std::make_unique<CPUStatistics>();
 
-	m_inputClass = std::shared_ptr<InputClass>();
-	m_inputClass->Initialize(m_hInst, m_hWnd, m_width, m_height);
+	
 
-	m_stateClass = std::make_unique<StateClass>();
-
-	m_blackForest = std::make_shared<BlackForestClass>(m_deviceResources, m_hWnd, m_width, m_height, SCREEN_DEPTH, SCREEN_NEAR);
-
-	m_userInterface = std::make_shared<UserInterfaceClass>(m_deviceResources, m_hWnd, m_width, m_height);
-
-	m_network = std::make_unique<NetworkClass>();
-	m_network->SetZonePointer(m_blackForest);
-	m_network->SetUIPointer(m_userInterface);
-	char ip[] = "155.248.215.180";
-	bool success = m_network->Initialize(ip, 7000, m_timer);
-	int iii = 0;
-	*/
 }
 
 ContentWindow::~ContentWindow()
 {
-
+	// Have to make sure to delete objects on close
+	ObjectStore::DestructObjects();
 }
 
 void ContentWindow::Update()
@@ -175,6 +171,9 @@ bool ContentWindow::Render()
 	 
 	// Draw all 3D simulation controls first
 	//m_layout->Render3DControls();
+
+	
+	m_scene->Draw();
 
 
 

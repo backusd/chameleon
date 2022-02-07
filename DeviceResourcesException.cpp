@@ -73,6 +73,47 @@ std::string DeviceResourcesException::TranslateErrorCode(HRESULT hr) noexcept
 	return errorString;
 }
 
+
+// InfoException ====================================================================================
+InfoException::InfoException(int line, const char* file, std::vector<std::string> infoMsgs) noexcept :
+	ChameleonException(line, file)
+{
+	// join all info messages with newlines into single string
+	for (const auto& m : infoMsgs)
+	{
+		m_info += m;
+		m_info.push_back('\n');
+	}
+	// remove final newline if exists
+	if (!m_info.empty())
+	{
+		m_info.pop_back();
+	}
+}
+
+
+const char* InfoException::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "\n[Error Info]\n" << GetErrorInfo() << std::endl << std::endl;
+	oss << GetOriginString();
+	m_whatBuffer = oss.str();
+	return m_whatBuffer.c_str();
+}
+
+const char* InfoException::GetType() const noexcept
+{
+	return "Graphics Info Exception";
+}
+
+std::string InfoException::GetErrorInfo() const noexcept
+{
+	return m_info;
+}
+
+
+
 // DeviceRemovedException ===========================================================================
 DeviceRemovedException::DeviceRemovedException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept :
 	DeviceResourcesException(line, file, hr, infoMsgs)

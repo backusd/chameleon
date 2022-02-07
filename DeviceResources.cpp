@@ -55,10 +55,6 @@ DeviceResources::~DeviceResources()
 	m_d3dRenderTargetView = nullptr;
 	m_d3dDepthStencilView = nullptr;
 	m_dxgiSwapChain = nullptr;
-
-	// ==========================================================
-	// Temporary D2D Resources
-	// m_d2dRenderTarget = nullptr;
 }
 
 RECT DeviceResources::WindowRect()

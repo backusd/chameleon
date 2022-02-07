@@ -54,6 +54,8 @@ public:
 
 	RECT WindowRect();
 
+	DxgiInfoManager& GetInfoManager() { return infoManager; }
+
 
 private:
 
