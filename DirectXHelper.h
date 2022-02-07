@@ -1,13 +1,7 @@
 #pragma once
 #include "pch.h"
 
-inline void ThrowIfFailed(HRESULT hr)
-{
-	if (FAILED(hr))
-	{
-		throw _com_error(hr);
-	}
-}
+
 
 inline bool SdkLayersAvailable()
 {

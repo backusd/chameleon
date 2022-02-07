@@ -3,8 +3,8 @@
 
 
 ChameleonException::ChameleonException(int line, const char* file) noexcept :
-	line(line),
-	file(file)
+	m_line(line),
+	m_file(file)
 {
 }
 
@@ -13,8 +13,8 @@ const char* ChameleonException::what() const noexcept
 	std::ostringstream oss;
 	oss << GetType() << std::endl
 		<< GetOriginString();
-	whatBuffer = oss.str();
-	return whatBuffer.c_str();
+	m_whatBuffer = oss.str();
+	return m_whatBuffer.c_str();
 }
 
 const char* ChameleonException::GetType() const noexcept
@@ -24,18 +24,18 @@ const char* ChameleonException::GetType() const noexcept
 
 int ChameleonException::GetLine() const noexcept
 {
-	return line;
+	return m_line;
 }
 
 const std::string& ChameleonException::GetFile() const noexcept
 {
-	return file;
+	return m_file;
 }
 
 std::string ChameleonException::GetOriginString() const noexcept
 {
 	std::ostringstream oss;
-	oss << "[File] " << file << std::endl
-		<< "[Line] " << line;
+	oss << "[File] " << m_file << std::endl
+		<< "[Line] " << m_line;
 	return oss.str();
 }

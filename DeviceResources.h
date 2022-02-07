@@ -1,6 +1,10 @@
 #pragma once
 #include "pch.h"
 #include "DirectXHelper.h"
+#include "DxgiInfoManager.h"
+#include "DeviceResourcesException.h"
+
+
 
 
 
@@ -8,6 +12,8 @@ class DeviceResources
 {
 public:
 	DeviceResources(HWND hWnd);
+	DeviceResources(const DeviceResources&) = delete;
+	DeviceResources& operator=(const DeviceResources&) = delete;
 	~DeviceResources();
 
 	// May need to expand this method...
@@ -56,15 +62,15 @@ private:
 	void CreateWindowSizeDependentResources();
 	void HandleDeviceLost();
 
+#ifndef NDEBUG
+	DxgiInfoManager infoManager;
+#endif
+
 	// Keep handle to window
 	HWND m_hWnd;
 
 	// DPI scale for the window
 	float m_dpiScale;
-
-	// ==========================================================
-	// Temporary D2D Resources
-	//Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> m_d2dRenderTarget;
 
 	// ==========================================================
 

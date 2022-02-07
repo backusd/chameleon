@@ -7,9 +7,7 @@ TextureClass::TextureClass(std::shared_ptr<DeviceResources> deviceResources, CHA
 {
 	HRESULT result;
 
-	ThrowIfFailed(
-		D3DX11CreateShaderResourceViewFromFile(m_deviceResources->D3DDevice(), filename, NULL, NULL, &m_texture, NULL)
-	);
+	D3DX11CreateShaderResourceViewFromFile(m_deviceResources->D3DDevice(), filename, NULL, NULL, &m_texture, NULL);
 }
 
 

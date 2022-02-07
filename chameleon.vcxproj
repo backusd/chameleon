@@ -167,6 +167,8 @@
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CPUStatistics.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
+    <ClCompile Include="DeviceResourcesException.cpp" />
+    <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="FontClass.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
     <ClCompile Include="HUD.cpp" />
@@ -207,7 +209,9 @@
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CPUStatistics.h" />
     <ClInclude Include="DeviceResources.h" />
+    <ClInclude Include="DeviceResourcesException.h" />
     <ClInclude Include="DirectXHelper.h" />
+    <ClInclude Include="DxgiInfoManager.h" />
     <ClInclude Include="FontClass.h" />
     <ClInclude Include="FontShaderClass.h" />
     <ClInclude Include="HUD.h" />

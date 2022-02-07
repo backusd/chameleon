@@ -138,9 +138,7 @@ bool BitmapClass::InitializeBuffers()
 	vertexData.pSysMem = vertices;
 
 	// Now finally create the vertex buffer.
-	ThrowIfFailed(
-		m_deviceResources->D3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)
-	);
+	m_deviceResources->D3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 
 	// Set up the description of the index buffer.
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -153,9 +151,7 @@ bool BitmapClass::InitializeBuffers()
 	indexData.pSysMem = indices;
 
 	// Create the index buffer.
-	ThrowIfFailed(
-		m_deviceResources->D3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer)
-	);
+	m_deviceResources->D3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
 	delete[] vertices;
@@ -254,9 +250,7 @@ bool BitmapClass::UpdateBuffers(int positionX, int positionY)
 
 	// Lock the vertex buffer.
 	D3D11_MAPPED_SUBRESOURCE resource;
-	ThrowIfFailed(
-		m_deviceResources->D3DDeviceContext()->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource)
-	);
+	m_deviceResources->D3DDeviceContext()->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 	memcpy(resource.pData, (void*)vertices, (sizeof(VertexType) * m_vertexCount));
 
 	m_deviceResources->D3DDeviceContext()->Unmap(m_vertexBuffer, 0);

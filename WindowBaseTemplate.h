@@ -65,11 +65,10 @@ WindowBaseTemplate<T>::WindowBaseTemplate(int width, int height, const char* nam
 
 	auto WS_options = WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION | WS_MAXIMIZEBOX | WS_SIZEBOX;
 
-	if (FAILED(AdjustWindowRect(&wr, WS_options, FALSE)))
+	if (AdjustWindowRect(&wr, WS_options, FALSE) == 0)
 	{
 		throw WINDOW_LAST_EXCEPT();
 	};
-	//AdjustWindowRect(&wr, WS_options, FALSE)
 
 	// create window & get hWnd
 	m_hWnd = CreateWindow(
@@ -105,9 +104,6 @@ LRESULT CALLBACK WindowBaseTemplate<T>::HandleMsgSetupBase(HWND hWnd, UINT msg, 
 		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
 
 		WindowBaseTemplate<T>* const pWnd = static_cast<WindowBaseTemplate<T>*>(pCreate->lpCreateParams);
-
-		//T* const pWnd = static_cast<T*>(pCreate->lpCreateParams);
-		//Window* const pWnd = static_cast<Window*>(pCreate->lpCreateParams);
 
 		// set WinAPI-managed user data to store ptr to window class
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWnd));

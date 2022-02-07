@@ -175,9 +175,7 @@ void SkyDomeClass::InitializeBuffers()
 	vertexData.pSysMem = vertices;
 
 	// Now finally create the vertex buffer.
-	ThrowIfFailed(
-		m_deviceResources->D3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)
-	);
+	m_deviceResources->D3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 
 	// Set up the description of the index buffer.
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -190,9 +188,7 @@ void SkyDomeClass::InitializeBuffers()
 	indexData.pSysMem = indices;
 
 	// Create the index buffer.
-	ThrowIfFailed(
-		m_deviceResources->D3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer)
-	);
+	m_deviceResources->D3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
 	delete[] vertices;
