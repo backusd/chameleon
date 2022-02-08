@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 /*
 A DrawPipeline will be configured for each item(s) that need to be rendered. It will consist of the following:
@@ -46,7 +47,7 @@ public:
 		std::vector<std::string> pixelShaderConstantBufferNames);
 
 	void Update(std::shared_ptr<StepTimer> timer);
-	void Draw(DirectX::XMMATRIX viewProjection);
+	void Draw();
 
 
 	void AddRenderable(std::shared_ptr<Renderable> renderable) { m_renderables.push_back(renderable); }
@@ -54,9 +55,38 @@ public:
 	void UpdatePSSubresource(int index, void* data);
 	void UpdateVSSubresource(int index, void* data);
 
+	void SetPerRendererableUpdate(std::function<void(std::shared_ptr<Renderable> renderable, 
+													 std::shared_ptr<Mesh> mesh,
+													 std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&, 
+													 std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&)> function) { PerRendererableUpdate = function; }
+
 private:
 	void SetPSConstantBuffers();
 	void SetVSConstantBuffers();
+
+	void SetPSConstantBuffers1();
+	void SetPSConstantBuffers2();
+	void SetPSConstantBuffers3();
+	void SetPSConstantBuffers4();
+	void SetPSConstantBuffers5();
+	void SetPSConstantBuffers6();
+	void SetPSConstantBuffers7();
+	void SetPSConstantBuffers8();
+
+	void SetVSConstantBuffers1();
+	void SetVSConstantBuffers2();
+	void SetVSConstantBuffers3();
+	void SetVSConstantBuffers4();
+	void SetVSConstantBuffers5();
+	void SetVSConstantBuffers6();
+	void SetVSConstantBuffers7();
+	void SetVSConstantBuffers8();
+
+	std::function<void(std::shared_ptr<Renderable> renderable, 
+					   std::shared_ptr<Mesh> mesh, 
+					   std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers, 
+					   std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)> PerRendererableUpdate;
+
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 

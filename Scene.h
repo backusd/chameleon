@@ -11,6 +11,7 @@
 #include "MoveLookController.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Terrain.h"
 
 #include <memory>
 
@@ -24,16 +25,26 @@ public:
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
 	void Draw();
 
+
+	DirectX::XMMATRIX ViewProjectionMatrix() { return m_viewMatrix * m_projectionMatrix; }
+	DirectX::XMMATRIX ViewMatrix() { return m_viewMatrix; }
+	DirectX::XMMATRIX ProjectionMatrix() { return m_projectionMatrix; }
+	
+
 private:
 	void CreateStaticResources();
 	void CreateWindowSizeDependentResources();
+
+	void SetupCubePipeline();
+	void SetupTerrainPipeline();
 
 	PhongMaterialProperties* m_material;
 
 	HWND m_hWnd;
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
-	std::shared_ptr<DrawPipeline> m_drawPipeline;
+	std::shared_ptr<DrawPipeline> m_cubePipeline;
+	std::shared_ptr<DrawPipeline> m_terrainPipeline;
 
 	std::unique_ptr<MoveLookController> m_moveLookController;
 

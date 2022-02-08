@@ -213,6 +213,12 @@
     <ClCompile Include="Box.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainMesh.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -359,7 +365,10 @@
     <ClInclude Include="HLSLStructures.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="ModelViewProjectionConstantBuffer.h">
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainMesh.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
   </ItemGroup>
@@ -408,6 +417,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="PhongPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TerrainVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TerrainPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

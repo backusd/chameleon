@@ -33,6 +33,8 @@
 #include "Scene.h"
 
 #include "BoxMesh.h"
+#include "Terrain.h"
+#include "TerrainMesh.h"
 
 /*
 #include "CPUStatistics.h"

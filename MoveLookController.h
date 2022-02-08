@@ -24,6 +24,8 @@ public:
 
 	bool IsMoving();
 
+	void SetPosition(DirectX::XMFLOAT3 position) { m_eyeVec = DirectX::XMLoadFloat3(&position); }
+
 	void CenterOnFace();
 	void RotateLeft90();
 	void RotateRight90();

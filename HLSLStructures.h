@@ -105,3 +105,19 @@ struct LightProperties
     //----------------------------------- (16 byte boundary)
     Light               Lights[MAX_LIGHTS]; // 80 * 8 bytes
 };  // Total:                                  672 bytes (42 * 16)
+
+
+
+// Terrain ===========================================================
+struct TerrainVertexType
+{
+    DirectX::XMFLOAT3 position;
+    DirectX::XMFLOAT4 color;
+};
+
+struct TerrainMatrixBufferType
+{
+    DirectX::XMMATRIX world;
+    DirectX::XMMATRIX view;
+    DirectX::XMMATRIX projection;
+};
