@@ -4,16 +4,6 @@ using Microsoft::WRL::ComPtr;
 using DirectX::XMFLOAT3;
 
 
-/////////////
-// GLOBALS //
-/////////////
-//const bool FULL_SCREEN = true;
-const bool FULL_SCREEN = false;
-const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 1000.0f;
-const float SCREEN_NEAR = 0.1f;
-
-
 ContentWindow::ContentWindow(int width, int height, const char* name) :
 	WindowBase(width, height, name),
 	m_stateBlock(nullptr),
@@ -24,13 +14,6 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	m_network(nullptr),
 	m_hud(nullptr),
 	m_scene(nullptr)
-	/*
-	m_cpuStatistics(nullptr),
-	m_inputClass(nullptr),
-	m_userInterface(nullptr),
-	m_stateClass(nullptr),
-	m_blackForest(nullptr),
-	*/
 {
 	// Create the device resources
 	m_deviceResources = std::make_shared<DeviceResources>(m_hWnd);
@@ -38,13 +21,29 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	// We now have access to the device, so we now need to initialize the object store before creating the scene
 	ObjectStore::Initialize(m_deviceResources);
-	ObjectStore::AddVertexShader(L"VertexShader.cso", "basic-cube-vertex-shader");
+
+	const D3D11_INPUT_ELEMENT_DESC ied[] =
+	{
+		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"VertexShader.cso", ied, std::size(ied), "basic-cube-vertex-shader");
 	ObjectStore::AddPixelShader(L"PixelShader.cso", "basic-cube-pixel-shader");
 
 
+	const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"PhongVertexShader.cso", vertexDesc, std::size(vertexDesc), "phong-vertex-shader");
+	ObjectStore::AddPixelShader(L"PhongPixelShader.cso", "phong-pixel-shader");
 
 
+	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources), "box-mesh");
 
+	ObjectStore::AddConstantBuffer<ModelViewProjectionConstantBuffer>("model-view-projection-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	ObjectStore::AddConstantBuffer<PhongMaterialProperties>("phong-material-properties-buffer", D3D11_USAGE_DEFAULT, 0);
+	ObjectStore::AddConstantBuffer<LightProperties>("light-properties-buffer", D3D11_USAGE_DEFAULT, 0);
 
 
 	// Create the state block 
@@ -63,7 +62,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	// m_network = std::make_shared<Network>("155.248.215.180", 7000, m_timer);
 
 	m_hud = std::make_shared<HUD>();
-	m_scene = std::make_shared<Scene>(m_deviceResources);
+	m_scene = std::make_shared<Scene>(m_deviceResources, m_hWnd);
 
 
 	
@@ -86,12 +85,14 @@ void ContentWindow::Update()
 	//oss << "Time: " << m_timer->GetTotalSeconds();
 	//SetWindowText(m_hWnd, oss.str().c_str());
 
+	/*
 	std::ostringstream oss;
 	if (m_mouse->LeftIsPressed())
 		oss << "Left";
 	else
 		oss << "(" << m_mouse->GetPosX() << ", " << m_mouse->GetPosY() << ")";
 	SetWindowText(m_hWnd, oss.str().c_str());
+	*/
 
 	m_timer->Tick([&]()
 		{
@@ -104,7 +105,7 @@ void ContentWindow::Update()
 			//m_network->Update();
 
 			//m_hud->Update();
-			//m_scene->Update();
+			m_scene->Update(m_timer, m_keyboard, m_mouse);
 
 			/*
 			m_cpuStatistics->Update(m_timer);

@@ -3,8 +3,15 @@
 std::shared_ptr<DeviceResources> ObjectStore::m_deviceResources = nullptr;
 
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> ObjectStore::m_vertexShaderMap;
-std::map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> ObjectStore::m_vertexShaderBlobMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>> ObjectStore::m_inputLayoutMap;
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> ObjectStore::m_pixelShaderMap;
+
+std::map<std::string, std::shared_ptr<Mesh>> ObjectStore::m_meshMap;
+
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>> ObjectStore::m_constantBufferMap;
+
+
+
 
 
 void ObjectStore::Initialize(std::shared_ptr<DeviceResources> deviceResources)
@@ -16,21 +23,32 @@ void ObjectStore::DestructObjects()
 {
 	m_deviceResources = nullptr;
 	m_vertexShaderMap.clear();
-	m_vertexShaderBlobMap.clear();
+	m_inputLayoutMap.clear();
 	m_pixelShaderMap.clear();
 }
 
-void ObjectStore::AddVertexShader(std::wstring fileName, std::string lookupName)
+void ObjectStore::AddVertexShaderAndInputLayout(std::wstring vertexShaderFile, const D3D11_INPUT_ELEMENT_DESC* inputDescription, UINT numElements, std::string lookupName)
 {
 	INFOMAN(m_deviceResources);
 
+	// Vertex Shader
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-	GFX_THROW_INFO(D3DReadFileToBlob(fileName.c_str(), &pBlob));
+	GFX_THROW_INFO(D3DReadFileToBlob(vertexShaderFile.c_str(), &pBlob));
 	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
 
 	m_vertexShaderMap.insert(std::pair(lookupName, pVertexShader));
-	m_vertexShaderBlobMap.insert(std::pair(lookupName, pBlob));
+
+	// Input Layout
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
+	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateInputLayout(
+		inputDescription, numElements,
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		&pInputLayout
+	));
+
+	m_inputLayoutMap.insert(std::pair(lookupName, pInputLayout));
 }
 
 void ObjectStore::AddPixelShader(std::wstring fileName, std::string lookupName)

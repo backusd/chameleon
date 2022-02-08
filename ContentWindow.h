@@ -32,6 +32,8 @@
 // 3D Scene
 #include "Scene.h"
 
+#include "BoxMesh.h"
+
 /*
 #include "CPUStatistics.h"
 #include "InputClass.h"

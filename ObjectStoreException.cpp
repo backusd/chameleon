@@ -1,6 +1,6 @@
 #include "ObjectStoreException.h"
 
-ObjectStoreException::ObjectStoreException(int line, const char* file, const char* mapVariable, std::string mapKey) noexcept :
+ObjectStoreInvalidKeyException::ObjectStoreInvalidKeyException(int line, const char* file, const char* mapVariable, std::string mapKey) noexcept :
 	ChameleonException(line, file)
 {
 	std::ostringstream oss;
@@ -9,7 +9,7 @@ ObjectStoreException::ObjectStoreException(int line, const char* file, const cha
 }
 
 
-const char* ObjectStoreException::what() const noexcept
+const char* ObjectStoreInvalidKeyException::what() const noexcept
 {
 	std::ostringstream oss;
 	oss << GetType() << std::endl
@@ -19,12 +19,12 @@ const char* ObjectStoreException::what() const noexcept
 	return m_whatBuffer.c_str();
 }
 
-const char* ObjectStoreException::GetType() const noexcept
+const char* ObjectStoreInvalidKeyException::GetType() const noexcept
 {
-	return "Object Store Exception";
+	return "Object Store Invalid Key Exception";
 }
 
-std::string ObjectStoreException::GetErrorInfo() const noexcept
+std::string ObjectStoreInvalidKeyException::GetErrorInfo() const noexcept
 {
 	return m_info;
 }

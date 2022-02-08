@@ -370,7 +370,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
 	D3D11_RASTERIZER_DESC rd;
 	rd.FillMode = D3D11_FILL_SOLID; // or D3D11_FILL_WIREFRAME
 	rd.CullMode = D3D11_CULL_NONE;
-	rd.FrontCounterClockwise = false;	// This must be true for the outline effect to work properly
+	rd.FrontCounterClockwise = true;	// This must be true for the outline effect to work properly
 	rd.DepthBias = 0;
 	rd.SlopeScaledDepthBias = 0.0f;
 	rd.DepthBiasClamp = 0.0f;
