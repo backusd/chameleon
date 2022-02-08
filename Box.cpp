@@ -1,11 +1,19 @@
 #include "Box.h"
 
+using DirectX::XMFLOAT3;
 
 Box::Box(float sideLength) :
 	Renderable(),
 	m_sideLength(sideLength)
 {
 
+}
+
+Box::Box(DirectX::XMFLOAT3 position, float sideLength) :
+	Renderable(),
+	m_sideLength(sideLength)
+{
+	m_position = XMFLOAT3(position.x, position.y, position.z);
 }
 
 DirectX::XMMATRIX Box::GetScaleMatrix()

@@ -14,9 +14,7 @@ Renderable::Renderable() :
 
 XMMATRIX Renderable::GetModelMatrix()
 {
-	return DirectX::XMMatrixTranspose(
-				DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) * 
-				GetScaleMatrix() *
-				DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z)
-			);
+	return DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *
+			GetScaleMatrix() *
+			DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 }

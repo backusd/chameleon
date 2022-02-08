@@ -24,6 +24,5 @@ protected:
 	float m_roll;
 	float m_pitch;
 	float m_yaw;
-
 };
 

@@ -11,6 +11,7 @@ class Box : public Renderable
 {
 public:
 	Box(float m_sideLength);
+	Box(DirectX::XMFLOAT3 position, float sideLength);
 
 	DirectX::XMMATRIX GetScaleMatrix() override;
 	

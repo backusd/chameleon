@@ -35,17 +35,11 @@ DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
 
 void DrawPipeline::UpdatePSSubresource(int index, void* data)
 {
-	INFOMAN(m_deviceResources);
-	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
-
-	context->UpdateSubresource(m_pixelShaderConstantBuffers[index].Get(), 0, nullptr, data, 0, 0);
+	m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_pixelShaderConstantBuffers[index].Get(), 0, nullptr, data, 0, 0);
 }
 void DrawPipeline::UpdateVSSubresource(int index, void* data)
 {
-	INFOMAN(m_deviceResources);
-	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
-
-	context->UpdateSubresource(m_vertexShaderConstantBuffers[index].Get(), 0, nullptr, data, 0, 0);
+	m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_vertexShaderConstantBuffers[index].Get(), 0, nullptr, data, 0, 0);
 }
 
 void DrawPipeline::Update(std::shared_ptr<StepTimer> timer)
@@ -103,13 +97,6 @@ void DrawPipeline::Draw(DirectX::XMMATRIX viewProjection)
 		mappedBuffer->model = model;
 		mappedBuffer->modelViewProjection = modelViewProjection;
 		mappedBuffer->inverseTransposeModel = inverseTransposeModel;
-		/*mappedBuffer->transform = DirectX::XMMatrixTranspose(
-			DirectX::XMMatrixRotationZ(2.0f) *
-			DirectX::XMMatrixRotationX(2.0f) *
-			DirectX::XMMatrixTranslation(0.0f, 0.0f, 5.0f) *
-			DirectX::XMMatrixPerspectiveLH(1.0f, 1.0f, 0.5f, 10.0f)
-		);
-		*/
 
 		context->Unmap(m_vertexShaderConstantBuffers[0].Get(), 0);
 
@@ -120,7 +107,6 @@ void DrawPipeline::Draw(DirectX::XMMATRIX viewProjection)
 
 void DrawPipeline::SetPSConstantBuffers()
 {
-	INFOMAN(m_deviceResources);
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
 	if (m_pixelShaderConstantBuffers.size() > 0)
@@ -200,7 +186,6 @@ void DrawPipeline::SetPSConstantBuffers()
 
 void DrawPipeline::SetVSConstantBuffers()
 {
-	INFOMAN(m_deviceResources);
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
 	if (m_vertexShaderConstantBuffers.size() > 0)

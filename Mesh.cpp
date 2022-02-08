@@ -18,8 +18,6 @@ void Mesh::PreparePipeline()
 	//		IASetVertexBuffers
 	//		IASetIndexBuffer
 
-
-	INFOMAN(m_deviceResources);
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
