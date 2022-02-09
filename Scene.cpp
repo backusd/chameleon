@@ -167,6 +167,7 @@ void Scene::SetupCubePipeline()
 		"box-mesh",
 		"phong-vertex-shader",
 		"phong-pixel-shader",
+		"solidfill",
 		vertexConstantBuffers,
 		pixelConstantBuffers
 		);
@@ -214,6 +215,7 @@ void Scene::SetupTerrainPipeline()
 		"terrain-mesh",
 		"terrain-vertex-shader",
 		"terrain-pixel-shader",
+		"wireframe",
 		vertexConstantBuffers,
 		pixelConstantBuffers
 		);

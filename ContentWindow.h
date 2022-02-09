@@ -93,6 +93,11 @@ protected:
 private:
 	void DiscardGraphicsResources();
 
+	void ObjectStoreAddShaders();
+	void ObjectStoreAddMeshes();
+	void ObjectStoreAddConstantBuffers();
+	void ObjectStoreAddRasterStates();
+
 	std::shared_ptr<DeviceResources> m_deviceResources;
 	std::shared_ptr<StepTimer> m_timer;
 

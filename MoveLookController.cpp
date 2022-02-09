@@ -22,7 +22,14 @@ MoveLookController::MoveLookController() :
 
 void MoveLookController::ResetState()
 {
-    m_mouseDown = false;
+    m_LButtonDown = false;
+    m_RButtonDown = false;
+    m_MButtonDown = false;
+    m_mouseDownInitialPositionX = 0.0f;
+    m_mouseDownInitialPositionY = 0.0f;
+    m_mouseCurrentPositionX = 0.0f;
+    m_mouseCurrentPositionY = 0.0f;
+
     m_left = false;
     m_right = false;
     m_up = false;
@@ -56,8 +63,60 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
 
     Keyboard::Event keyEvent;
 
-    // Process keyboard events, but only if the LButton is NOT down
-    if (m_mouseDown)
+    // Process mouse events
+    while (!mouse->IsEmpty())
+    {
+        e = mouse->Read();
+        switch (e.GetType())
+        {
+        case Mouse::Event::Type::WheelUp: ZoomIn(mouse->GetPosX(), mouse->GetPosY()); break;
+        case Mouse::Event::Type::WheelDown: ZoomOut(mouse->GetPosX(), mouse->GetPosY()); break;
+        case Mouse::Event::Type::LPress:
+            // Only register the LPress if the RButton and MButton are not already down
+            if (!(m_RButtonDown || m_MButtonDown))
+            {
+                m_LButtonDown = true;
+                m_mouseDownInitialPositionX = m_mouseCurrentPositionX = mouse->GetPosX();
+                m_mouseDownInitialPositionY = m_mouseCurrentPositionY = mouse->GetPosY();
+            }
+            break;
+
+        case Mouse::Event::Type::LRelease: m_LButtonDown = false; break;
+        case Mouse::Event::Type::RPress:
+            // Only register the RPress if the LButton and MButton are not already down
+            if (!(m_LButtonDown || m_MButtonDown))
+            {
+                m_RButtonDown = true;
+                m_mouseDownInitialPositionX = m_mouseCurrentPositionX = mouse->GetPosX();
+                m_mouseDownInitialPositionY = m_mouseCurrentPositionY = mouse->GetPosY();
+            }
+            break;
+
+        case Mouse::Event::Type::RRelease: m_RButtonDown = false; break;
+        case Mouse::Event::Type::MPress:
+            // Only register the MPress if the LButton and RButton are not already down
+            if (!(m_LButtonDown || m_RButtonDown))
+            {
+                m_MButtonDown = true;
+                m_mouseDownInitialPositionX = m_mouseCurrentPositionX = mouse->GetPosX();
+                m_mouseDownInitialPositionY = m_mouseCurrentPositionY = mouse->GetPosY();
+            }
+            break;
+
+        case Mouse::Event::Type::MRelease: m_MButtonDown = false; break;
+        case Mouse::Event::Type::Move:
+            m_mouseCurrentPositionX = mouse->GetPosX();
+            m_mouseCurrentPositionY = mouse->GetPosY();
+            MouseMove();
+            break;
+        default:
+            break;
+        }
+
+    }
+
+    // Process keyboard events, but only if a mouse button is not down
+    if (m_LButtonDown || m_MButtonDown || m_RButtonDown)
     {
         // Just drop any key events if mouse is down
         keyboard->FlushKey();
@@ -84,96 +143,7 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
     UpdatePosition();
 
     
-    while (!mouse->IsEmpty())
-    {
-        e = mouse->Read();
-        switch (e.GetType())
-        {
-        case Mouse::Event::Type::WheelUp:
-            /*
-            factor = 0.05f;
-            DirectX::XMStoreFloat3(&newEye, m_eyeVec);
-            // newEye.x += factor;
-            // newEye.y += factor;
-            newEye.z += factor;
-            m_eyeVec = DirectX::XMLoadFloat3(&newEye);
-
-            oss << "EYE: (" << newEye.x << ", " << newEye.y << ", " << newEye.z << ")";
-            SetWindowText(hWnd, oss.str().c_str());
-            */
-            break;
-
-        case Mouse::Event::Type::WheelDown:
-            /*
-            factor = 0.05f;
-            DirectX::XMStoreFloat3(&newEye, m_eyeVec);
-            //newEye.x -= factor;
-            //newEye.y -= factor;
-            newEye.z -= factor;
-            m_eyeVec = DirectX::XMLoadFloat3(&newEye);
-
-            oss << "EYE: (" << newEye.x << ", " << newEye.y << ", " << newEye.z << ")";
-            SetWindowText(hWnd, oss.str().c_str());
-            */
-            break;
-
-        case Mouse::Event::Type::LPress:
-            /*
-            m_mouseDown = true;
-            m_mousePositionX = m_mousePositionXNew = mouse->GetPosX();
-            m_mousePositionY = m_mousePositionYNew = mouse->GetPosY();
-            */
-            break;
-
-        case Mouse::Event::Type::LRelease:
-            /*
-            m_mouseDown = false;
-            */
-            break;
-
-        case Mouse::Event::Type::Move:
-            /*
-            if (m_mouseDown)
-            {
-                RECT rect;
-                GetClientRect(hWnd, &rect);
-
-                m_mousePositionXNew = mouse->GetPosX();
-                m_mousePositionYNew = mouse->GetPosY();
-
-                // Compute the eye distance to center
-                float radius = 0.0f;
-                DirectX::XMStoreFloat(&radius, DirectX::XMVector3Length(m_eyeVec));
-
-                // If the pointer were to move from the middle of the screen to the far right,
-                // that should produce one full rotation. Therefore, set a rotationFactor = 2
-                float rotationFactor = 2.0f;
-                float width = rect.right - rect.left;
-                float height = rect.bottom - rect.top;
-
-                float radiansPerPixelX = (DirectX::XM_2PI / width) * rotationFactor;
-                float radiansPerPixelY = (DirectX::XM_2PI / height) * rotationFactor;
-
-                float thetaX = radiansPerPixelX * (m_mousePositionX - m_mousePositionXNew);
-                float thetaY = radiansPerPixelY * (m_mousePositionY - m_mousePositionYNew);
-
-
-                // Rotate
-                RotateLeftRight(thetaX);
-                RotateUpDown(-thetaY);
-
-                // reset the mouse position variables
-                m_mousePositionX = m_mousePositionXNew;
-                m_mousePositionY = m_mousePositionYNew;
-            }
-            */
-            break;
-
-        default:
-            break;
-        }
-
-    }
+    
 
     m_previousTime = m_currentTime;
 
@@ -318,6 +288,74 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
     */
 }
 
+void MoveLookController::ZoomIn(int mouseX, int mouseY)
+{
+    /*
+           factor = 0.05f;
+           DirectX::XMStoreFloat3(&newEye, m_eyeVec);
+           // newEye.x += factor;
+           // newEye.y += factor;
+           newEye.z += factor;
+           m_eyeVec = DirectX::XMLoadFloat3(&newEye);
+
+           oss << "EYE: (" << newEye.x << ", " << newEye.y << ", " << newEye.z << ")";
+           SetWindowText(hWnd, oss.str().c_str());
+           */
+}
+void MoveLookController::ZoomOut(int mouseX, int mouseY)
+{
+    /*
+factor = 0.05f;
+DirectX::XMStoreFloat3(&newEye, m_eyeVec);
+//newEye.x -= factor;
+//newEye.y -= factor;
+newEye.z -= factor;
+m_eyeVec = DirectX::XMLoadFloat3(&newEye);
+
+oss << "EYE: (" << newEye.x << ", " << newEye.y << ", " << newEye.z << ")";
+SetWindowText(hWnd, oss.str().c_str());
+*/
+}
+
+void MoveLookController::MouseMove()
+{
+    /*
+if (m_mouseDown)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+
+    m_mousePositionXNew = mouse->GetPosX();
+    m_mousePositionYNew = mouse->GetPosY();
+
+    // Compute the eye distance to center
+    float radius = 0.0f;
+    DirectX::XMStoreFloat(&radius, DirectX::XMVector3Length(m_eyeVec));
+
+    // If the pointer were to move from the middle of the screen to the far right,
+    // that should produce one full rotation. Therefore, set a rotationFactor = 2
+    float rotationFactor = 2.0f;
+    float width = rect.right - rect.left;
+    float height = rect.bottom - rect.top;
+
+    float radiansPerPixelX = (DirectX::XM_2PI / width) * rotationFactor;
+    float radiansPerPixelY = (DirectX::XM_2PI / height) * rotationFactor;
+
+    float thetaX = radiansPerPixelX * (m_mousePositionX - m_mousePositionXNew);
+    float thetaY = radiansPerPixelY * (m_mousePositionY - m_mousePositionYNew);
+
+
+    // Rotate
+    RotateLeftRight(thetaX);
+    RotateUpDown(-thetaY);
+
+    // reset the mouse position variables
+    m_mousePositionX = m_mousePositionXNew;
+    m_mousePositionY = m_mousePositionYNew;
+}
+*/
+}
+
 /*
 void MoveLookController::RotateLeftRight(float theta)
 {
@@ -383,7 +421,7 @@ void MoveLookController::UpdatePosition()
 
 bool MoveLookController::IsMoving()
 {
-    return m_up || m_down || m_left || m_right || m_mouseDown; // || m_movingToNewLocation;
+    return m_up || m_down || m_left || m_right; // || m_mouseDown; // || m_movingToNewLocation;
 }
 
 void MoveLookController::LookLeft()

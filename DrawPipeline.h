@@ -38,11 +38,13 @@ public:
 	DrawPipeline(std::shared_ptr<DeviceResources> deviceResources, 
 		std::string meshName,
 		std::string vertexShaderName, 
-		std::string pixelShaderName);
+		std::string pixelShaderName,
+		std::string rasterStateName);
 	DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
 		std::string meshName,
 		std::string vertexShaderName,
 		std::string pixelShaderName,
+		std::string rasterStateName,
 		std::vector<std::string> vertexShaderConstantBufferNames,
 		std::vector<std::string> pixelShaderConstantBufferNames);
 
@@ -95,9 +97,11 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> m_pixelShaderConstantBuffers;
 	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> m_vertexShaderConstantBuffers;
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_inputLayout;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_rasterState;
 
 	std::vector<std::shared_ptr<Renderable>> m_renderables;
+
 };

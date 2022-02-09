@@ -195,6 +195,7 @@
     <ClCompile Include="StateClass.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TerrainMesh.cpp" />
+    <ClCompile Include="TerrainMeshException.cpp" />
     <ClCompile Include="TextClass.cpp" />
     <ClCompile Include="TextureClass.cpp" />
     <ClCompile Include="UserInterfaceClass.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TerrainMesh.h" />
+    <ClInclude Include="TerrainMeshException.h" />
     <ClInclude Include="TextClass.h" />
     <ClInclude Include="TextureClass.h" />
     <ClInclude Include="UserInterfaceClass.h" />
@@ -266,11 +268,13 @@
     <Image Include="char2.dds" />
     <Image Include="chat.dds" />
     <Image Include="font.dds" />
+    <Image Include="heightmap.bmp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="cube.txt" />
     <Text Include="fontdata.txt" />
     <Text Include="skydome.txt" />
+    <Text Include="Terrain.txt" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PhongPixelShader.hlsl">

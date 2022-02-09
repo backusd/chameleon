@@ -22,40 +22,10 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	// We now have access to the device, so we now need to initialize the object store before creating the scene
 	ObjectStore::Initialize(m_deviceResources);
 
-	const D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"VertexShader.cso", ied, static_cast<UINT>(std::size(ied)), "basic-cube-vertex-shader");
-	ObjectStore::AddPixelShader(L"PixelShader.cso", "basic-cube-pixel-shader");
-
-
-	const D3D11_INPUT_ELEMENT_DESC terrainDesc[] =
-	{
-		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainVertexShader.cso", terrainDesc, static_cast<UINT>(std::size(terrainDesc)), "terrain-vertex-shader");
-	ObjectStore::AddPixelShader(L"TerrainPixelShader.cso", "terrain-pixel-shader");
-
-
-
-	const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"PhongVertexShader.cso", vertexDesc, static_cast<UINT>(std::size(vertexDesc)), "phong-vertex-shader");
-	ObjectStore::AddPixelShader(L"PhongPixelShader.cso", "phong-pixel-shader");
-
-
-	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources), "box-mesh");
-	ObjectStore::AddMesh(std::make_shared<TerrainMesh>(m_deviceResources), "terrain-mesh");
-
-	ObjectStore::AddConstantBuffer<ModelViewProjectionConstantBuffer>("model-view-projection-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-	ObjectStore::AddConstantBuffer<PhongMaterialProperties>("phong-material-properties-buffer", D3D11_USAGE_DEFAULT, 0);
-	ObjectStore::AddConstantBuffer<LightProperties>("light-properties-buffer", D3D11_USAGE_DEFAULT, 0);
-	ObjectStore::AddConstantBuffer<TerrainMatrixBufferType>("terrain-constant-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	ObjectStoreAddShaders();
+	ObjectStoreAddMeshes();
+	ObjectStoreAddConstantBuffers();
+	ObjectStoreAddRasterStates();
 
 
 	// Create the state block 
@@ -85,6 +55,67 @@ ContentWindow::~ContentWindow()
 {
 	// Have to make sure to delete objects on close
 	ObjectStore::DestructObjects();
+}
+
+void ContentWindow::ObjectStoreAddShaders()
+{
+	const D3D11_INPUT_ELEMENT_DESC ied[] =
+	{
+		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"VertexShader.cso", ied, static_cast<UINT>(std::size(ied)), "basic-cube-vertex-shader");
+	ObjectStore::AddPixelShader(L"PixelShader.cso", "basic-cube-pixel-shader");
+
+
+	const D3D11_INPUT_ELEMENT_DESC terrainDesc[] =
+	{
+		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainVertexShader.cso", terrainDesc, static_cast<UINT>(std::size(terrainDesc)), "terrain-vertex-shader");
+	ObjectStore::AddPixelShader(L"TerrainPixelShader.cso", "terrain-pixel-shader");
+
+
+
+	const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"PhongVertexShader.cso", vertexDesc, static_cast<UINT>(std::size(vertexDesc)), "phong-vertex-shader");
+	ObjectStore::AddPixelShader(L"PhongPixelShader.cso", "phong-pixel-shader");
+}
+void ContentWindow::ObjectStoreAddMeshes()
+{
+	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources), "box-mesh");
+	ObjectStore::AddMesh(std::make_shared<TerrainMesh>(m_deviceResources), "terrain-mesh");
+}
+void ContentWindow::ObjectStoreAddConstantBuffers()
+{
+	ObjectStore::AddConstantBuffer<ModelViewProjectionConstantBuffer>("model-view-projection-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	ObjectStore::AddConstantBuffer<PhongMaterialProperties>("phong-material-properties-buffer", D3D11_USAGE_DEFAULT, 0);
+	ObjectStore::AddConstantBuffer<LightProperties>("light-properties-buffer", D3D11_USAGE_DEFAULT, 0);
+	ObjectStore::AddConstantBuffer<TerrainMatrixBufferType>("terrain-constant-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+}
+void ContentWindow::ObjectStoreAddRasterStates()
+{
+	D3D11_RASTERIZER_DESC rd;
+	rd.FillMode = D3D11_FILL_SOLID; // or D3D11_FILL_WIREFRAME
+	rd.CullMode = D3D11_CULL_NONE;
+	rd.FrontCounterClockwise = true;	// This must be true for the outline effect to work properly
+	rd.DepthBias = 0;
+	rd.SlopeScaledDepthBias = 0.0f;
+	rd.DepthBiasClamp = 0.0f;
+	rd.DepthClipEnable = true;
+	rd.ScissorEnable = false;
+	rd.MultisampleEnable = false;
+	rd.AntialiasedLineEnable = false;
+
+	ObjectStore::AddRasterState(rd, "solidfill");
+
+	rd.FillMode = D3D11_FILL_WIREFRAME;
+
+	ObjectStore::AddRasterState(rd, "wireframe");
 }
 
 void ContentWindow::Update()

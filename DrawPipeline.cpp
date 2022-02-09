@@ -4,12 +4,13 @@ using DirectX::XMFLOAT4;
 using DirectX::XMMATRIX;
 using DirectX::XMFLOAT4X4;
 
-DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources, std::string meshName, std::string vertexShaderName, std::string pixelShaderName) :
+DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources, std::string meshName, std::string vertexShaderName, std::string pixelShaderName, std::string rasterStateName) :
 	m_deviceResources(deviceResources),
 	m_mesh(ObjectStore::GetMesh(meshName)),
 	m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
 	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
-	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName))
+	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
+	m_rasterState(ObjectStore::GetRasterState(rasterStateName))
 {
 	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&) {};
 }
@@ -18,13 +19,15 @@ DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
 							std::string meshName, 
 							std::string vertexShaderName, 
 							std::string pixelShaderName,
+							std::string rasterStateName,
 							std::vector<std::string> vertexShaderConstantBufferNames,
 							std::vector<std::string> pixelShaderConstantBufferNames) :
 	m_deviceResources(deviceResources),
 	m_mesh(ObjectStore::GetMesh(meshName)),
 	m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
 	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
-	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName))
+	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
+	m_rasterState(ObjectStore::GetRasterState(rasterStateName))
 {
 	for (std::string name : vertexShaderConstantBufferNames)
 		m_vertexShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
@@ -64,6 +67,9 @@ void DrawPipeline::Draw()
 	// Set the pixel shader and vertex shader constant buffers
 	SetPSConstantBuffers();
 	SetVSConstantBuffers();
+
+	// Set the raster state
+	context->RSSetState(m_rasterState.Get());
 
 	// loop over each renderable and update the necessary buffers for each rendereable
 	UINT indexCount = m_mesh->IndexCount();

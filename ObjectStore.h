@@ -28,7 +28,7 @@ public:
 	static void AddVertexShaderAndInputLayout(std::wstring vertexShaderFile, const D3D11_INPUT_ELEMENT_DESC* inputDescription, UINT numElements, std::string lookupName);
 	static void AddPixelShader(std::wstring fileName, std::string lookupName);
 	static void AddMesh(std::shared_ptr<Mesh> mesh, std::string lookupName) { m_meshMap.insert(std::pair(lookupName, mesh)); }
-	// static void AddConstantBuffer(std::shared_ptr<ConstantBuffer> buffer, std::string lookupName) { m_constantBufferMap.insert(std::pair(lookupName, buffer)); }
+	static void AddRasterState(D3D11_RASTERIZER_DESC desc, std::string lookupName);
 	
 	template <typename T>
 	static void AddConstantBuffer(std::string lookupName, D3D11_USAGE usage, UINT CPUAccessFlags);
@@ -38,7 +38,7 @@ public:
 	static Microsoft::WRL::ComPtr<ID3D11PixelShader> GetPixelShader(std::string lookupName) { MAP_LOOKUP(m_pixelShaderMap, lookupName); }
 	static std::shared_ptr<Mesh> GetMesh(std::string lookupName) { MAP_LOOKUP(m_meshMap, lookupName); }
 	static Microsoft::WRL::ComPtr<ID3D11Buffer> GetConstantBuffer(std::string lookupName) { MAP_LOOKUP(m_constantBufferMap, lookupName); }
-	
+	static Microsoft::WRL::ComPtr<ID3D11RasterizerState> GetRasterState(std::string lookupName) { MAP_LOOKUP(m_rasterStateMap, lookupName); }
 
 
 private:
@@ -53,6 +53,8 @@ private:
 	static std::map<std::string, std::shared_ptr<Mesh>> m_meshMap;
 
 	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>> m_constantBufferMap;
+
+	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11RasterizerState>> m_rasterStateMap;
 };
 
 template <typename T>

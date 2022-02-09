@@ -219,6 +219,9 @@
     <ClCompile Include="TerrainMesh.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainMeshException.cpp">
+      <Filter>Source Files\Exceptions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -371,6 +374,9 @@
     <ClInclude Include="TerrainMesh.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="TerrainMeshException.h">
+      <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -394,6 +400,9 @@
     <Image Include="font.dds">
       <Filter>Data</Filter>
     </Image>
+    <Image Include="heightmap.bmp">
+      <Filter>Data</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="cube.txt">
@@ -403,6 +412,9 @@
       <Filter>Data</Filter>
     </Text>
     <Text Include="skydome.txt">
+      <Filter>Data</Filter>
+    </Text>
+    <Text Include="Terrain.txt">
       <Filter>Data</Filter>
     </Text>
   </ItemGroup>

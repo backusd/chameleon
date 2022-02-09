@@ -56,6 +56,9 @@ public:
 
 	DxgiInfoManager& GetInfoManager() { return infoManager; }
 
+	void SetSolidRasterState() { m_d3dDeviceContext->RSSetState(solidRasterState.Get()); }
+	void SetWireframeRasterState() { m_d3dDeviceContext->RSSetState(wireframeRasterState.Get()); }
+
 
 private:
 
@@ -94,6 +97,10 @@ private:
 	// Direct3D Rendering objects ------ THESE MAY END UP GETTING STORED PER WINDOW
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView1>	m_d3dRenderTargetView;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	m_d3dDepthStencilView;
+
+	// Keep one rasterstate for solid fill and another for wireframe
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> solidRasterState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> wireframeRasterState;
 
 	D3D11_VIEWPORT m_viewport;
 

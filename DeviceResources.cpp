@@ -379,9 +379,17 @@ void DeviceResources::CreateWindowSizeDependentResources()
 	rd.MultisampleEnable = false;
 	rd.AntialiasedLineEnable = false;
 
-	ComPtr<ID3D11RasterizerState> rasterState;
-	m_d3dDevice->CreateRasterizerState(&rd, rasterState.ReleaseAndGetAddressOf());
-	m_d3dDeviceContext->RSSetState(rasterState.Get());
+	// Create and set the solid raster state
+	GFX_THROW_INFO(
+		m_d3dDevice->CreateRasterizerState(&rd, solidRasterState.ReleaseAndGetAddressOf())
+	);
+	m_d3dDeviceContext->RSSetState(solidRasterState.Get());
+
+	// Also create the wireframe raster state
+	rd.FillMode = D3D11_FILL_WIREFRAME;
+	GFX_THROW_INFO(
+		m_d3dDevice->CreateRasterizerState(&rd, wireframeRasterState.ReleaseAndGetAddressOf())
+	);
 
 	// Create a Direct2D target bitmap associated with the
 	// swap cahin back buffer and set it as the current target

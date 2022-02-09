@@ -10,6 +10,8 @@ std::map<std::string, std::shared_ptr<Mesh>> ObjectStore::m_meshMap;
 
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>> ObjectStore::m_constantBufferMap;
 
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11RasterizerState>> ObjectStore::m_rasterStateMap;
+
 
 
 
@@ -61,4 +63,16 @@ void ObjectStore::AddPixelShader(std::wstring fileName, std::string lookupName)
 	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
 
 	m_pixelShaderMap.insert(std::pair(lookupName, pPixelShader));
+}
+
+void ObjectStore::AddRasterState(D3D11_RASTERIZER_DESC desc, std::string lookupName)
+{
+	INFOMAN(m_deviceResources);
+
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterState;
+	GFX_THROW_INFO(
+		m_deviceResources->D3DDevice()->CreateRasterizerState(&desc, rasterState.ReleaseAndGetAddressOf())
+	);
+
+	m_rasterStateMap.insert(std::pair(lookupName, rasterState));
 }

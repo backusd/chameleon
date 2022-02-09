@@ -45,7 +45,7 @@ public:
 	void OnKeyUp(unsigned char keycode);
 	*/
 
-	bool LButtonIsDown() { return m_mouseDown; }
+	bool LButtonIsDown() { return m_LButtonDown; }
 	bool ShiftIsDown() { return m_shift; }
 
 	DirectX::XMVECTOR Position() { return m_eyeVec; }
@@ -64,6 +64,10 @@ private:
 	void MoveForward();
 	void MoveBackward();
 
+	void ZoomIn(int mouseX, int mouseY);
+	void ZoomOut(int mouseX, int mouseY);
+	void MouseMove();
+
 	//void RotateLeftRight(float theta);
 	//void RotateUpDown(float theta);
 
@@ -78,6 +82,9 @@ private:
 	bool  m_ctrl;
 	bool  m_alt;
 
+	// Input states for mouse
+
+
 	double m_currentTime;
 	double m_previousTime;
 
@@ -86,7 +93,9 @@ private:
 	double m_moveSpeed; // units per second
 
 	// Input states for mouse
-	bool  m_mouseDown;
+	bool  m_LButtonDown, m_RButtonDown, m_MButtonDown;
+	float m_mouseDownInitialPositionX, m_mouseDownInitialPositionY;
+	float m_mouseCurrentPositionX, m_mouseCurrentPositionY;
 
 
 

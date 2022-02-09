@@ -39,7 +39,7 @@ BoxMesh::BoxMesh(std::shared_ptr<DeviceResources> deviceResources) :
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.CPUAccessFlags = 0u;
 	bd.MiscFlags = 0u;
-	bd.ByteWidth = v.size() * m_sizeOfVertex;
+	bd.ByteWidth = static_cast<UINT>(v.size()) * m_sizeOfVertex;
 	bd.StructureByteStride = m_sizeOfVertex;
 	D3D11_SUBRESOURCE_DATA sd = {};
 	sd.pSysMem = v.data();
