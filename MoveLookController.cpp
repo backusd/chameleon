@@ -1,12 +1,17 @@
 #include "MoveLookController.h"
 
+using DirectX::XMVECTOR;
+using DirectX::XMFLOAT3;
+
 
 MoveLookController::MoveLookController() :
-    m_elapsedTime(0.0),
-    m_moveStartTime(0.0),
-    m_movementMaxTime(1.0),
-    m_timeAtLastMoveUpdate(0.0),
-    m_totalRotationAngle(0.0f)
+    m_moveSpeed(10.0),
+    m_turnSpeed(0.5)
+    //m_elapsedTime(0.0),
+    //m_moveStartTime(0.0),
+    //m_movementMaxTime(1.0),
+    //m_timeAtLastMoveUpdate(0.0),
+    //m_totalRotationAngle(0.0f)
 {
     ResetState();
 
@@ -24,10 +29,15 @@ void MoveLookController::ResetState()
     m_down = false;
     m_shift = false;
     m_ctrl = false;
-    m_movingToNewLocation = false;
-    m_updatedViewMatrixHasBeenRead = false;
-    m_rotatingLeftRight = false;
-    m_rotatingUpDown = false;
+    m_alt = false;
+
+    m_currentTime = 0.0;
+    m_previousTime = 0.0;
+    
+    //m_movingToNewLocation = false;
+    //m_updatedViewMatrixHasBeenRead = false;
+    //m_rotatingLeftRight = false;
+    //m_rotatingUpDown = false;
 }
 
 DirectX::XMMATRIX MoveLookController::ViewMatrix()
@@ -37,17 +47,50 @@ DirectX::XMMATRIX MoveLookController::ViewMatrix()
 
 void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse, HWND hWnd)
 {
+    m_currentTime = timer->GetTotalSeconds();
+
     Mouse::Event e;
     float factor;
     XMFLOAT3 newEye;
     std::ostringstream oss;
 
+    Keyboard::Event keyEvent;
+
+    // Process keyboard events, but only if the LButton is NOT down
+    if (m_mouseDown)
+    {
+        // Just drop any key events if mouse is down
+        keyboard->FlushKey();
+    }
+    else
+    {
+        while (!keyboard->KeyIsEmpty())
+        {
+            keyEvent = keyboard->ReadKey();
+            switch (keyEvent.GetCode())
+            {
+            case VK_SHIFT:      m_shift = keyEvent.IsPress(); break;
+            case VK_CONTROL:    m_ctrl = keyEvent.IsPress(); break;
+            case VK_MENU:       m_alt = keyEvent.IsPress(); break;    // ALT key
+            case VK_LEFT:       m_left = keyEvent.IsPress(); break;
+            case VK_UP:         m_up = keyEvent.IsPress(); break;
+            case VK_RIGHT:      m_right = keyEvent.IsPress(); break;
+            case VK_DOWN:       m_down = keyEvent.IsPress(); break;                
+            }
+        }
+    }
+
+    // Call update position to check if any of the new variables have been set and update the position accordingly
+    UpdatePosition();
+
+    
     while (!mouse->IsEmpty())
     {
         e = mouse->Read();
         switch (e.GetType())
         {
         case Mouse::Event::Type::WheelUp:
+            /*
             factor = 0.05f;
             DirectX::XMStoreFloat3(&newEye, m_eyeVec);
             // newEye.x += factor;
@@ -57,9 +100,11 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
 
             oss << "EYE: (" << newEye.x << ", " << newEye.y << ", " << newEye.z << ")";
             SetWindowText(hWnd, oss.str().c_str());
+            */
             break;
 
         case Mouse::Event::Type::WheelDown:
+            /*
             factor = 0.05f;
             DirectX::XMStoreFloat3(&newEye, m_eyeVec);
             //newEye.x -= factor;
@@ -69,19 +114,25 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
 
             oss << "EYE: (" << newEye.x << ", " << newEye.y << ", " << newEye.z << ")";
             SetWindowText(hWnd, oss.str().c_str());
+            */
             break;
 
         case Mouse::Event::Type::LPress:
+            /*
             m_mouseDown = true;
             m_mousePositionX = m_mousePositionXNew = mouse->GetPosX();
             m_mousePositionY = m_mousePositionYNew = mouse->GetPosY();
+            */
             break;
 
         case Mouse::Event::Type::LRelease:
+            /*
             m_mouseDown = false;
+            */
             break;
 
         case Mouse::Event::Type::Move:
+            /*
             if (m_mouseDown)
             {
                 RECT rect;
@@ -115,6 +166,7 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
                 m_mousePositionX = m_mousePositionXNew;
                 m_mousePositionY = m_mousePositionYNew;
             }
+            */
             break;
 
         default:
@@ -122,6 +174,8 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
         }
 
     }
+
+    m_previousTime = m_currentTime;
 
     /*
     if (m_mouseDown)
@@ -264,6 +318,7 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
     */
 }
 
+/*
 void MoveLookController::RotateLeftRight(float theta)
 {
     // Use Rodrigue's Rotation Formula
@@ -301,12 +356,138 @@ void MoveLookController::RotateUpDown(float theta)
     // Now update the new up-vector should be the cross product between the k-vector and the new eye-vector
     m_upVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(k, m_eyeVec));
 }
+*/
+
+void MoveLookController::UpdatePosition()
+{
+    if (m_up && !m_down)
+    {
+        if (m_shift)
+            LookUp();
+        else
+            MoveForward();     
+    }
+    else if (m_down && !m_up)
+    {
+        if (m_shift)
+            LookDown();
+        else
+            MoveBackward();        
+    }
+
+    if (m_left && !m_right)
+        LookLeft();
+    else if (m_right && !m_left)
+        LookRight();
+}
 
 bool MoveLookController::IsMoving()
 {
-    return m_up || m_down || m_left || m_right || m_mouseDown || m_movingToNewLocation;
+    return m_up || m_down || m_left || m_right || m_mouseDown; // || m_movingToNewLocation;
 }
 
+void MoveLookController::LookLeft()
+{
+    double timeDelta = m_currentTime - m_previousTime;
+    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+
+    // First compute the difference between the atVec and eyeVec. This gives us a vector
+    // that has its tail at the origin, which we can then rotate, and add back to the eyeVec
+    // to compute the final atVec
+    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
+
+    // Rotate the diff about the yAxis
+    XMVECTOR yAxis = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(yAxis, angle);
+    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
+
+    // Add the diff back to the eye vec to get a slightly different atVec
+    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+}
+void MoveLookController::LookRight()
+{
+    double timeDelta = m_currentTime - m_previousTime;
+    float angle = -1.0f * static_cast<float>(m_turnSpeed * timeDelta);
+
+    // First compute the difference between the atVec and eyeVec. This gives us a vector
+    // that has its tail at the origin, which we can then rotate, and add back to the eyeVec
+    // to compute the final atVec
+    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
+
+    // Rotate the diff about the yAxis
+    XMVECTOR yAxis = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(yAxis, angle);
+    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
+
+    // Add the diff back to the eye vec to get a slightly different atVec
+    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+}
+void MoveLookController::LookUp()
+{
+    double timeDelta = m_currentTime - m_previousTime;
+    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+
+    // If shift is pressed, then we want to pan up
+    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
+
+    // sideways vector should be the cross product of vector going between atVec and eyeVec (the diff vector) and the upVec
+    XMVECTOR sidewaysVector = DirectX::XMVector3Cross(diff, m_upVec);
+
+    // Rotate the diff about the sidewaysVector
+    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(sidewaysVector, angle);
+    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
+
+    // Add the diff back to the eye vec to get a slightly different atVec
+    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+}
+void MoveLookController::LookDown()
+{
+    double timeDelta = m_currentTime - m_previousTime;
+    float angle = -1.0f * static_cast<float>(m_turnSpeed * timeDelta);
+
+    // If shift is pressed, then we want to pan up
+    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
+
+    // sideways vector should be the cross product of vector going between atVec and eyeVec (the diff vector) and the upVec
+    XMVECTOR sidewaysVector = DirectX::XMVector3Cross(diff, m_upVec);
+
+    // Rotate the diff about the sidewaysVector
+    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(sidewaysVector, angle);
+    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
+
+    // Add the diff back to the eye vec to get a slightly different atVec
+    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+}
+void MoveLookController::MoveForward()
+{
+    double timeDelta = m_currentTime - m_previousTime;
+
+    // Compute the difference between the eyeVec and atVec - and normalize it
+    XMVECTOR diffNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(m_atVec, m_eyeVec));
+
+    // Scale the diffNormalVector according to the velocity and timedelta to get the change in position
+    XMVECTOR positionChange = DirectX::XMVectorScale(diffNormal, static_cast<float>(m_moveSpeed * timeDelta));
+
+    // Add this value to the eyeVec and atVec
+    m_eyeVec = DirectX::XMVectorAdd(m_eyeVec, positionChange);
+    m_atVec = DirectX::XMVectorAdd(m_atVec, positionChange);
+}
+void MoveLookController::MoveBackward()
+{
+    double timeDelta = m_currentTime - m_previousTime;
+
+    // Compute the difference between the eyeVec and atVec - and normalize it
+    XMVECTOR diffNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(m_eyeVec, m_atVec));
+
+    // Scale the diffNormalVector according to the velocity and timedelta to get the change in position
+    XMVECTOR positionChange = DirectX::XMVectorScale(diffNormal, m_moveSpeed * timeDelta);
+
+    // Add this value to the eyeVec and atVec
+    m_eyeVec = DirectX::XMVectorAdd(m_eyeVec, positionChange);
+    m_atVec = DirectX::XMVectorAdd(m_atVec, positionChange);
+}
+
+/*
 void MoveLookController::OnLButtonDown(float mouseX, float mouseY)
 {
     // When the pointer is pressed begin tracking the pointer movement.
@@ -497,3 +678,4 @@ void MoveLookController::OnKeyUp(unsigned char keycode)
     if (!(m_up || m_down || m_left || m_right))
         m_elapsedTime = 0.0f;
 }
+*/

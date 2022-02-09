@@ -26,6 +26,7 @@ public:
 
 	void SetPosition(DirectX::XMFLOAT3 position) { m_eyeVec = DirectX::XMLoadFloat3(&position); }
 
+	/*
 	void CenterOnFace();
 	void RotateLeft90();
 	void RotateRight90();
@@ -42,6 +43,7 @@ public:
 
 	void OnKeyDown(unsigned char keycode);
 	void OnKeyUp(unsigned char keycode);
+	*/
 
 	bool LButtonIsDown() { return m_mouseDown; }
 	bool ShiftIsDown() { return m_shift; }
@@ -52,18 +54,47 @@ public:
 
 private:
 	void ResetState();
+	
+	void UpdatePosition();
 
-	void RotateLeftRight(float theta);
-	void RotateUpDown(float theta);
+	void LookLeft();
+	void LookRight();
+	void LookUp();
+	void LookDown();
+	void MoveForward();
+	void MoveBackward();
 
-	void InitializeAutomatedMove(double maxMoveTime);
+	//void RotateLeftRight(float theta);
+	//void RotateUpDown(float theta);
+
+	// void InitializeAutomatedMove(double maxMoveTime);
+
+	// Input states for keyboard
+	bool  m_left;
+	bool  m_right;
+	bool  m_up;
+	bool  m_down;
+	bool  m_shift;
+	bool  m_ctrl;
+	bool  m_alt;
+
+	double m_currentTime;
+	double m_previousTime;
+
+	// Movement speeds
+	double m_turnSpeed; // radians per second
+	double m_moveSpeed; // units per second
+
+	// Input states for mouse
+	bool  m_mouseDown;
+
 
 
 	// Eye/at/up vectors
 	DirectX::XMVECTOR m_eyeVec;
 	DirectX::XMVECTOR m_atVec;
 	DirectX::XMVECTOR m_upVec;
-
+	/*
 	// When zooming in/out, or rotating 90, etc., we simply need to set the target location and
 	// Update() will move the camera for us
 	DirectX::XMFLOAT3 m_eyeTarget;
@@ -79,21 +110,15 @@ private:
 	bool m_rotatingUpDown;
 
 	// Pointer Variables
-	bool  m_mouseDown;
 	float m_mousePositionX;
 	float m_mousePositionY;
 	float m_mousePositionXNew;
 	float m_mousePositionYNew;
 
-	// Input states for keyboard
-	bool  m_left;
-	bool  m_right;
-	bool  m_up;
-	bool  m_down;
-	bool  m_shift;
-	bool  m_ctrl;
+	
 	bool  m_movingToNewLocation; // zooming in/out, rotating 90', centering on closest face, etc.
 
 	// Keep track of total time to be able to compute the time delta
 	double m_elapsedTime;
+	*/
 };
