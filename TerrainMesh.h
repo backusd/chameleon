@@ -22,6 +22,7 @@ class TerrainMesh : public Mesh
 	struct ModelType
 	{
 		float x, y, z;
+		float tu, tv;
 	};
 
 
@@ -51,5 +52,5 @@ private:
 	std::string m_terrainFilename;
 
 	std::vector<std::unique_ptr<HeightMapType>> m_heightMapVector;
-	std::vector<std::unique_ptr<ModelType>> m_terrainModelVector;
+	std::vector<std::unique_ptr<ModelType>>     m_terrainModelVector;
 };

@@ -10,7 +10,9 @@ DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources, std
 	m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
 	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
 	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
-	m_rasterState(ObjectStore::GetRasterState(rasterStateName))
+	m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
+	m_samplerState(nullptr),
+	m_texture(nullptr)
 {
 	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&) {};
 }
@@ -27,13 +29,21 @@ DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
 	m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
 	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
 	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
-	m_rasterState(ObjectStore::GetRasterState(rasterStateName))
+	m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
+	m_samplerState(nullptr),
+	m_texture(nullptr)
 {
 	for (std::string name : vertexShaderConstantBufferNames)
 		m_vertexShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
 
 	for (std::string name : pixelShaderConstantBufferNames)
 		m_pixelShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
+}
+
+void DrawPipeline::SetTexture(std::string textureLookupName, std::string sampleStateLookupName)
+{
+	m_texture = ObjectStore::GetTexture(textureLookupName);
+	m_samplerState = ObjectStore::GetSamplerState(sampleStateLookupName);
 }
 
 void DrawPipeline::UpdatePSSubresource(int index, void* data)
@@ -70,6 +80,12 @@ void DrawPipeline::Draw()
 
 	// Set the raster state
 	context->RSSetState(m_rasterState.Get());
+
+	if (m_texture != nullptr)
+	{
+		context->PSSetShaderResources(0, 1, m_texture->GetTexture().GetAddressOf());
+		context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+	}
 
 	// loop over each renderable and update the necessary buffers for each rendereable
 	UINT indexCount = m_mesh->IndexCount();

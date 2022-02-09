@@ -2,16 +2,15 @@
 
 std::shared_ptr<DeviceResources> ObjectStore::m_deviceResources = nullptr;
 
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> ObjectStore::m_vertexShaderMap;
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>> ObjectStore::m_inputLayoutMap;
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> ObjectStore::m_pixelShaderMap;
-
-std::map<std::string, std::shared_ptr<Mesh>> ObjectStore::m_meshMap;
-
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>> ObjectStore::m_constantBufferMap;
-
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>>	 ObjectStore::m_vertexShaderMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>>	 ObjectStore::m_inputLayoutMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>>	 ObjectStore::m_pixelShaderMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>>			 ObjectStore::m_constantBufferMap;
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11RasterizerState>> ObjectStore::m_rasterStateMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>	 ObjectStore::m_samplerStateMap;
 
+std::map<std::string, std::shared_ptr<Mesh>>    ObjectStore::m_meshMap;
+std::map<std::string, std::shared_ptr<Texture>> ObjectStore::m_textureMap;
 
 
 
@@ -75,4 +74,16 @@ void ObjectStore::AddRasterState(D3D11_RASTERIZER_DESC desc, std::string lookupN
 	);
 
 	m_rasterStateMap.insert(std::pair(lookupName, rasterState));
+}
+
+void ObjectStore::AddSamplerState(D3D11_SAMPLER_DESC desc, std::string lookupName)
+{
+	INFOMAN(m_deviceResources);
+
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampleState;
+	GFX_THROW_INFO(
+		m_deviceResources->D3DDevice()->CreateSamplerState(&desc, sampleState.ReleaseAndGetAddressOf())
+	);
+
+	m_samplerStateMap.insert(std::pair(lookupName, sampleState));
 }

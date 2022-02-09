@@ -2,6 +2,7 @@
 
 using DirectX::XMFLOAT4;
 using DirectX::XMFLOAT3;
+using DirectX::XMFLOAT2;
 
 TerrainMesh::TerrainMesh(std::shared_ptr<DeviceResources> deviceResources) :
 	Mesh(deviceResources)
@@ -16,6 +17,7 @@ TerrainMesh::TerrainMesh(std::shared_ptr<DeviceResources> deviceResources) :
 
 void TerrainMesh::Tutorial1Setup()
 {
+	/*
 	m_topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 
 	INFOMAN(m_deviceResources);
@@ -169,6 +171,7 @@ void TerrainMesh::Tutorial1Setup()
 
 	delete[] indices;
 	indices = 0;
+	*/
 }
 
 void TerrainMesh::Tutorial2Setup(std::string setupFilename)
@@ -430,42 +433,48 @@ void TerrainMesh::BuildTerrainModel()
 			m_terrainModelVector[index]->x = m_heightMapVector[index1]->x;
 			m_terrainModelVector[index]->y = m_heightMapVector[index1]->y;
 			m_terrainModelVector[index]->z = m_heightMapVector[index1]->z;
-
+			m_terrainModelVector[index]->tu = 0.0f;
+			m_terrainModelVector[index]->tv = 0.0f;
 			index++;
 
 			// Triangle 1 - Upper right.
 			m_terrainModelVector[index]->x = m_heightMapVector[index2]->x;
 			m_terrainModelVector[index]->y = m_heightMapVector[index2]->y;
 			m_terrainModelVector[index]->z = m_heightMapVector[index2]->z;
-
+			m_terrainModelVector[index]->tu = 1.0f;
+			m_terrainModelVector[index]->tv = 0.0f;
 			index++;
 
 			// Triangle 1 - Bottom left.
 			m_terrainModelVector[index]->x = m_heightMapVector[index3]->x;
 			m_terrainModelVector[index]->y = m_heightMapVector[index3]->y;
 			m_terrainModelVector[index]->z = m_heightMapVector[index3]->z;
-
+			m_terrainModelVector[index]->tu = 0.0f;
+			m_terrainModelVector[index]->tv = 1.0f;
 			index++;
 
 			// Triangle 2 - Bottom left.
 			m_terrainModelVector[index]->x = m_heightMapVector[index3]->x;
 			m_terrainModelVector[index]->y = m_heightMapVector[index3]->y;
 			m_terrainModelVector[index]->z = m_heightMapVector[index3]->z;
-
+			m_terrainModelVector[index]->tu = 0.0f;
+			m_terrainModelVector[index]->tv = 1.0f;
 			index++;
 
 			// Triangle 2 - Upper right.
 			m_terrainModelVector[index]->x = m_heightMapVector[index2]->x;
 			m_terrainModelVector[index]->y = m_heightMapVector[index2]->y;
 			m_terrainModelVector[index]->z = m_heightMapVector[index2]->z;
-
+			m_terrainModelVector[index]->tu = 1.0f;
+			m_terrainModelVector[index]->tv = 0.0f;
 			index++;
 
 			// Triangle 2 - Bottom right.
 			m_terrainModelVector[index]->x = m_heightMapVector[index4]->x;
 			m_terrainModelVector[index]->y = m_heightMapVector[index4]->y;
 			m_terrainModelVector[index]->z = m_heightMapVector[index4]->z;
-
+			m_terrainModelVector[index]->tu = 1.0f;
+			m_terrainModelVector[index]->tv = 1.0f;
 			index++;
 		}
 	}
@@ -507,7 +516,7 @@ void TerrainMesh::InitializeBuffers()
 	for (i = 0; i < m_vertexCount; i++)
 	{
 		vertices[i].position = XMFLOAT3(m_terrainModelVector[i]->x, m_terrainModelVector[i]->y, m_terrainModelVector[i]->z);
-		vertices[i].color = color;
+		vertices[i].texture = XMFLOAT2(m_terrainModelVector[i]->tu, m_terrainModelVector[i]->tv);
 		indices[i] = i;
 	}
 

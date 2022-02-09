@@ -97,6 +97,8 @@ private:
 	void ObjectStoreAddMeshes();
 	void ObjectStoreAddConstantBuffers();
 	void ObjectStoreAddRasterStates();
+	void ObjectStoreAddSamplerStates();
+	void ObjectStoreAddTextures();
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 	std::shared_ptr<StepTimer> m_timer;

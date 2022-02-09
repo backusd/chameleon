@@ -210,6 +210,7 @@ void Scene::SetupTerrainPipeline()
 	std::vector<std::string> vertexConstantBuffers = { "terrain-constant-buffer" };
 	std::vector<std::string> pixelConstantBuffers;
 
+	/*
 	m_terrainPipeline = std::make_shared<DrawPipeline>(
 		m_deviceResources,
 		"terrain-mesh",
@@ -219,6 +220,17 @@ void Scene::SetupTerrainPipeline()
 		vertexConstantBuffers,
 		pixelConstantBuffers
 		);
+	*/
+	m_terrainPipeline = std::make_shared<DrawPipeline>(
+		m_deviceResources,
+		"terrain-mesh",
+		"terrain-texture-vertex-shader",
+		"terrain-texture-pixel-shader",
+		"solidfill",
+		vertexConstantBuffers,
+		pixelConstantBuffers
+		);
+	m_terrainPipeline->SetTexture("terrain-texture", "terrain-texture-sampler");
 
 	m_terrainPipeline->AddRenderable(std::make_shared<Terrain>());
 

@@ -228,6 +228,12 @@
     <ClCompile Include="FontFamily.cpp">
       <Filter>Source Files\HUD</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureException.cpp">
+      <Filter>Source Files\Exceptions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -389,6 +395,12 @@
     <ClInclude Include="FontFamily.h">
       <Filter>Header Files\HUD</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureException.h">
+      <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -413,6 +425,12 @@
       <Filter>Data</Filter>
     </Image>
     <Image Include="heightmap.bmp">
+      <Filter>Data</Filter>
+    </Image>
+    <Image Include="dirt01d.tga">
+      <Filter>Data</Filter>
+    </Image>
+    <Image Include="test.tga">
       <Filter>Data</Filter>
     </Image>
   </ItemGroup>
@@ -447,6 +465,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="TerrainPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TerrainTextureVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TerrainTexturePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

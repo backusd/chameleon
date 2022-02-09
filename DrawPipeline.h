@@ -8,6 +8,7 @@
 #include "Renderable.h"
 #include "StepTimer.h"
 #include "HLSLStructures.h"
+#include "Texture.h"
 
 
 #include <string>
@@ -53,6 +54,8 @@ public:
 
 
 	void AddRenderable(std::shared_ptr<Renderable> renderable) { m_renderables.push_back(renderable); }
+	void SetTexture(std::string textureLookupName, std::string sampleStateLookupName);
+
 
 	void UpdatePSSubresource(int index, void* data);
 	void UpdateVSSubresource(int index, void* data);
@@ -101,6 +104,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_rasterState;
+
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerState;
+	std::shared_ptr<Texture>				   m_texture;
 
 	std::vector<std::shared_ptr<Renderable>> m_renderables;
 

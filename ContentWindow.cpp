@@ -26,6 +26,8 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	ObjectStoreAddMeshes();
 	ObjectStoreAddConstantBuffers();
 	ObjectStoreAddRasterStates();
+	ObjectStoreAddSamplerStates();
+	ObjectStoreAddTextures();
 
 
 	// Create the state block 
@@ -59,6 +61,7 @@ ContentWindow::~ContentWindow()
 
 void ContentWindow::ObjectStoreAddShaders()
 {
+	// Basic Cube ==================================================================================================
 	const D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
 		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
@@ -66,7 +69,7 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddVertexShaderAndInputLayout(L"VertexShader.cso", ied, static_cast<UINT>(std::size(ied)), "basic-cube-vertex-shader");
 	ObjectStore::AddPixelShader(L"PixelShader.cso", "basic-cube-pixel-shader");
 
-
+	// Terrain =====================================================================================================
 	const D3D11_INPUT_ELEMENT_DESC terrainDesc[] =
 	{
 		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
@@ -75,8 +78,16 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainVertexShader.cso", terrainDesc, static_cast<UINT>(std::size(terrainDesc)), "terrain-vertex-shader");
 	ObjectStore::AddPixelShader(L"TerrainPixelShader.cso", "terrain-pixel-shader");
 
+	// Terrain Texture ==============================================================================================
+	const D3D11_INPUT_ELEMENT_DESC terrainTextureDesc[] =
+	{
+		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainTextureVertexShader.cso", terrainTextureDesc, static_cast<UINT>(std::size(terrainTextureDesc)), "terrain-texture-vertex-shader");
+	ObjectStore::AddPixelShader(L"TerrainTexturePixelShader.cso", "terrain-texture-pixel-shader");
 
-
+	// Phong ======================================================================================================
 	const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -116,6 +127,33 @@ void ContentWindow::ObjectStoreAddRasterStates()
 	rd.FillMode = D3D11_FILL_WIREFRAME;
 
 	ObjectStore::AddRasterState(rd, "wireframe");
+}
+
+void ContentWindow::ObjectStoreAddSamplerStates()
+{
+	D3D11_SAMPLER_DESC samplerDesc;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	ObjectStore::AddSamplerState(samplerDesc, "terrain-texture-sampler");
+}
+
+void ContentWindow::ObjectStoreAddTextures()
+{
+	//std::string filename = "test.tga";
+	std::string filename = "dirt01d.tga";
+	ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, filename), "terrain-texture");
 }
 
 void ContentWindow::Update()
