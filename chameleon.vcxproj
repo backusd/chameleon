@@ -173,6 +173,7 @@
     <ClCompile Include="DrawPipeline.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="FontClass.cpp" />
+    <ClCompile Include="FontFamily.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="InputClass.cpp" />
@@ -196,6 +197,7 @@
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TerrainMesh.cpp" />
     <ClCompile Include="TerrainMeshException.cpp" />
+    <ClCompile Include="Text.cpp" />
     <ClCompile Include="TextClass.cpp" />
     <ClCompile Include="TextureClass.cpp" />
     <ClCompile Include="UserInterfaceClass.cpp" />
@@ -222,6 +224,7 @@
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="DxgiInfoManager.h" />
     <ClInclude Include="FontClass.h" />
+    <ClInclude Include="FontFamily.h" />
     <ClInclude Include="FontShaderClass.h" />
     <ClInclude Include="HLSLStructures.h" />
     <ClInclude Include="HUD.h" />
@@ -249,6 +252,7 @@
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TerrainMesh.h" />
     <ClInclude Include="TerrainMeshException.h" />
+    <ClInclude Include="Text.h" />
     <ClInclude Include="TextClass.h" />
     <ClInclude Include="TextureClass.h" />
     <ClInclude Include="UserInterfaceClass.h" />

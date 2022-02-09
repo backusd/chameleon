@@ -43,7 +43,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	// m_network = std::make_shared<Network>("155.248.215.180", 7000, m_timer);
 
-	m_hud = std::make_shared<HUD>();
+	m_hud = std::make_shared<HUD>(m_deviceResources);
 	m_scene = std::make_shared<Scene>(m_deviceResources, m_hWnd);
 
 
@@ -147,7 +147,7 @@ void ContentWindow::Update()
 
 			//m_network->Update();
 
-			//m_hud->Update();
+			m_hud->Update(m_timer);
 			m_scene->Update(m_timer, m_keyboard, m_mouse);
 
 			/*
@@ -233,6 +233,7 @@ bool ContentWindow::Render()
 
 	// re-render the captured control to make sure it is on top of the UI
 	//m_layout->Render2DCapturedControl();
+	m_hud->Draw();
 
 
 	HRESULT hr = context2->EndDraw();

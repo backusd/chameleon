@@ -39,10 +39,8 @@ private:
 
 	void LoadSetupFile(std::string setupFilename);
 	void LoadBitmapHeightMap();
-	//void ShutdownHeightMap();
 	void SetTerrainCoordinates();
 	void BuildTerrainModel();
-	//void ShutdownTerrainModel();
 
 
 	unsigned int m_vertexCount;
