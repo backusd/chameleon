@@ -230,7 +230,12 @@ void Scene::SetupTerrainPipeline()
 		vertexConstantBuffers,
 		pixelConstantBuffers
 		);
-	m_terrainPipeline->SetTexture("terrain-texture", "terrain-texture-sampler");
+	m_terrainPipeline->AddPixelShaderTexture("terrain-texture");
+	m_terrainPipeline->AddPixelShaderTexture("terrain-normal-map-texture");
+
+	m_terrainPipeline->SetSamplerState("terrain-texture-sampler");
+
+
 
 	m_terrainPipeline->AddRenderable(std::make_shared<Terrain>());
 

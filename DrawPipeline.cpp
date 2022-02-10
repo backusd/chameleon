@@ -11,8 +11,7 @@ DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources, std
 	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
 	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
 	m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
-	m_samplerState(nullptr),
-	m_texture(nullptr)
+	m_samplerState(nullptr)
 {
 	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&) {};
 }
@@ -30,8 +29,7 @@ DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
 	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
 	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
 	m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
-	m_samplerState(nullptr),
-	m_texture(nullptr)
+	m_samplerState(nullptr)
 {
 	for (std::string name : vertexShaderConstantBufferNames)
 		m_vertexShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
@@ -40,9 +38,12 @@ DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
 		m_pixelShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
 }
 
-void DrawPipeline::SetTexture(std::string textureLookupName, std::string sampleStateLookupName)
+void DrawPipeline::AddPixelShaderTexture(std::string textureLookupName)
 {
-	m_texture = ObjectStore::GetTexture(textureLookupName);
+	m_pixelShaderTextures.push_back(ObjectStore::GetTexture(textureLookupName));
+}
+void DrawPipeline::SetSamplerState(std::string sampleStateLookupName)
+{
 	m_samplerState = ObjectStore::GetSamplerState(sampleStateLookupName);
 }
 
@@ -81,11 +82,11 @@ void DrawPipeline::Draw()
 	// Set the raster state
 	context->RSSetState(m_rasterState.Get());
 
-	if (m_texture != nullptr)
-	{
-		context->PSSetShaderResources(0, 1, m_texture->GetTexture().GetAddressOf());
+	for (unsigned int iii = 0; iii < m_pixelShaderTextures.size(); ++iii)
+		context->PSSetShaderResources(iii, 1, m_pixelShaderTextures[iii]->GetTexture().GetAddressOf());
+	
+	if (m_samplerState != nullptr)
 		context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
-	}
 
 	// loop over each renderable and update the necessary buffers for each rendereable
 	UINT indexCount = m_mesh->IndexCount();

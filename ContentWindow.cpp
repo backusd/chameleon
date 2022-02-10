@@ -79,17 +79,13 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddPixelShader(L"TerrainPixelShader.cso", "terrain-pixel-shader");
 
 	// Terrain Texture ==============================================================================================
-	/*
-	const D3D11_INPUT_ELEMENT_DESC terrainTextureDesc[] =
-	{
-		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};*/
 	const D3D11_INPUT_ELEMENT_DESC terrainTextureDesc[] =
 	{
 		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainTextureVertexShader.cso", terrainTextureDesc, static_cast<UINT>(std::size(terrainTextureDesc)), "terrain-texture-vertex-shader");
@@ -162,6 +158,7 @@ void ContentWindow::ObjectStoreAddTextures()
 	//std::string filename = "test.tga";
 	std::string filename = "dirt01d.tga";
 	ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, filename), "terrain-texture");
+	ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, "dirt01n.tga"), "terrain-normal-map-texture");
 }
 
 void ContentWindow::Update()

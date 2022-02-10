@@ -277,6 +277,7 @@
     <Image Include="chat.dds" />
     <Image Include="colormap.bmp" />
     <Image Include="dirt01d.tga" />
+    <Image Include="dirt01n.tga" />
     <Image Include="font.dds" />
     <Image Include="heightmap.bmp" />
     <Image Include="test.tga" />

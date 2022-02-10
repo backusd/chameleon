@@ -26,12 +26,21 @@ class TerrainMesh : public Mesh
 		float x, y, z;
 		float tu, tv;
 		float nx, ny, nz;
+		float tx, ty, tz;
+		float bx, by, bz;
 		float r, g, b;
 	};
 
 	struct VectorType
 	{
 		float x, y, z;
+	};
+
+	struct TempVertexType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
 	};
 
 
@@ -53,6 +62,9 @@ private:
 	void BuildTerrainModel();
 	void CalculateNormals();
 	void LoadColorMap();
+
+	void CalculateTerrainVectors();
+	void CalculateTangentBinormal(TempVertexType, TempVertexType, TempVertexType, VectorType&, VectorType&);
 
 	unsigned int m_vertexCount;
 

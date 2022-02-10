@@ -199,6 +199,9 @@ void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 	// We can now release the height map since it is no longer needed in memory once the 3D terrain model has been built.
 	m_heightMapVector.clear();
 
+	// Calculate the tangent and binormal for the terrain model.
+	CalculateTerrainVectors();
+
 	// Load the rendering buffers with the terrain data.
 	InitializeBuffers();
 
@@ -563,6 +566,8 @@ void TerrainMesh::InitializeBuffers()
 		vertices[i].position = XMFLOAT3(m_terrainModelVector[i]->x, m_terrainModelVector[i]->y, m_terrainModelVector[i]->z);
 		vertices[i].texture = XMFLOAT2(m_terrainModelVector[i]->tu, m_terrainModelVector[i]->tv);
 		vertices[i].normal = XMFLOAT3(m_terrainModelVector[i]->nx, m_terrainModelVector[i]->ny, m_terrainModelVector[i]->nz);
+		vertices[i].tangent = XMFLOAT3(m_terrainModelVector[i]->tx, m_terrainModelVector[i]->ty, m_terrainModelVector[i]->tz);
+		vertices[i].binormal = XMFLOAT3(m_terrainModelVector[i]->bx, m_terrainModelVector[i]->by, m_terrainModelVector[i]->bz);
 		vertices[i].color = XMFLOAT3(m_terrainModelVector[i]->r, m_terrainModelVector[i]->g, m_terrainModelVector[i]->b);
 		indices[i] = i;
 	}
@@ -842,4 +847,131 @@ void TerrainMesh::LoadColorMap()
 	// Release the bitmap image data.
 	delete[] bitmapImage;
 	bitmapImage = 0;
+}
+
+void TerrainMesh::CalculateTerrainVectors()
+{
+	int faceCount, i, index;
+	TempVertexType vertex1, vertex2, vertex3;
+	VectorType tangent, binormal;
+
+
+	// Calculate the number of faces in the terrain model.
+	faceCount = m_vertexCount / 3;
+
+	// Initialize the index to the model data.
+	index = 0;
+
+	// Go through all the faces and calculate the the tangent, binormal, and normal vectors.
+	for (i = 0; i < faceCount; i++)
+	{
+		// Get the three vertices for this face from the terrain model.
+		vertex1.x = m_terrainModelVector[index]->x;
+		vertex1.y = m_terrainModelVector[index]->y;
+		vertex1.z = m_terrainModelVector[index]->z;
+		vertex1.tu = m_terrainModelVector[index]->tu;
+		vertex1.tv = m_terrainModelVector[index]->tv;
+		vertex1.nx = m_terrainModelVector[index]->nx;
+		vertex1.ny = m_terrainModelVector[index]->ny;
+		vertex1.nz = m_terrainModelVector[index]->nz;
+		index++;
+
+		vertex2.x = m_terrainModelVector[index]->x;
+		vertex2.y = m_terrainModelVector[index]->y;
+		vertex2.z = m_terrainModelVector[index]->z;
+		vertex2.tu = m_terrainModelVector[index]->tu;
+		vertex2.tv = m_terrainModelVector[index]->tv;
+		vertex2.nx = m_terrainModelVector[index]->nx;
+		vertex2.ny = m_terrainModelVector[index]->ny;
+		vertex2.nz = m_terrainModelVector[index]->nz;
+		index++;
+
+		vertex3.x = m_terrainModelVector[index]->x;
+		vertex3.y = m_terrainModelVector[index]->y;
+		vertex3.z = m_terrainModelVector[index]->z;
+		vertex3.tu = m_terrainModelVector[index]->tu;
+		vertex3.tv = m_terrainModelVector[index]->tv;
+		vertex3.nx = m_terrainModelVector[index]->nx;
+		vertex3.ny = m_terrainModelVector[index]->ny;
+		vertex3.nz = m_terrainModelVector[index]->nz;
+		index++;
+
+		// Calculate the tangent and binormal of that face.
+		CalculateTangentBinormal(vertex1, vertex2, vertex3, tangent, binormal);
+
+		// Store the tangent and binormal for this face back in the model structure.
+		m_terrainModelVector[index - 1]->tx = tangent.x;
+		m_terrainModelVector[index - 1]->ty = tangent.y;
+		m_terrainModelVector[index - 1]->tz = tangent.z;
+		m_terrainModelVector[index - 1]->bx = binormal.x;
+		m_terrainModelVector[index - 1]->by = binormal.y;
+		m_terrainModelVector[index - 1]->bz = binormal.z;
+
+		m_terrainModelVector[index - 2]->tx = tangent.x;
+		m_terrainModelVector[index - 2]->ty = tangent.y;
+		m_terrainModelVector[index - 2]->tz = tangent.z;
+		m_terrainModelVector[index - 2]->bx = binormal.x;
+		m_terrainModelVector[index - 2]->by = binormal.y;
+		m_terrainModelVector[index - 2]->bz = binormal.z;
+
+		m_terrainModelVector[index - 3]->tx = tangent.x;
+		m_terrainModelVector[index - 3]->ty = tangent.y;
+		m_terrainModelVector[index - 3]->tz = tangent.z;
+		m_terrainModelVector[index - 3]->bx = binormal.x;
+		m_terrainModelVector[index - 3]->by = binormal.y;
+		m_terrainModelVector[index - 3]->bz = binormal.z;
+	}
+}
+
+void TerrainMesh::CalculateTangentBinormal(TempVertexType vertex1, TempVertexType vertex2, TempVertexType vertex3, VectorType& tangent, VectorType& binormal)
+{
+	float vector1[3], vector2[3];
+	float tuVector[2], tvVector[2];
+	float den;
+	float length;
+
+
+	// Calculate the two vectors for this face.
+	vector1[0] = vertex2.x - vertex1.x;
+	vector1[1] = vertex2.y - vertex1.y;
+	vector1[2] = vertex2.z - vertex1.z;
+
+	vector2[0] = vertex3.x - vertex1.x;
+	vector2[1] = vertex3.y - vertex1.y;
+	vector2[2] = vertex3.z - vertex1.z;
+
+	// Calculate the tu and tv texture space vectors.
+	tuVector[0] = vertex2.tu - vertex1.tu;
+	tvVector[0] = vertex2.tv - vertex1.tv;
+
+	tuVector[1] = vertex3.tu - vertex1.tu;
+	tvVector[1] = vertex3.tv - vertex1.tv;
+
+	// Calculate the denominator of the tangent/binormal equation.
+	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+	// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
+	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
+	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+
+	binormal.x = (tuVector[0] * vector2[0] - tuVector[1] * vector1[0]) * den;
+	binormal.y = (tuVector[0] * vector2[1] - tuVector[1] * vector1[1]) * den;
+	binormal.z = (tuVector[0] * vector2[2] - tuVector[1] * vector1[2]) * den;
+
+	// Calculate the length of the tangent.
+	length = (float)sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
+
+	// Normalize the tangent and then store it.
+	tangent.x = tangent.x / length;
+	tangent.y = tangent.y / length;
+	tangent.z = tangent.z / length;
+
+	// Calculate the length of the binormal.
+	length = (float)sqrt((binormal.x * binormal.x) + (binormal.y * binormal.y) + (binormal.z * binormal.z));
+
+	// Normalize the binormal and then store it.
+	binormal.x = binormal.x / length;
+	binormal.y = binormal.y / length;
+	binormal.z = binormal.z / length;
 }
