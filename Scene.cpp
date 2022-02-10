@@ -11,7 +11,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_terrainPipeline(nullptr)
 {
 	m_moveLookController = std::make_unique<MoveLookController>();
-	m_moveLookController->SetPosition(XMFLOAT3(128.0f, 5.0f, -10.0f));
+	m_moveLookController->SetPosition(XMFLOAT3(50.0f, 10.0f, -10.0f));
 
 	CreateStaticResources();
 	CreateWindowSizeDependentResources();
@@ -208,7 +208,7 @@ void Scene::SetupCubePipeline()
 void Scene::SetupTerrainPipeline()
 {
 	std::vector<std::string> vertexConstantBuffers = { "terrain-constant-buffer" };
-	std::vector<std::string> pixelConstantBuffers;
+	std::vector<std::string> pixelConstantBuffers = { "terrain-light-buffer" };
 
 	/*
 	m_terrainPipeline = std::make_shared<DrawPipeline>(
@@ -246,6 +246,7 @@ void Scene::SetupTerrainPipeline()
 
 		D3D11_MAPPED_SUBRESOURCE ms;
 
+		// Update the vertex shader buffer
 		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		context->Map(vertexShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
@@ -257,6 +258,24 @@ void Scene::SetupTerrainPipeline()
 		mappedBuffer->projection = this->ProjectionMatrix();
 
 		context->Unmap(vertexShaderBuffers[0].Get(), 0);
+
+
+		// Update the pixel shader lighting buffer
+
+		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		context->Map(pixelShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+
+
+		// Get a pointer to the data in the light constant buffer.
+		TerrainLightBufferType* lightingBuffer = (TerrainLightBufferType*)ms.pData;
+
+		// Copy the lighting variables into the constant buffer.
+		lightingBuffer->diffuseColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		lightingBuffer->lightDirection = XMFLOAT3(-0.5f, -1.0f, -0.5f);
+		lightingBuffer->padding = 0.0f;
+
+		// Unlock the light constant buffer.
+		context->Unmap(pixelShaderBuffers[0].Get(), 0);
 	}
 	);
 }

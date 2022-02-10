@@ -16,12 +16,16 @@ struct VertexInputType
 {
     float4 position : POSITION;
     float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 color : COLOR;
 };
 
 struct PixelInputType
 {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 color : COLOR;
 };
 
 
@@ -31,7 +35,6 @@ struct PixelInputType
 PixelInputType main(VertexInputType input)
 {
     PixelInputType output;
-
 
     // Change the position vector to be 4 units for proper matrix calculations.
     input.position.w = 1.0f;
@@ -43,6 +46,15 @@ PixelInputType main(VertexInputType input)
 
     // Store the texture coordinates for the pixel shader.
     output.tex = input.tex;
+
+    // Calculate the normal vector against the world matrix only.
+    output.normal = mul((float3x3)worldMatrix, input.normal);
+
+    // Normalize the normal vector.
+    output.normal = normalize(output.normal);
+
+    // Store the input color for the pixel shader to use.
+    output.color = float4(input.color, 1.0f);
 
     return output;
 }

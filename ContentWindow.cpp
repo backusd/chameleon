@@ -79,10 +79,18 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddPixelShader(L"TerrainPixelShader.cso", "terrain-pixel-shader");
 
 	// Terrain Texture ==============================================================================================
+	/*
 	const D3D11_INPUT_ELEMENT_DESC terrainTextureDesc[] =
 	{
 		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};*/
+	const D3D11_INPUT_ELEMENT_DESC terrainTextureDesc[] =
+	{
+		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainTextureVertexShader.cso", terrainTextureDesc, static_cast<UINT>(std::size(terrainTextureDesc)), "terrain-texture-vertex-shader");
 	ObjectStore::AddPixelShader(L"TerrainTexturePixelShader.cso", "terrain-texture-pixel-shader");
@@ -107,6 +115,7 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 	ObjectStore::AddConstantBuffer<PhongMaterialProperties>("phong-material-properties-buffer", D3D11_USAGE_DEFAULT, 0);
 	ObjectStore::AddConstantBuffer<LightProperties>("light-properties-buffer", D3D11_USAGE_DEFAULT, 0);
 	ObjectStore::AddConstantBuffer<TerrainMatrixBufferType>("terrain-constant-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	ObjectStore::AddConstantBuffer<TerrainLightBufferType>("terrain-light-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 void ContentWindow::ObjectStoreAddRasterStates()
 {
@@ -128,7 +137,6 @@ void ContentWindow::ObjectStoreAddRasterStates()
 
 	ObjectStore::AddRasterState(rd, "wireframe");
 }
-
 void ContentWindow::ObjectStoreAddSamplerStates()
 {
 	D3D11_SAMPLER_DESC samplerDesc;

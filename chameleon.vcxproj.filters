@@ -433,6 +433,9 @@
     <Image Include="test.tga">
       <Filter>Data</Filter>
     </Image>
+    <Image Include="colormap.bmp">
+      <Filter>Data</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="cube.txt">

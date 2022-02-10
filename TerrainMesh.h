@@ -17,12 +17,21 @@ class TerrainMesh : public Mesh
 	struct HeightMapType
 	{
 		float x, y, z;
+		float nx, ny, nz;
+		float r, g, b;
 	};
 
 	struct ModelType
 	{
 		float x, y, z;
 		float tu, tv;
+		float nx, ny, nz;
+		float r, g, b;
+	};
+
+	struct VectorType
+	{
+		float x, y, z;
 	};
 
 
@@ -42,7 +51,8 @@ private:
 	void LoadBitmapHeightMap();
 	void SetTerrainCoordinates();
 	void BuildTerrainModel();
-
+	void CalculateNormals();
+	void LoadColorMap();
 
 	unsigned int m_vertexCount;
 
@@ -50,6 +60,7 @@ private:
 	int m_terrainHeight, m_terrainWidth;
 	float m_heightScale;
 	std::string m_terrainFilename;
+	std::string m_colorMapFilename;
 
 	std::vector<std::unique_ptr<HeightMapType>> m_heightMapVector;
 	std::vector<std::unique_ptr<ModelType>>     m_terrainModelVector;

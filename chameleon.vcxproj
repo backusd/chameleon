@@ -275,6 +275,7 @@
     <Image Include="char1.dds" />
     <Image Include="char2.dds" />
     <Image Include="chat.dds" />
+    <Image Include="colormap.bmp" />
     <Image Include="dirt01d.tga" />
     <Image Include="font.dds" />
     <Image Include="heightmap.bmp" />

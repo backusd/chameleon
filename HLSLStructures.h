@@ -113,6 +113,8 @@ struct TerrainVertexType
 {
     DirectX::XMFLOAT3 position;
     DirectX::XMFLOAT2 texture;
+    DirectX::XMFLOAT3 normal;
+    DirectX::XMFLOAT3 color;
 };
 
 struct TerrainMatrixBufferType
@@ -120,4 +122,11 @@ struct TerrainMatrixBufferType
     DirectX::XMMATRIX world;
     DirectX::XMMATRIX view;
     DirectX::XMMATRIX projection;
+};
+
+struct TerrainLightBufferType
+{
+    DirectX::XMFLOAT4 diffuseColor;
+    DirectX::XMFLOAT3 lightDirection;
+    float padding;
 };
