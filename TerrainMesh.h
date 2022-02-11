@@ -58,6 +58,7 @@ private:
 
 	void LoadSetupFile(std::string setupFilename);
 	void LoadBitmapHeightMap();
+	void LoadRawHeightMap();
 	void SetTerrainCoordinates();
 	void BuildTerrainModel();
 	void CalculateNormals();

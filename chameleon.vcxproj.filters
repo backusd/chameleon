@@ -434,6 +434,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="heightmap.r16">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="blackforest_cm.bmp">
@@ -463,10 +466,10 @@
     <Image Include="test.tga">
       <Filter>Data</Filter>
     </Image>
-    <Image Include="colormap.bmp">
+    <Image Include="dirt01n.tga">
       <Filter>Data</Filter>
     </Image>
-    <Image Include="dirt01n.tga">
+    <Image Include="colormap.bmp">
       <Filter>Data</Filter>
     </Image>
   </ItemGroup>

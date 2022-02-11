@@ -182,7 +182,8 @@ void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 	LoadSetupFile(setupFilename);
 
 	// Initialize the terrain height map with the data from the bitmap file.
-	LoadBitmapHeightMap();
+	//LoadBitmapHeightMap();
+	LoadRawHeightMap();
 
 	// Setup the X and Z coordinates for the height map as well as scale the terrain height by the height scale value.
 	SetTerrainCoordinates();
@@ -265,6 +266,67 @@ void TerrainMesh::LoadSetupFile(std::string filename)
 
 	// Close the setup file.
 	fin.close();
+}
+
+void TerrainMesh::LoadRawHeightMap()
+{
+	int error, i, j, index;
+	FILE* filePtr;
+	unsigned long long imageSize, count;
+	unsigned short* rawImage;
+	std::ostringstream oss;
+
+	// Create the float array to hold the height map data.
+	for (int iii = 0; iii < m_terrainWidth * m_terrainHeight; ++iii)
+		m_heightMapVector.push_back(std::make_unique<HeightMapType>());
+
+	// Open the 16 bit raw height map file for reading in binary.
+	error = fopen_s(&filePtr, m_terrainFilename.c_str(), "rb");
+	if (error != 0)
+	{		
+		oss << "Failed to open file: " << m_terrainFilename;
+		throw TerrainMeshException(__LINE__, __FILE__, oss.str());
+	}
+
+	// Calculate the size of the raw image data.
+	imageSize = m_terrainHeight * m_terrainWidth;
+
+	// Allocate memory for the raw image data.
+	rawImage = new unsigned short[imageSize];
+
+	// Read in the raw image data.
+	count = fread(rawImage, sizeof(unsigned short), imageSize, filePtr);
+	if (count != imageSize)
+	{
+		oss << "Failed bytes read does not match expected for file: " << m_terrainFilename << std::endl;
+		oss << "    Expected: " << imageSize << std::endl;
+		oss << "    Actual:   " << count << std::endl;
+		throw TerrainMeshException(__LINE__, __FILE__, oss.str());
+	}
+
+	// Close the file.
+	error = fclose(filePtr);
+	if (error != 0)
+	{
+		oss << "Failed to close file: " << m_terrainFilename;
+		throw TerrainMeshException(__LINE__, __FILE__, oss.str());
+	}
+
+	// Copy the image data into the height map array.
+	for (j = 0; j < m_terrainHeight; j++)
+	{
+		for (i = 0; i < m_terrainWidth; i++)
+		{
+			index = (m_terrainWidth * j) + i;
+
+			// Store the height at this point in the height map array.
+			m_heightMapVector[index]->y = (float)rawImage[index];
+		}
+	}
+
+	// Release the bitmap image data.
+	delete[] rawImage;
+	rawImage = 0;
 }
 
 void TerrainMesh::LoadBitmapHeightMap()
