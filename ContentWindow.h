@@ -35,6 +35,8 @@
 #include "BoxMesh.h"
 #include "Terrain.h"
 #include "TerrainMesh.h"
+#include "SkyDomeMesh.h"
+#include "DepthStencilState.h"
 
 /*
 #include "CPUStatistics.h"
@@ -99,6 +101,7 @@ private:
 	void ObjectStoreAddRasterStates();
 	void ObjectStoreAddSamplerStates();
 	void ObjectStoreAddTextures();
+	void ObjectStoreAddDepthStencilStates();
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 	std::shared_ptr<StepTimer> m_timer;

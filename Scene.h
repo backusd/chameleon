@@ -12,6 +12,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Terrain.h"
+#include "SkyDomeMesh.h"
 
 #include <memory>
 
@@ -37,6 +38,7 @@ private:
 
 	void SetupCubePipeline();
 	void SetupTerrainPipeline();
+	void SetupSkyDomePipeline();
 
 	PhongMaterialProperties* m_material;
 
@@ -45,6 +47,7 @@ private:
 
 	std::shared_ptr<DrawPipeline> m_cubePipeline;
 	std::shared_ptr<DrawPipeline> m_terrainPipeline;
+	std::shared_ptr<DrawPipeline> m_skyDomePipeline;
 
 	std::unique_ptr<MoveLookController> m_moveLookController;
 

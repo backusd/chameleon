@@ -19,6 +19,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 
 	SetupCubePipeline();
 	SetupTerrainPipeline();
+	SetupSkyDomePipeline();
 
 
 
@@ -142,13 +143,21 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 
 
 	m_cubePipeline->Update(timer);
-
 	m_terrainPipeline->Update(timer);
+	m_skyDomePipeline->Update(timer);
+
+	// Update the sky dome's position to that of the move look controller
+	XMFLOAT3 position;
+	DirectX::XMStoreFloat3(&position, m_moveLookController->Position());
+	m_skyDomePipeline->GetRenderable(0)->SetPosition(position);
 }
 
 
 void Scene::Draw()
 {
+	// Draw the sky dome first because depth test will be turned off
+	m_skyDomePipeline->Draw();
+
 	// Set the cube material once for all cubes then draw them
 	m_cubePipeline->UpdatePSSubresource(0, m_material);
 	m_cubePipeline->Draw();
@@ -168,6 +177,7 @@ void Scene::SetupCubePipeline()
 		"phong-vertex-shader",
 		"phong-pixel-shader",
 		"solidfill",
+		"depth-enabled-depth-stencil-state",
 		vertexConstantBuffers,
 		pixelConstantBuffers
 		);
@@ -227,6 +237,7 @@ void Scene::SetupTerrainPipeline()
 		"terrain-texture-vertex-shader",
 		"terrain-texture-pixel-shader",
 		"solidfill",
+		"depth-enabled-depth-stencil-state",
 		vertexConstantBuffers,
 		pixelConstantBuffers
 		);
@@ -278,6 +289,72 @@ void Scene::SetupTerrainPipeline()
 		lightingBuffer->diffuseColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		lightingBuffer->lightDirection = XMFLOAT3(-0.5f, -1.0f, -0.5f);
 		lightingBuffer->padding = 0.0f;
+
+		// Unlock the light constant buffer.
+		context->Unmap(pixelShaderBuffers[0].Get(), 0);
+	}
+	);
+}
+
+void Scene::SetupSkyDomePipeline()
+{
+	std::vector<std::string> vertexConstantBuffers = { "sky-dome-constant-buffer" };
+	std::vector<std::string> pixelConstantBuffers = { "sky-dome-gradient-buffer" };
+
+	m_skyDomePipeline = std::make_shared<DrawPipeline>(
+		m_deviceResources,
+		"sky-dome-mesh",
+		"sky-dome-vertex-shader",
+		"sky-dome-pixel-shader",
+		"solidfill",			// Raster state will need to change
+		"depth-disabled-depth-stencil-state",
+		vertexConstantBuffers,
+		pixelConstantBuffers
+		);
+
+
+	m_skyDomePipeline->AddRenderable(std::make_shared<Terrain>());
+
+	m_skyDomePipeline->SetPerRendererableUpdate(
+		[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
+	(std::shared_ptr<Renderable> renderable,
+		std::shared_ptr<Mesh> mesh,
+		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers,
+		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)
+	{
+		auto deviceResources = weakDeviceResources.lock();
+		ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
+
+		std::shared_ptr<SkyDomeMesh> skyDomeMesh = std::dynamic_pointer_cast<SkyDomeMesh>(mesh);
+
+		D3D11_MAPPED_SUBRESOURCE ms;
+
+		// Update the vertex shader buffer
+		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		context->Map(vertexShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+
+		XMMATRIX _model = renderable->GetModelMatrix();
+		TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
+
+		mappedBuffer->world = renderable->GetModelMatrix();
+		mappedBuffer->view = this->ViewMatrix();
+		mappedBuffer->projection = this->ProjectionMatrix();
+
+		context->Unmap(vertexShaderBuffers[0].Get(), 0);
+
+
+		// Update the pixel shader lighting buffer
+
+		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		context->Map(pixelShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+
+
+		// Get a pointer to the data in the light constant buffer.
+		SkyDomeColorBufferType* skyDomeColorBuffer = (SkyDomeColorBufferType*)ms.pData;
+
+		// Copy the lighting variables into the constant buffer.
+		skyDomeColorBuffer->apexColor = skyDomeMesh->GetApexColor();
+		skyDomeColorBuffer->centerColor = skyDomeMesh->GetCenterColor();
 
 		// Unlock the light constant buffer.
 		context->Unmap(pixelShaderBuffers[0].Get(), 0);

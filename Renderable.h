@@ -17,6 +17,8 @@ public:
 
 	virtual void Update(std::shared_ptr<StepTimer> timer) = 0;
 
+	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }
+
 protected:
 	DirectX::XMFLOAT3 m_position; // Every object will have a "center point" location
 	

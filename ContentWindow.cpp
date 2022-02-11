@@ -28,7 +28,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	ObjectStoreAddRasterStates();
 	ObjectStoreAddSamplerStates();
 	ObjectStoreAddTextures();
-
+	ObjectStoreAddDepthStencilStates();
 
 	// Create the state block 
 	HRESULT hr;
@@ -92,18 +92,31 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddPixelShader(L"TerrainTexturePixelShader.cso", "terrain-texture-pixel-shader");
 
 	// Phong ======================================================================================================
-	const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+	const D3D11_INPUT_ELEMENT_DESC phongVertexDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"PhongVertexShader.cso", vertexDesc, static_cast<UINT>(std::size(vertexDesc)), "phong-vertex-shader");
+	ObjectStore::AddVertexShaderAndInputLayout(L"PhongVertexShader.cso", phongVertexDesc, static_cast<UINT>(std::size(phongVertexDesc)), "phong-vertex-shader");
 	ObjectStore::AddPixelShader(L"PhongPixelShader.cso", "phong-pixel-shader");
+
+
+	// Sky Dome ======================================================================================================
+	const D3D11_INPUT_ELEMENT_DESC skyDomeVertexDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"SkyDomeVertexShader.cso", skyDomeVertexDesc, static_cast<UINT>(std::size(skyDomeVertexDesc)), "sky-dome-vertex-shader");
+	ObjectStore::AddPixelShader(L"SkyDomePixelShader.cso", "sky-dome-pixel-shader");
+
+
+
 }
 void ContentWindow::ObjectStoreAddMeshes()
 {
 	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources), "box-mesh");
 	ObjectStore::AddMesh(std::make_shared<TerrainMesh>(m_deviceResources), "terrain-mesh");
+	ObjectStore::AddMesh(std::make_shared<SkyDomeMesh>(m_deviceResources), "sky-dome-mesh");
 }
 void ContentWindow::ObjectStoreAddConstantBuffers()
 {
@@ -112,6 +125,8 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 	ObjectStore::AddConstantBuffer<LightProperties>("light-properties-buffer", D3D11_USAGE_DEFAULT, 0);
 	ObjectStore::AddConstantBuffer<TerrainMatrixBufferType>("terrain-constant-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 	ObjectStore::AddConstantBuffer<TerrainLightBufferType>("terrain-light-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	ObjectStore::AddConstantBuffer<SkyDomeWorldViewProjectionBufferType>("sky-dome-constant-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	ObjectStore::AddConstantBuffer<SkyDomeColorBufferType>("sky-dome-gradient-buffer", D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 void ContentWindow::ObjectStoreAddRasterStates()
 {
@@ -152,13 +167,17 @@ void ContentWindow::ObjectStoreAddSamplerStates()
 
 	ObjectStore::AddSamplerState(samplerDesc, "terrain-texture-sampler");
 }
-
 void ContentWindow::ObjectStoreAddTextures()
 {
 	//std::string filename = "test.tga";
 	std::string filename = "dirt01d.tga";
 	ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, filename), "terrain-texture");
 	ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, "dirt01n.tga"), "terrain-normal-map-texture");
+}
+void ContentWindow::ObjectStoreAddDepthStencilStates()
+{
+	ObjectStore::AddDepthStencilState(std::make_shared<DepthStencilState>(m_deviceResources, true), "depth-enabled-depth-stencil-state");
+	ObjectStore::AddDepthStencilState(std::make_shared<DepthStencilState>(m_deviceResources, false), "depth-disabled-depth-stencil-state");
 }
 
 void ContentWindow::Update()

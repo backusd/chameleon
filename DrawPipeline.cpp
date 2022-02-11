@@ -4,32 +4,41 @@ using DirectX::XMFLOAT4;
 using DirectX::XMMATRIX;
 using DirectX::XMFLOAT4X4;
 
-DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources, std::string meshName, std::string vertexShaderName, std::string pixelShaderName, std::string rasterStateName) :
-	m_deviceResources(deviceResources),
-	m_mesh(ObjectStore::GetMesh(meshName)),
-	m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
-	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
-	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
-	m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
-	m_samplerState(nullptr)
+DrawPipeline::DrawPipeline(
+	std::shared_ptr<DeviceResources> deviceResources, 
+	std::string meshName, std::string vertexShaderName, 
+	std::string pixelShaderName, 
+	std::string rasterStateName,
+	std::string depthStencilStateName) :
+		m_deviceResources(deviceResources),
+		m_mesh(ObjectStore::GetMesh(meshName)),
+		m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
+		m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
+		m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
+		m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
+		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
+		m_samplerState(nullptr)
 {
 	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&) {};
 }
 
-DrawPipeline::DrawPipeline(std::shared_ptr<DeviceResources> deviceResources, 
-							std::string meshName, 
-							std::string vertexShaderName, 
-							std::string pixelShaderName,
-							std::string rasterStateName,
-							std::vector<std::string> vertexShaderConstantBufferNames,
-							std::vector<std::string> pixelShaderConstantBufferNames) :
-	m_deviceResources(deviceResources),
-	m_mesh(ObjectStore::GetMesh(meshName)),
-	m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
-	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
-	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
-	m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
-	m_samplerState(nullptr)
+DrawPipeline::DrawPipeline(
+	std::shared_ptr<DeviceResources> deviceResources, 
+	std::string meshName, 
+	std::string vertexShaderName, 
+	std::string pixelShaderName,
+	std::string rasterStateName,
+	std::string depthStencilStateName,
+	std::vector<std::string> vertexShaderConstantBufferNames,
+	std::vector<std::string> pixelShaderConstantBufferNames) :
+		m_deviceResources(deviceResources),
+		m_mesh(ObjectStore::GetMesh(meshName)),
+		m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
+		m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
+		m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
+		m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
+		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
+		m_samplerState(nullptr)
 {
 	for (std::string name : vertexShaderConstantBufferNames)
 		m_vertexShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
@@ -87,6 +96,9 @@ void DrawPipeline::Draw()
 	
 	if (m_samplerState != nullptr)
 		context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+
+	// Set the depth stencil state
+	context->OMSetDepthStencilState(m_depthStencilState->GetState().Get(), 1);
 
 	// loop over each renderable and update the necessary buffers for each rendereable
 	UINT indexCount = m_mesh->IndexCount();

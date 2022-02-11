@@ -11,6 +11,8 @@ std::map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>	 ObjectStore::
 
 std::map<std::string, std::shared_ptr<Mesh>>    ObjectStore::m_meshMap;
 std::map<std::string, std::shared_ptr<Texture>> ObjectStore::m_textureMap;
+std::map<std::string, std::shared_ptr<DepthStencilState>> ObjectStore::m_depthStencilStateMap;
+
 
 
 

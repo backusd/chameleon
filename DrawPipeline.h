@@ -40,12 +40,14 @@ public:
 		std::string meshName,
 		std::string vertexShaderName, 
 		std::string pixelShaderName,
-		std::string rasterStateName);
+		std::string rasterStateName,
+		std::string depthStencilStateName);
 	DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
 		std::string meshName,
 		std::string vertexShaderName,
 		std::string pixelShaderName,
 		std::string rasterStateName,
+		std::string depthStencilStateName,
 		std::vector<std::string> vertexShaderConstantBufferNames,
 		std::vector<std::string> pixelShaderConstantBufferNames);
 
@@ -57,6 +59,8 @@ public:
 	
 	void AddPixelShaderTexture(std::string textureLookupName);
 	void SetSamplerState(std::string sampleStateLookupName);
+
+	std::shared_ptr<Renderable> GetRenderable(int index) { return m_renderables[index]; }
 
 
 	void UpdatePSSubresource(int index, void* data);
@@ -99,18 +103,17 @@ private:
 
 	std::shared_ptr<Mesh> m_mesh;
 
-	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> m_pixelShaderConstantBuffers;
-	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> m_vertexShaderConstantBuffers;
+	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>	m_pixelShaderConstantBuffers;
+	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>	m_vertexShaderConstantBuffers;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState>			m_samplerState;
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_rasterState;
 
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerState;
+	std::vector<std::shared_ptr<Texture>>		m_pixelShaderTextures;
+	std::vector<std::shared_ptr<Renderable>>	m_renderables;
 
-	std::vector<std::shared_ptr<Texture>>	   m_pixelShaderTextures;
-
-	std::vector<std::shared_ptr<Renderable>> m_renderables;
-
+	std::shared_ptr<DepthStencilState>			m_depthStencilState;
 };

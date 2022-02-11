@@ -6,6 +6,7 @@
 #include "ObjectStoreException.h"
 #include "Mesh.h"
 #include "Texture.h"
+#include "DepthStencilState.h"
 
 #include <memory>
 #include <string>
@@ -32,7 +33,9 @@ public:
 	static void AddSamplerState(D3D11_SAMPLER_DESC desc, std::string lookupName);
 	static void AddMesh(std::shared_ptr<Mesh> mesh, std::string lookupName) { m_meshMap.insert(std::pair(lookupName, mesh)); }
 	static void AddTexture(std::shared_ptr<Texture> texture, std::string lookupName) { m_textureMap.insert(std::pair(lookupName, texture)); }
-	
+	static void AddDepthStencilState(std::shared_ptr<DepthStencilState> depthStencilState, std::string lookupName) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); }
+
+
 	template <typename T>
 	static void AddConstantBuffer(std::string lookupName, D3D11_USAGE usage, UINT CPUAccessFlags);
 
@@ -44,6 +47,7 @@ public:
 	static Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(std::string lookupName) { MAP_LOOKUP(m_samplerStateMap, lookupName); }
 	static std::shared_ptr<Mesh> GetMesh(std::string lookupName) { MAP_LOOKUP(m_meshMap, lookupName); }
 	static std::shared_ptr<Texture> GetTexture(std::string lookupName) { MAP_LOOKUP(m_textureMap, lookupName); }
+	static std::shared_ptr<DepthStencilState> GetDepthStencilState(std::string lookupName) { MAP_LOOKUP(m_depthStencilStateMap, lookupName); }
 
 private:
 	ObjectStore() {} // Disallow creation of an ObjectStore object
@@ -59,6 +63,8 @@ private:
 
 	static std::map<std::string, std::shared_ptr<Mesh>> m_meshMap;
 	static std::map<std::string, std::shared_ptr<Texture>> m_textureMap;
+	static std::map<std::string, std::shared_ptr<DepthStencilState>> m_depthStencilStateMap;
+
 	
 };
 

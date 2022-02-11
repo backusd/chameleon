@@ -132,3 +132,22 @@ struct TerrainLightBufferType
     DirectX::XMFLOAT3 lightDirection;
     float padding;
 };
+
+// Sky Dome ==============================================================
+struct SkyDomeVertexType
+{
+    DirectX::XMFLOAT3 position;
+};
+
+struct SkyDomeWorldViewProjectionBufferType
+{
+    DirectX::XMMATRIX world;
+    DirectX::XMMATRIX view;
+    DirectX::XMMATRIX projection;
+};
+
+struct SkyDomeColorBufferType
+{
+    DirectX::XMFLOAT4 apexColor;
+    DirectX::XMFLOAT4 centerColor;
+};
