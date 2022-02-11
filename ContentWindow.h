@@ -38,6 +38,11 @@
 #include "SkyDomeMesh.h"
 #include "DepthStencilState.h"
 
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
+#include <tchar.h>
+
 /*
 #include "CPUStatistics.h"
 #include "InputClass.h"
@@ -104,9 +109,18 @@ private:
 	void ObjectStoreAddDepthStencilStates();
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
+
+	bool m_show_demo_window;
+	bool m_show_another_window;
+	ImVec4 m_clear_color;
+
+
+
+
+	
 	std::shared_ptr<StepTimer> m_timer;
 
-	Microsoft::WRL::ComPtr<ID2D1DrawingStateBlock1> m_stateBlock;
+	//Microsoft::WRL::ComPtr<ID2D1DrawingStateBlock1> m_stateBlock;
 	
 	
 	std::shared_ptr<CPU> m_cpu;
@@ -118,21 +132,7 @@ private:
 
 	std::shared_ptr<HUD> m_hud;
 	std::shared_ptr<Scene> m_scene;
-
-
-	// std::ostringstream oss;
-
-
-	/*
-	std::unique_ptr<CPUStatistics> m_cpuStatistics;
-	std::shared_ptr<InputClass> m_inputClass;
-	std::shared_ptr<UserInterfaceClass> m_userInterface;
-
-	std::unique_ptr<StateClass> m_stateClass;
-	std::shared_ptr<BlackForestClass> m_blackForest;
-
-	std::unique_ptr<NetworkClass> m_network;
-	*/
+	
 
 
 

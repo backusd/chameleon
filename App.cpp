@@ -7,16 +7,7 @@ App::App()
 		// All other hard coded pixel values will be in DIPS. However, because we don't have access to the D2DFactory
 		// at the time of window creation (that could probably be changed), these values are physical pixels for the window size
 		std::shared_ptr<ContentWindow> main = std::make_shared<ContentWindow>(1000, 800, "Main Window");
-
 		WindowManager::AddWindow(main);
-
-
-
-		////////////////////////////////////////////
-		// Initialize all static global data here //
-		
-
-
 	}
 	catch (const ChameleonException& e)
 	{
@@ -41,6 +32,10 @@ int App::Run()
 		{
 			// Destroy all windows
 			WindowManager::DestroyWindows();
+
+			ImGui_ImplDX11_Shutdown();
+			ImGui_ImplWin32_Shutdown();
+			ImGui::DestroyContext();
 
 			// if return optional has value, means we're quitting so return exit code
 			return *ecode;

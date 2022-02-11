@@ -1,16 +1,17 @@
 #pragma once
 
 #define WIN32_LEAN_AND_MEAN
+
 #define NOGDICAPMASKS
 #define NOSYSMETRICS
 #define NOMENUS
 #define NOICONS
-#define NOSYSCOMMANDS
+// #define NOSYSCOMMANDS	--> Causes build to fail because WinMain.cpp uses SC_KEYMENU
 #define NORASTEROPS
 #define OEMRESOURCE
 #define NOATOM
 #define NOCLIPBOARD
-#define NOCOLOR
+//#define NOCOLOR		--> Causes build to fail because imgui_impl_win32.cpp uses COLOR_BACKGROUND
 //#define NOCTLMGR		--> Causes build to fail when #include <comdef.h> which is used for _com_error
 #define NODRAWTEXT
 #define NOKERNEL
@@ -37,6 +38,7 @@
 #define NOMINMAX
 
 #define STRICT
+
 
 
 #include <Windows.h>
