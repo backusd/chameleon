@@ -7,6 +7,7 @@ using DirectX::XMFLOAT3;
 ContentWindow::ContentWindow(int width, int height, const char* name) :
 	WindowBase(width, height, name),
 	// m_stateBlock(nullptr),
+	io(ImGui::GetIO()),
 	m_timer(nullptr),
 	m_cpu(nullptr),
 	m_keyboard(nullptr),
@@ -19,11 +20,8 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	m_deviceResources = std::make_shared<DeviceResources>(m_hWnd);
 	m_deviceResources->OnResize(); // Calling OnResize will create the render target, etc.
 
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();	
+	
 
-	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -310,10 +308,6 @@ void ContentWindow::Update()
 
 bool ContentWindow::Render()
 {
-	// Don't try to render anything before the first Update.
-	//if (m_timer->GetFrameCount() == 0)
-	//	return false;
-
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
 	m_deviceResources->ResetViewport();
@@ -326,11 +320,7 @@ bool ContentWindow::Render()
 	context->OMSetRenderTargets(1, targets, m_deviceResources->GetDepthStencilView());
 
 
-	 
-	// Draw all 3D simulation controls first
-	//m_layout->Render3DControls();
 
-	
 	m_scene->Draw();
 
 
@@ -539,19 +529,19 @@ LRESULT ContentWindow::OnDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 LRESULT ContentWindow::OnLButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	const POINTS pt = MAKEPOINTS(lParam);
-	//m_mouse->OnLeftPressed(pt.x, pt.y);
+	m_mouse->OnLeftPressed(pt.x, pt.y);
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnLButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	const POINTS pt = MAKEPOINTS(lParam);
-	//m_mouse->OnLeftReleased(pt.x, pt.y);
+	m_mouse->OnLeftReleased(pt.x, pt.y);
 	// release mouse if outside of window
 	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
 	{
 		ReleaseCapture();
-		//m_mouse->OnMouseLeave();
+		m_mouse->OnMouseLeave();
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -559,26 +549,26 @@ LRESULT ContentWindow::OnLButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 LRESULT ContentWindow::OnLButtonDoubleClick(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	const POINTS pt = MAKEPOINTS(lParam);
-	//m_mouse->OnLeftDoubleClick(pt.x, pt.y);
+	m_mouse->OnLeftDoubleClick(pt.x, pt.y);
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	const POINTS pt = MAKEPOINTS(lParam);
-	//m_mouse->OnMiddlePressed(pt.x, pt.y);
+	m_mouse->OnMiddlePressed(pt.x, pt.y);
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	const POINTS pt = MAKEPOINTS(lParam);
-	//m_mouse->OnMiddleReleased(pt.x, pt.y);
+	m_mouse->OnMiddleReleased(pt.x, pt.y);
 	// release mouse if outside of window
 	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
 	{
 		ReleaseCapture();
-		//m_mouse->OnMouseLeave();
+		m_mouse->OnMouseLeave();
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -586,19 +576,19 @@ LRESULT ContentWindow::OnMButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 LRESULT ContentWindow::OnRButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	const POINTS pt = MAKEPOINTS(lParam);
-	//m_mouse->OnRightPressed(pt.x, pt.y);
+	m_mouse->OnRightPressed(pt.x, pt.y);
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnRButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	const POINTS pt = MAKEPOINTS(lParam);
-	//m_mouse->OnRightReleased(pt.x, pt.y);
+	m_mouse->OnRightReleased(pt.x, pt.y);
 	// release mouse if outside of window
 	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
 	{
 		ReleaseCapture();
-		//m_mouse->OnMouseLeave();
+		m_mouse->OnMouseLeave();
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -607,38 +597,40 @@ LRESULT ContentWindow::OnRButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 
 LRESULT ContentWindow::OnResize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	m_deviceResources->OnResize();
 	return 0;
 }
 
 LRESULT ContentWindow::OnMouseMove(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	/*
-	// in client region -> log move, and log enter + capture mouse (if not previously in window)
-	if (pt.x >= 0 && pt.x < m_width && pt.y >= 0 && pt.y < m_height)
+	if (!io.WantCaptureMouse)
 	{
-		m_mouse->OnMouseMove(pt.x, pt.y);
-		if (!m_mouse->IsInWindow()) // IsInWindow() will tell you if it was PREVIOUSLY in the window or not
-		{
-			SetCapture(hWnd);
-			m_mouse->OnMouseEnter();
-		}
-	}
-	// not in client -> log move / maintain capture if button down
-	else
-	{
-		if (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON))
+		const POINTS pt = MAKEPOINTS(lParam);
+		// in client region -> log move, and log enter + capture mouse (if not previously in window)
+		if (pt.x >= 0 && pt.x < m_width && pt.y >= 0 && pt.y < m_height)
 		{
 			m_mouse->OnMouseMove(pt.x, pt.y);
+			if (!m_mouse->IsInWindow()) // IsInWindow() will tell you if it was PREVIOUSLY in the window or not
+			{
+				SetCapture(hWnd);
+				m_mouse->OnMouseEnter();
+			}
 		}
-		// button up -> release capture / log event for leaving
+		// not in client -> log move / maintain capture if button down
 		else
 		{
-			ReleaseCapture();
-			m_mouse->OnMouseLeave();
+			if (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON))
+			{
+				m_mouse->OnMouseMove(pt.x, pt.y);
+			}
+			// button up -> release capture / log event for leaving
+			else
+			{
+				ReleaseCapture();
+				m_mouse->OnMouseLeave();
+			}
 		}
-	}*/
-
+	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMouseLeave(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -647,10 +639,12 @@ LRESULT ContentWindow::OnMouseLeave(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 }
 LRESULT ContentWindow::OnMouseWheel(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
-	//m_mouse->OnWheelDelta(pt.x, pt.y, delta);
-
+	if (!io.WantCaptureMouse)
+	{
+		const POINTS pt = MAKEPOINTS(lParam);
+		const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+		m_mouse->OnWheelDelta(pt.x, pt.y, delta);
+	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
@@ -679,20 +673,29 @@ LRESULT ContentWindow::OnGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 LRESULT ContentWindow::OnChar(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	//m_keyboard->OnChar(static_cast<unsigned char>(wParam));
+	if (!io.WantCaptureKeyboard)
+	{
+		m_keyboard->OnChar(static_cast<unsigned char>(wParam));
+	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	//m_keyboard->OnKeyReleased(static_cast<unsigned char>(wParam));
+	if (!io.WantCaptureKeyboard)
+	{
+		m_keyboard->OnKeyReleased(static_cast<unsigned char>(wParam));
+	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	//if (!(lParam & 0x40000000) || m_keyboard->AutorepeatIsEnabled()) // filter autorepeat
-	//{
-	//	m_keyboard->OnKeyPressed(static_cast<unsigned char>(wParam));
-	//}
+	if (!io.WantCaptureKeyboard)
+	{
+		if (!(lParam & 0x40000000) || m_keyboard->AutorepeatIsEnabled()) // filter autorepeat
+		{
+			m_keyboard->OnKeyPressed(static_cast<unsigned char>(wParam));
+		}
+	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnSysKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -707,6 +710,6 @@ LRESULT ContentWindow::OnSysKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 LRESULT ContentWindow::OnKillFocus(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	// clear keystate when window loses focus to prevent input getting "stuck"
-	//m_keyboard->ClearState();
+	m_keyboard->ClearState();
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }

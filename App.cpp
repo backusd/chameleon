@@ -4,6 +4,11 @@ App::App()
 {
 	try
 	{
+		// MUST set this here so that the ContentWindow constructor can call ImGui::GetIO()
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+
 		// All other hard coded pixel values will be in DIPS. However, because we don't have access to the D2DFactory
 		// at the time of window creation (that could probably be changed), these values are physical pixels for the window size
 		std::shared_ptr<ContentWindow> main = std::make_shared<ContentWindow>(1000, 800, "Main Window");
