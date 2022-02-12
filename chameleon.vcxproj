@@ -207,6 +207,7 @@
     <ClCompile Include="SphereMesh.cpp" />
     <ClCompile Include="StateClass.cpp" />
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TerrainCellMesh.cpp" />
     <ClCompile Include="TerrainMesh.cpp" />
     <ClCompile Include="TerrainMeshException.cpp" />
     <ClCompile Include="Text.cpp" />
@@ -277,6 +278,7 @@
     <ClInclude Include="StateClass.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TerrainCellMesh.h" />
     <ClInclude Include="TerrainMesh.h" />
     <ClInclude Include="TerrainMeshException.h" />
     <ClInclude Include="Text.h" />

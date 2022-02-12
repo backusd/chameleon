@@ -5,10 +5,11 @@ using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT2;
 
 TerrainMesh::TerrainMesh(std::shared_ptr<DeviceResources> deviceResources) :
-	Mesh(deviceResources)
+	m_deviceResources(deviceResources)
+	//Mesh(deviceResources)
 {
-	m_sizeOfVertex = sizeof(TerrainVertexType);
-	m_indexFormat = DXGI_FORMAT_R32_UINT;
+	//m_sizeOfVertex = sizeof(TerrainVertexType);
+	//m_indexFormat = DXGI_FORMAT_R32_UINT;
 
 	// Tutorial1Setup();
 
@@ -176,7 +177,7 @@ void TerrainMesh::Tutorial1Setup()
 
 void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 {
-	m_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	//m_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	// Get the terrain filename, dimensions, and so forth from the setup file.
 	LoadSetupFile(setupFilename);
@@ -203,8 +204,11 @@ void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 	// Calculate the tangent and binormal for the terrain model.
 	CalculateTerrainVectors();
 
+	// Load the terrain data into individual cells
+	LoadTerrainCells();
+
 	// Load the rendering buffers with the terrain data.
-	InitializeBuffers();
+	// InitializeBuffers();
 
 	// Release the terrain model now that the rendering buffers have been loaded.
 	m_terrainModelVector.clear();
@@ -485,7 +489,7 @@ void TerrainMesh::BuildTerrainModel()
 
 	// Create the 3D terrain model array.
 	for (unsigned int iii = 0; iii < m_vertexCount; ++iii)
-		m_terrainModelVector.push_back(std::make_unique<ModelType>());
+		m_terrainModelVector.push_back(std::make_unique<TerrainModelType>());
 
 	// Initialize the index into the height map array.
 	index = 0;
@@ -589,7 +593,7 @@ void TerrainMesh::BuildTerrainModel()
 		}
 	}
 }
-
+/*
 void TerrainMesh::InitializeBuffers()
 {
 	INFOMAN(m_deviceResources);
@@ -674,7 +678,7 @@ void TerrainMesh::InitializeBuffers()
 	delete[] indices;
 	indices = 0;
 }
-
+*/
 void TerrainMesh::CalculateNormals()
 {
 	int i, j, index1, index2, index3, index;
@@ -1036,4 +1040,34 @@ void TerrainMesh::CalculateTangentBinormal(TempVertexType vertex1, TempVertexTyp
 	binormal.x = binormal.x / length;
 	binormal.y = binormal.y / length;
 	binormal.z = binormal.z / length;
+}
+
+void TerrainMesh::LoadTerrainCells()
+{
+	int cellHeight, cellWidth, cellRowCount, i, j, index;
+	bool result;
+
+
+	// Set the height and width of each terrain cell to a fixed 33x33 vertex array.
+	cellHeight = 33;
+	cellWidth = 33;
+
+	// Calculate the number of cells needed to store the terrain data.
+	cellRowCount = (m_terrainWidth - 1) / (cellWidth - 1);
+	int cellCount = cellRowCount * cellRowCount;
+
+	// Create the terrain cell array.
+	for (int iii = 0; iii < cellCount; ++iii)
+		m_terrainCells.push_back(std::make_shared<TerrainCellMesh>(m_deviceResources));
+
+	// Loop through and initialize all the terrain cells.
+	for (j = 0; j < cellRowCount; j++)
+	{
+		for (i = 0; i < cellRowCount; i++)
+		{
+			index = (cellRowCount * j) + i;
+
+			m_terrainCells[index]->Initialize(m_terrainModelVector, i, j, cellHeight, cellWidth, m_terrainWidth);
+		}
+	}
 }

@@ -76,6 +76,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	ObjectStore::Initialize(m_deviceResources);
 
 	ObjectStoreAddShaders();
+	ObjectStoreAddTerrains(); // Must call this first because ObjectStoreAddMeshes tries to lookup the terrains
 	ObjectStoreAddMeshes();
 	ObjectStoreAddConstantBuffers();
 	ObjectStoreAddRasterStates();
@@ -156,11 +157,23 @@ void ContentWindow::ObjectStoreAddShaders()
 
 
 }
+void ContentWindow::ObjectStoreAddTerrains()
+{
+	ObjectStore::AddTerrain(std::make_shared<TerrainMesh>(m_deviceResources), "terrain");
+}
 void ContentWindow::ObjectStoreAddMeshes()
 {
 	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources), "box-mesh");
-	ObjectStore::AddMesh(std::make_shared<TerrainMesh>(m_deviceResources), "terrain-mesh");
 	ObjectStore::AddMesh(std::make_shared<SkyDomeMesh>(m_deviceResources), "sky-dome-mesh");
+
+	// Add terrain meshes sequentially
+	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
+	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)
+	{
+		std::ostringstream oss;
+		oss << "terrain_" << iii;
+		ObjectStore::AddMesh(terrain->GetTerrainCell(iii), oss.str());
+	}
 }
 void ContentWindow::ObjectStoreAddConstantBuffers()
 {

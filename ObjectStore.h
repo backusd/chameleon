@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "DepthStencilState.h"
+#include "TerrainMesh.h"
 
 #include <memory>
 #include <string>
@@ -34,6 +35,7 @@ public:
 	static void AddMesh(std::shared_ptr<Mesh> mesh, std::string lookupName) { m_meshMap.insert(std::pair(lookupName, mesh)); }
 	static void AddTexture(std::shared_ptr<Texture> texture, std::string lookupName) { m_textureMap.insert(std::pair(lookupName, texture)); }
 	static void AddDepthStencilState(std::shared_ptr<DepthStencilState> depthStencilState, std::string lookupName) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); }
+	static void AddTerrain(std::shared_ptr<TerrainMesh> terrainMesh, std::string lookupName) { m_terrainMeshMap.insert(std::pair(lookupName, terrainMesh)); }
 
 
 	template <typename T>
@@ -48,6 +50,7 @@ public:
 	static std::shared_ptr<Mesh> GetMesh(std::string lookupName) { MAP_LOOKUP(m_meshMap, lookupName); }
 	static std::shared_ptr<Texture> GetTexture(std::string lookupName) { MAP_LOOKUP(m_textureMap, lookupName); }
 	static std::shared_ptr<DepthStencilState> GetDepthStencilState(std::string lookupName) { MAP_LOOKUP(m_depthStencilStateMap, lookupName); }
+	static std::shared_ptr<TerrainMesh> GetTerrain(std::string lookupName) { MAP_LOOKUP(m_terrainMeshMap, lookupName); }
 
 private:
 	ObjectStore() {} // Disallow creation of an ObjectStore object
@@ -64,6 +67,7 @@ private:
 	static std::map<std::string, std::shared_ptr<Mesh>> m_meshMap;
 	static std::map<std::string, std::shared_ptr<Texture>> m_textureMap;
 	static std::map<std::string, std::shared_ptr<DepthStencilState>> m_depthStencilStateMap;
+	static std::map<std::string, std::shared_ptr<TerrainMesh>> m_terrainMeshMap;
 
 	
 };

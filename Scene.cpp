@@ -7,8 +7,8 @@ using DirectX::XMFLOAT3;
 Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_deviceResources(deviceResources),
 	m_hWnd(hWnd),
-	m_cubePipeline(nullptr),
-	m_terrainPipeline(nullptr)
+	m_cubePipeline(nullptr)
+	//m_terrainPipeline(nullptr)
 {
 	m_moveLookController = std::make_unique<MoveLookController>();
 	m_moveLookController->SetPosition(XMFLOAT3(50.0f, 10.0f, -10.0f));
@@ -143,7 +143,7 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 
 
 	m_cubePipeline->Update(timer);
-	m_terrainPipeline->Update(timer);
+	// m_terrainPipeline->Update(timer);
 	m_skyDomePipeline->Update(timer);
 
 	// Update the sky dome's position to that of the move look controller
@@ -163,7 +163,8 @@ void Scene::Draw()
 	m_cubePipeline->Draw();
 
 	// Draw the terrain
-	m_terrainPipeline->Draw();
+	for (std::shared_ptr<DrawPipeline> terrainPipeline : m_terrainPipelines)
+		terrainPipeline->Draw();
 }
 
 void Scene::SetupCubePipeline()
@@ -217,20 +218,9 @@ void Scene::SetupCubePipeline()
 
 void Scene::SetupTerrainPipeline()
 {
-	std::vector<std::string> vertexConstantBuffers = { "terrain-constant-buffer" };
-	std::vector<std::string> pixelConstantBuffers = { "terrain-light-buffer" };
 
 	/*
-	m_terrainPipeline = std::make_shared<DrawPipeline>(
-		m_deviceResources,
-		"terrain-mesh",
-		"terrain-vertex-shader",
-		"terrain-pixel-shader",
-		"wireframe",
-		vertexConstantBuffers,
-		pixelConstantBuffers
-		);
-	*/
+
 	m_terrainPipeline = std::make_shared<DrawPipeline>(
 		m_deviceResources,
 		"terrain-mesh",
@@ -294,6 +284,85 @@ void Scene::SetupTerrainPipeline()
 		context->Unmap(pixelShaderBuffers[0].Get(), 0);
 	}
 	);
+	*/
+
+
+	std::vector<std::string> vertexConstantBuffers = { "terrain-constant-buffer" };
+	std::vector<std::string> pixelConstantBuffers = { "terrain-light-buffer" };
+
+	std::shared_ptr<Terrain> terr = std::make_shared<Terrain>();
+
+	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
+	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)
+	{
+		std::ostringstream oss;
+		oss << "terrain_" << iii;
+
+
+		
+		m_terrainPipelines.push_back(std::make_shared<DrawPipeline>(
+			m_deviceResources,
+			oss.str(),
+			"terrain-texture-vertex-shader",
+			"terrain-texture-pixel-shader",
+			"solidfill",
+			"depth-enabled-depth-stencil-state",
+			vertexConstantBuffers,
+			pixelConstantBuffers
+			));
+
+		m_terrainPipelines[iii]->AddPixelShaderTexture("terrain-texture");
+		m_terrainPipelines[iii]->AddPixelShaderTexture("terrain-normal-map-texture");
+
+		m_terrainPipelines[iii]->SetSamplerState("terrain-texture-sampler");
+
+		m_terrainPipelines[iii]->AddRenderable(terr);
+
+		m_terrainPipelines[iii]->SetPerRendererableUpdate(
+			[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
+		(std::shared_ptr<Renderable> renderable,
+			std::shared_ptr<Mesh> mesh,
+			std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers,
+			std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)
+		{
+			auto deviceResources = weakDeviceResources.lock();
+			ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
+
+			D3D11_MAPPED_SUBRESOURCE ms;
+
+			// Update the vertex shader buffer
+			ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+			context->Map(vertexShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+
+			XMMATRIX _model = renderable->GetModelMatrix();
+			TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
+
+			mappedBuffer->world = renderable->GetModelMatrix();
+			mappedBuffer->view = this->ViewMatrix();
+			mappedBuffer->projection = this->ProjectionMatrix();
+
+			context->Unmap(vertexShaderBuffers[0].Get(), 0);
+
+
+			// Update the pixel shader lighting buffer
+
+			ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+			context->Map(pixelShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+
+
+			// Get a pointer to the data in the light constant buffer.
+			TerrainLightBufferType* lightingBuffer = (TerrainLightBufferType*)ms.pData;
+
+			// Copy the lighting variables into the constant buffer.
+			lightingBuffer->diffuseColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			lightingBuffer->lightDirection = XMFLOAT3(-0.5f, -1.0f, -0.5f);
+			lightingBuffer->padding = 0.0f;
+
+			// Unlock the light constant buffer.
+			context->Unmap(pixelShaderBuffers[0].Get(), 0);
+		}
+		);
+	}
 }
 
 void Scene::SetupSkyDomePipeline()

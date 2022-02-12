@@ -101,6 +101,7 @@ private:
 	void DiscardGraphicsResources();
 
 	void ObjectStoreAddShaders();
+	void ObjectStoreAddTerrains();
 	void ObjectStoreAddMeshes();
 	void ObjectStoreAddConstantBuffers();
 	void ObjectStoreAddRasterStates();

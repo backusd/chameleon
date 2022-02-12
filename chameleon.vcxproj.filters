@@ -273,6 +273,9 @@
     <ClCompile Include="imgui_impl_win32.cpp">
       <Filter>Source Files\ImGUI</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainCellMesh.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -478,6 +481,9 @@
     </ClInclude>
     <ClInclude Include="imstb_truetype.h">
       <Filter>Source Files\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainCellMesh.h">
+      <Filter>Header Files\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

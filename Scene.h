@@ -13,6 +13,7 @@
 #include "Mouse.h"
 #include "Terrain.h"
 #include "SkyDomeMesh.h"
+#include "TerrainMesh.h"
 
 #include <memory>
 
@@ -46,8 +47,11 @@ private:
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
 	std::shared_ptr<DrawPipeline> m_cubePipeline;
-	std::shared_ptr<DrawPipeline> m_terrainPipeline;
+	//std::shared_ptr<DrawPipeline> m_terrainPipeline;
 	std::shared_ptr<DrawPipeline> m_skyDomePipeline;
+	
+	std::vector<std::shared_ptr<DrawPipeline>> m_terrainPipelines;
+
 
 	std::unique_ptr<MoveLookController> m_moveLookController;
 
