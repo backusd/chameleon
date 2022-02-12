@@ -41,7 +41,6 @@ DeviceResources::DeviceResources(HWND hWnd) :
 	CreateDeviceIndependentResources();
 	CreateDeviceDependentResources();
 }
-
 DeviceResources::~DeviceResources()
 {
 	m_d2dFactory = nullptr;

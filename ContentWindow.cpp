@@ -7,7 +7,7 @@ using DirectX::XMFLOAT3;
 ContentWindow::ContentWindow(int width, int height, const char* name) :
 	WindowBase(width, height, name),
 	// m_stateBlock(nullptr),
-	io(ImGui::GetIO()),
+	m_io(ImGui::GetIO()),
 	m_timer(nullptr),
 	m_cpu(nullptr),
 	m_keyboard(nullptr),
@@ -22,11 +22,11 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	
 
-	(void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+	(void)m_io;
+	m_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+	m_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+	m_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 	//io.ConfigViewportsNoAutoMerge = true;
 	//io.ConfigViewportsNoTaskBarIcon = true;
 	//io.ConfigViewportsNoDefaultParent = true;
@@ -41,7 +41,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 	ImGuiStyle& style = ImGui::GetStyle();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	if (m_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		style.WindowRounding = 0.0f;
 		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -83,14 +83,8 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	ObjectStoreAddTextures();
 	ObjectStoreAddDepthStencilStates();
 
-	// Create the state block 
-	//HRESULT hr;
-	//GFX_THROW_NOINFO(
-	//	m_deviceResources->D2DFactory()->CreateDrawingStateBlock(m_stateBlock.GetAddressOf())
-	//);
 
 	m_timer = std::make_shared<StepTimer>();
-
 	m_cpu = std::make_shared<CPU>(m_timer);
 
 	m_keyboard = std::make_shared<Keyboard>();
@@ -310,121 +304,48 @@ bool ContentWindow::Render()
 {
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
-	m_deviceResources->ResetViewport();
-
-	FLOAT background[4] = { 45.0f / 255.0f, 45.0f / 255.0f, 48.0f / 255.0f };
-	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), background);
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	ID3D11RenderTargetView* const targets[1] = { m_deviceResources->GetBackBufferRenderTargetView() };
 	context->OMSetRenderTargets(1, targets, m_deviceResources->GetDepthStencilView());
 
-
-
+	// Draw the scene before rendering the ImGui controls so you have the option to have ImGui rendered over the scene
 	m_scene->Draw();
 
 
-
-	// Draw all 2D / Menu controls next
-	m_deviceResources->ResetViewport();
-
-	/*
-	ID2D1DeviceContext* context2 = m_deviceResources->D2DDeviceContext();
-	context2->SaveDrawingState(m_stateBlock.Get());
-	context2->BeginDraw();
-	context2->SetTransform(m_deviceResources->OrientationTransform2D());
-
-	//m_layout->Render2DControls();
-
-	// re-render the captured control to make sure it is on top of the UI
-	//m_layout->Render2DCapturedControl();
-	m_hud->Draw();
-
-
-	HRESULT hr = context2->EndDraw();
-	if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
-	{
-		DiscardGraphicsResources();
-	}
-
-	context2->RestoreDrawingState(m_stateBlock.Get());
-	*/
-
-	// Start the Dear ImGui frame
+	// Start the Dear ImGui frame =========================================================================================
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-	if (m_show_demo_window)
-		ImGui::ShowDemoWindow(&m_show_demo_window);
 
-	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-	{
-		static float f = 0.0f;
-		static int counter = 0;
+	// Move Look Controller ================================================================================================
+	ImGui::Begin("Move Look Controller");
+	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &m_show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &m_show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&m_clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::End();
-	}
-
-	// 3. Show another simple window.
-	if (m_show_another_window)
-	{
-		ImGui::Begin("Another Window", &m_show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			m_show_another_window = false;
-		ImGui::End();
-	}
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / m_io.Framerate, m_io.Framerate);
+	ImGui::End();
+	
 
 
-	// Render the Scene
+	// Lighting ============================================================================================================
+	ImGui::Begin("Lighting");
+
+	ImGui::End();
 
 
 
 
-
-
-
-	// Rendering
+	// Render ImGui
 	ImGui::Render();
-	//const float clear_color_with_alpha[4] = { m_clear_color.x * m_clear_color.w, m_clear_color.y * m_clear_color.w, m_clear_color.z * m_clear_color.w, m_clear_color.w };
-	//g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
-	//context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), clear_color_with_alpha);
-	
-	
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	// Update and Render additional Platform Windows
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	if (m_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}
-
-
-
-
-
-
-
-
 
 	return true;
 }
@@ -603,7 +524,7 @@ LRESULT ContentWindow::OnResize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 LRESULT ContentWindow::OnMouseMove(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	if (!io.WantCaptureMouse)
+	if (!m_io.WantCaptureMouse)
 	{
 		const POINTS pt = MAKEPOINTS(lParam);
 		// in client region -> log move, and log enter + capture mouse (if not previously in window)
@@ -639,7 +560,7 @@ LRESULT ContentWindow::OnMouseLeave(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 }
 LRESULT ContentWindow::OnMouseWheel(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	if (!io.WantCaptureMouse)
+	if (!m_io.WantCaptureMouse)
 	{
 		const POINTS pt = MAKEPOINTS(lParam);
 		const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
@@ -673,7 +594,7 @@ LRESULT ContentWindow::OnGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 LRESULT ContentWindow::OnChar(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	if (!io.WantCaptureKeyboard)
+	if (!m_io.WantCaptureKeyboard)
 	{
 		m_keyboard->OnChar(static_cast<unsigned char>(wParam));
 	}
@@ -681,7 +602,7 @@ LRESULT ContentWindow::OnChar(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 LRESULT ContentWindow::OnKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	if (!io.WantCaptureKeyboard)
+	if (!m_io.WantCaptureKeyboard)
 	{
 		m_keyboard->OnKeyReleased(static_cast<unsigned char>(wParam));
 	}
@@ -689,7 +610,7 @@ LRESULT ContentWindow::OnKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 }
 LRESULT ContentWindow::OnKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	if (!io.WantCaptureKeyboard)
+	if (!m_io.WantCaptureKeyboard)
 	{
 		if (!(lParam & 0x40000000) || m_keyboard->AutorepeatIsEnabled()) // filter autorepeat
 		{
