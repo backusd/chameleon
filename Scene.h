@@ -14,6 +14,7 @@
 #include "Terrain.h"
 #include "SkyDomeMesh.h"
 #include "TerrainMesh.h"
+#include "Frustum.h"
 
 #include <memory>
 
@@ -50,11 +51,12 @@ private:
 	std::shared_ptr<DrawPipeline> m_cubePipeline;
 	std::shared_ptr<DrawPipeline> m_skyDomePipeline;
 	
+	std::vector<bool> m_terrainCellVisibility;
 	std::vector<std::shared_ptr<DrawPipeline>> m_terrainPipelines;
 	std::shared_ptr<DrawPipeline> m_terrainCubePipeline;
 
-
 	std::unique_ptr<MoveLookController> m_moveLookController;
+	std::shared_ptr<Frustum> m_frustum;
 
 	CD3D11_VIEWPORT m_viewport;
 

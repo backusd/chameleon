@@ -43,6 +43,13 @@ public:
 	float GetYLength();
 	float GetZLength();
 
+	float GetMaxWidth() { return m_maxWidth; }
+	float GetMaxHeight() { return m_maxHeight; }
+	float GetMaxDepth() { return m_maxDepth; }
+	float GetMinWidth() { return m_minWidth; }
+	float GetMinHeight() { return m_minHeight; }
+	float GetMinDepth() { return m_minDepth; }
+
 
 	VectorType* m_vertexList;
 

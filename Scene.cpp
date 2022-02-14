@@ -15,6 +15,8 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	CreateStaticResources();
 	CreateWindowSizeDependentResources();
 
+	m_frustum = std::make_shared<Frustum>(1000.0f, m_viewMatrix, m_projectionMatrix);
+
 
 	SetupCubePipeline();
 	SetupTerrainPipeline();
@@ -141,6 +143,8 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	m_moveLookController->Update(timer, keyboard, mouse, m_hWnd);
 	m_viewMatrix = m_moveLookController->ViewMatrix();
 
+	// Update the frustum with the new view matrix
+	m_frustum->UpdateFrustum(m_viewMatrix, m_projectionMatrix);
 
 	m_cubePipeline->Update(timer);
 	// m_terrainPipeline->Update(timer);
@@ -150,6 +154,23 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	XMFLOAT3 position;
 	DirectX::XMStoreFloat3(&position, m_moveLookController->Position());
 	m_skyDomePipeline->GetRenderable(0)->SetPosition(position);
+
+
+	// Now that everything has been updated, perform terrain cell culling
+	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
+	std::shared_ptr<TerrainCellMesh> cell;
+	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)
+	{
+		cell = terrain->GetTerrainCell(iii);
+		m_terrainCellVisibility[iii] = m_frustum->CheckRectangle2(
+			cell->GetMaxWidth(), 
+			cell->GetMaxHeight(), 
+			cell->GetMaxDepth(), 
+			cell->GetMinWidth(), 
+			cell->GetMinHeight(), 
+			cell->GetMinDepth()
+		);
+	}
 }
 
 
@@ -162,11 +183,14 @@ void Scene::Draw()
 	m_cubePipeline->UpdatePSSubresource(0, m_material);
 	m_cubePipeline->Draw();
 
-	// Draw the terrain
-	for (std::shared_ptr<DrawPipeline> terrainPipeline : m_terrainPipelines)
-		terrainPipeline->Draw();
+	// Draw each terrain cell that is visible
+	for (unsigned int iii = 0; iii < m_terrainPipelines.size(); ++iii)
+	{
+		if (m_terrainCellVisibility[iii])
+			m_terrainPipelines[iii]->Draw();
+	}
 
-	m_terrainCubePipeline->Draw();
+	// m_terrainCubePipeline->Draw();
 }
 
 void Scene::SetupCubePipeline()
@@ -228,6 +252,9 @@ void Scene::SetupTerrainPipeline()
 	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
 	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)
 	{
+		// Also populate the visibility vector
+		m_terrainCellVisibility.push_back(false);
+
 		std::ostringstream oss;
 		oss << "terrain_" << iii;
 
