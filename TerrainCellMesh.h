@@ -49,7 +49,6 @@ public:
 private:
 	void InitializeBuffers(int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth, std::vector<std::unique_ptr< TerrainModelType>>& terrainModel);
 	void CalculateCellDimensions();
-	void BuildLineBuffers();
 
 
 	int m_vertexCount;
