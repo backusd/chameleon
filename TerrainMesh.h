@@ -82,9 +82,11 @@ private:
 	std::string m_terrainFilename;
 	std::string m_colorMapFilename;
 
-	std::vector<std::unique_ptr<HeightMapType>>		m_heightMapVector;
-	std::vector<std::unique_ptr<TerrainModelType>>	m_terrainModelVector;
+	//std::vector<std::unique_ptr<HeightMapType>>		m_heightMapVector;
+	//std::vector<std::unique_ptr<TerrainModelType>>	m_terrainModelVector;
 
+	TerrainModelType* m_terrainModel;
+	HeightMapType* m_heightMap;
 
 	std::vector<std::shared_ptr<TerrainCellMesh>> m_terrainCells;
 };

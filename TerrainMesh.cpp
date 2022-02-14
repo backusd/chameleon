@@ -199,7 +199,12 @@ void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 	BuildTerrainModel();
 
 	// We can now release the height map since it is no longer needed in memory once the 3D terrain model has been built.
-	m_heightMapVector.clear();
+	//m_heightMapVector.clear();
+	if (m_heightMap)
+	{
+		delete[] m_heightMap;
+		m_heightMap = 0;
+	}
 
 	// Calculate the tangent and binormal for the terrain model.
 	CalculateTerrainVectors();
@@ -211,7 +216,12 @@ void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 	// InitializeBuffers();
 
 	// Release the terrain model now that the rendering buffers have been loaded.
-	m_terrainModelVector.clear();
+	//m_terrainModelVector.clear();
+	if (m_terrainModel)
+	{
+		delete[] m_terrainModel;
+		m_terrainModel = 0;
+	}
 }
 
 void TerrainMesh::LoadSetupFile(std::string filename)
@@ -281,8 +291,7 @@ void TerrainMesh::LoadRawHeightMap()
 	std::ostringstream oss;
 
 	// Create the float array to hold the height map data.
-	for (int iii = 0; iii < m_terrainWidth * m_terrainHeight; ++iii)
-		m_heightMapVector.push_back(std::make_unique<HeightMapType>());
+	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
 
 	// Open the 16 bit raw height map file for reading in binary.
 	error = fopen_s(&filePtr, m_terrainFilename.c_str(), "rb");
@@ -324,7 +333,7 @@ void TerrainMesh::LoadRawHeightMap()
 			index = (m_terrainWidth * j) + i;
 
 			// Store the height at this point in the height map array.
-			m_heightMapVector[index]->y = (float)rawImage[index];
+			m_heightMap[index].y = (float)rawImage[index];
 		}
 	}
 
@@ -346,10 +355,7 @@ void TerrainMesh::LoadBitmapHeightMap()
 
 
 	// Start by creating the array structure to hold the height map data.
-	unsigned long long totalHeights = static_cast<unsigned long long>(m_terrainWidth) * static_cast<unsigned long long>(m_terrainHeight);
-	for (int iii = 0; iii < totalHeights; ++iii)
-		m_heightMapVector.push_back(std::make_unique<HeightMapType>());
-
+	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
 
 
 	// Open the bitmap map file in binary.
@@ -440,7 +446,7 @@ void TerrainMesh::LoadBitmapHeightMap()
 			height = bitmapImage[k];
 
 			// Store the pixel value as the height at this point in the height map array.
-			m_heightMapVector[index]->y = (float)height;
+			m_heightMap[index].y = (float)height;
 
 			// Increment the bitmap image data index.
 			k += 3;
@@ -467,14 +473,14 @@ void TerrainMesh::SetTerrainCoordinates()
 			index = (m_terrainWidth * j) + i;
 
 			// Set the X and Z coordinates.
-			m_heightMapVector[index]->x = (float)i;
-			m_heightMapVector[index]->z = -(float)j;
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].z = -(float)j;
 
 			// Move the terrain depth into the positive range.  For example from (0, -256) to (256, 0).
-			m_heightMapVector[index]->z += (float)(m_terrainHeight - 1);
+			m_heightMap[index].z += (float)(m_terrainHeight - 1);
 
 			// Scale the height.
-			m_heightMapVector[index]->y /= m_heightScale;
+			m_heightMap[index].y /= m_heightScale;
 		}
 	}
 }
@@ -488,8 +494,7 @@ void TerrainMesh::BuildTerrainModel()
 	m_vertexCount = (m_terrainHeight - 1) * (m_terrainWidth - 1) * 6;
 
 	// Create the 3D terrain model array.
-	for (unsigned int iii = 0; iii < m_vertexCount; ++iii)
-		m_terrainModelVector.push_back(std::make_unique<TerrainModelType>());
+	m_terrainModel = new TerrainModelType[m_vertexCount];
 
 	// Initialize the index into the height map array.
 	index = 0;
@@ -508,177 +513,92 @@ void TerrainMesh::BuildTerrainModel()
 
 			// Now create two triangles for that quad.
 			// Triangle 1 - Upper left.
-			m_terrainModelVector[index]->x = m_heightMapVector[index1]->x;
-			m_terrainModelVector[index]->y = m_heightMapVector[index1]->y;
-			m_terrainModelVector[index]->z = m_heightMapVector[index1]->z;
-			m_terrainModelVector[index]->tu = 0.0f;
-			m_terrainModelVector[index]->tv = 0.0f;
-			m_terrainModelVector[index]->nx = m_heightMapVector[index1]->nx;
-			m_terrainModelVector[index]->ny = m_heightMapVector[index1]->ny;
-			m_terrainModelVector[index]->nz = m_heightMapVector[index1]->nz;
-			m_terrainModelVector[index]->r = m_heightMapVector[index1]->r;
-			m_terrainModelVector[index]->g = m_heightMapVector[index1]->g;
-			m_terrainModelVector[index]->b = m_heightMapVector[index1]->b;
+			m_terrainModel[index].x = m_heightMap[index1].x;
+			m_terrainModel[index].y = m_heightMap[index1].y;
+			m_terrainModel[index].z = m_heightMap[index1].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index1].nx;
+			m_terrainModel[index].ny = m_heightMap[index1].ny;
+			m_terrainModel[index].nz = m_heightMap[index1].nz;
+			m_terrainModel[index].r = m_heightMap[index1].r;
+			m_terrainModel[index].g = m_heightMap[index1].g;
+			m_terrainModel[index].b = m_heightMap[index1].b;
 			index++;
 
 			// Triangle 1 - Upper right.
-			m_terrainModelVector[index]->x = m_heightMapVector[index2]->x;
-			m_terrainModelVector[index]->y = m_heightMapVector[index2]->y;
-			m_terrainModelVector[index]->z = m_heightMapVector[index2]->z;
-			m_terrainModelVector[index]->tu = 0.0f;
-			m_terrainModelVector[index]->tv = 1.0f;
-			m_terrainModelVector[index]->nx = m_heightMapVector[index2]->nx;
-			m_terrainModelVector[index]->ny = m_heightMapVector[index2]->ny;
-			m_terrainModelVector[index]->nz = m_heightMapVector[index2]->nz;
-			m_terrainModelVector[index]->r = m_heightMapVector[index2]->r;
-			m_terrainModelVector[index]->g = m_heightMapVector[index2]->g;
-			m_terrainModelVector[index]->b = m_heightMapVector[index2]->b;
+			m_terrainModel[index].x = m_heightMap[index2].x;
+			m_terrainModel[index].y = m_heightMap[index2].y;
+			m_terrainModel[index].z = m_heightMap[index2].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index2].nx;
+			m_terrainModel[index].ny = m_heightMap[index2].ny;
+			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
 			index++;
 
 			// Triangle 1 - Bottom left.
-			m_terrainModelVector[index]->x = m_heightMapVector[index3]->x;
-			m_terrainModelVector[index]->y = m_heightMapVector[index3]->y;
-			m_terrainModelVector[index]->z = m_heightMapVector[index3]->z;
-			m_terrainModelVector[index]->tu = 1.0f;
-			m_terrainModelVector[index]->tv = 0.0f;
-			m_terrainModelVector[index]->nx = m_heightMapVector[index3]->nx;
-			m_terrainModelVector[index]->ny = m_heightMapVector[index3]->ny;
-			m_terrainModelVector[index]->nz = m_heightMapVector[index3]->nz;
-			m_terrainModelVector[index]->r = m_heightMapVector[index3]->r;
-			m_terrainModelVector[index]->g = m_heightMapVector[index3]->g;
-			m_terrainModelVector[index]->b = m_heightMapVector[index3]->b;
+			m_terrainModel[index].x = m_heightMap[index3].x;
+			m_terrainModel[index].y = m_heightMap[index3].y;
+			m_terrainModel[index].z = m_heightMap[index3].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index3].nx;
+			m_terrainModel[index].ny = m_heightMap[index3].ny;
+			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
 			index++;
 
 			// Triangle 2 - Bottom left.
-			m_terrainModelVector[index]->x = m_heightMapVector[index3]->x;
-			m_terrainModelVector[index]->y = m_heightMapVector[index3]->y;
-			m_terrainModelVector[index]->z = m_heightMapVector[index3]->z;
-			m_terrainModelVector[index]->tu = 1.0f;
-			m_terrainModelVector[index]->tv = 0.0f;
-			m_terrainModelVector[index]->nx = m_heightMapVector[index3]->nx;
-			m_terrainModelVector[index]->ny = m_heightMapVector[index3]->ny;
-			m_terrainModelVector[index]->nz = m_heightMapVector[index3]->nz;
-			m_terrainModelVector[index]->r = m_heightMapVector[index3]->r;
-			m_terrainModelVector[index]->g = m_heightMapVector[index3]->g;
-			m_terrainModelVector[index]->b = m_heightMapVector[index3]->b;
+			m_terrainModel[index].x = m_heightMap[index3].x;
+			m_terrainModel[index].y = m_heightMap[index3].y;
+			m_terrainModel[index].z = m_heightMap[index3].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index3].nx;
+			m_terrainModel[index].ny = m_heightMap[index3].ny;
+			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
 			index++;
 
 			// Triangle 2 - Upper right.
-			m_terrainModelVector[index]->x = m_heightMapVector[index2]->x;
-			m_terrainModelVector[index]->y = m_heightMapVector[index2]->y;
-			m_terrainModelVector[index]->z = m_heightMapVector[index2]->z;
-			m_terrainModelVector[index]->tu = 0.0f;
-			m_terrainModelVector[index]->tv = 1.0f;
-			m_terrainModelVector[index]->nx = m_heightMapVector[index2]->nx;
-			m_terrainModelVector[index]->ny = m_heightMapVector[index2]->ny;
-			m_terrainModelVector[index]->nz = m_heightMapVector[index2]->nz;
-			m_terrainModelVector[index]->r = m_heightMapVector[index2]->r;
-			m_terrainModelVector[index]->g = m_heightMapVector[index2]->g;
-			m_terrainModelVector[index]->b = m_heightMapVector[index2]->b;
+			m_terrainModel[index].x = m_heightMap[index2].x;
+			m_terrainModel[index].y = m_heightMap[index2].y;
+			m_terrainModel[index].z = m_heightMap[index2].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index2].nx;
+			m_terrainModel[index].ny = m_heightMap[index2].ny;
+			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
 			index++;
 
 			// Triangle 2 - Bottom right.
-			m_terrainModelVector[index]->x = m_heightMapVector[index4]->x;
-			m_terrainModelVector[index]->y = m_heightMapVector[index4]->y;
-			m_terrainModelVector[index]->z = m_heightMapVector[index4]->z;
-			m_terrainModelVector[index]->tu = 1.0f;
-			m_terrainModelVector[index]->tv = 1.0f;
-			m_terrainModelVector[index]->nx = m_heightMapVector[index4]->nx;
-			m_terrainModelVector[index]->ny = m_heightMapVector[index4]->ny;
-			m_terrainModelVector[index]->nz = m_heightMapVector[index4]->nz;
-			m_terrainModelVector[index]->r = m_heightMapVector[index4]->r;
-			m_terrainModelVector[index]->g = m_heightMapVector[index4]->g;
-			m_terrainModelVector[index]->b = m_heightMapVector[index4]->b;
+			m_terrainModel[index].x = m_heightMap[index4].x;
+			m_terrainModel[index].y = m_heightMap[index4].y;
+			m_terrainModel[index].z = m_heightMap[index4].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index4].nx;
+			m_terrainModel[index].ny = m_heightMap[index4].ny;
+			m_terrainModel[index].nz = m_heightMap[index4].nz;
+			m_terrainModel[index].r = m_heightMap[index4].r;
+			m_terrainModel[index].g = m_heightMap[index4].g;
+			m_terrainModel[index].b = m_heightMap[index4].b;
 			index++;
 		}
 	}
 }
-/*
-void TerrainMesh::InitializeBuffers()
-{
-	INFOMAN(m_deviceResources);
 
-	// Vertex Buffer =================================================================================
-	TerrainVertexType* vertices;
-	unsigned long* indices;
-	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexData, indexData;
-	unsigned int i;
-	int terrainWidth, terrainHeight;
-	XMFLOAT4 color;
-
-	// Set the height and width of the terrain grid.
-	terrainHeight = 256;
-	terrainWidth = 256;
-
-	// Set the color of the terrain grid.
-	color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// Calculate the number of vertices in the terrain.
-	m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 6;
-
-	// Set the index count to the same as the vertex count.
-	m_indexCount = m_vertexCount;
-
-	// Create the vertex array.
-	vertices = new TerrainVertexType[m_vertexCount];
-
-	// Create the index array.
-	indices = new unsigned long[m_indexCount];
-
-	// Load the vertex array and index array with 3D terrain model data.
-	for (i = 0; i < m_vertexCount; i++)
-	{
-		vertices[i].position = XMFLOAT3(m_terrainModelVector[i]->x, m_terrainModelVector[i]->y, m_terrainModelVector[i]->z);
-		vertices[i].texture = XMFLOAT2(m_terrainModelVector[i]->tu, m_terrainModelVector[i]->tv);
-		vertices[i].normal = XMFLOAT3(m_terrainModelVector[i]->nx, m_terrainModelVector[i]->ny, m_terrainModelVector[i]->nz);
-		vertices[i].tangent = XMFLOAT3(m_terrainModelVector[i]->tx, m_terrainModelVector[i]->ty, m_terrainModelVector[i]->tz);
-		vertices[i].binormal = XMFLOAT3(m_terrainModelVector[i]->bx, m_terrainModelVector[i]->by, m_terrainModelVector[i]->bz);
-		vertices[i].color = XMFLOAT3(m_terrainModelVector[i]->r, m_terrainModelVector[i]->g, m_terrainModelVector[i]->b);
-		indices[i] = i;
-	}
-
-	// Set up the description of the static vertex buffer.
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(TerrainVertexType) * m_vertexCount;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the vertex data.
-	vertexData.pSysMem = vertices;
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// Now create the vertex buffer.
-	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer));
-
-	// Index Buffer =================================================================================
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = indices;
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// Create the index buffer.
-	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer));
-
-
-	// Release the arrays now that the buffers have been created and loaded.
-	delete[] vertices;
-	vertices = 0;
-
-	delete[] indices;
-	indices = 0;
-}
-*/
 void TerrainMesh::CalculateNormals()
 {
 	int i, j, index1, index2, index3, index;
@@ -699,17 +619,17 @@ void TerrainMesh::CalculateNormals()
 			index3 = (j * m_terrainWidth) + i;          // Upper left vertex.
 
 			// Get three vertices from the face.
-			vertex1[0] = m_heightMapVector[index1]->x;
-			vertex1[1] = m_heightMapVector[index1]->y;
-			vertex1[2] = m_heightMapVector[index1]->z;
+			vertex1[0] = m_heightMap[index1].x;
+			vertex1[1] = m_heightMap[index1].y;
+			vertex1[2] = m_heightMap[index1].z;
 
-			vertex2[0] = m_heightMapVector[index2]->x;
-			vertex2[1] = m_heightMapVector[index2]->y;
-			vertex2[2] = m_heightMapVector[index2]->z;
+			vertex2[0] = m_heightMap[index2].x;
+			vertex2[1] = m_heightMap[index2].y;
+			vertex2[2] = m_heightMap[index2].z;
 
-			vertex3[0] = m_heightMapVector[index3]->x;
-			vertex3[1] = m_heightMapVector[index3]->y;
-			vertex3[2] = m_heightMapVector[index3]->z;
+			vertex3[0] = m_heightMap[index3].x;
+			vertex3[1] = m_heightMap[index3].y;
+			vertex3[2] = m_heightMap[index3].z;
 
 			// Calculate the two vectors for this face.
 			vector1[0] = vertex1[0] - vertex3[0];
@@ -794,9 +714,9 @@ void TerrainMesh::CalculateNormals()
 			index = (j * m_terrainWidth) + i;
 
 			// Normalize the final shared normal for this vertex and store it in the height map array.
-			m_heightMapVector[index]->nx = (sum[0] / length);
-			m_heightMapVector[index]->ny = (sum[1] / length);
-			m_heightMapVector[index]->nz = (sum[2] / length);
+			m_heightMap[index].nx = (sum[0] / length);
+			m_heightMap[index].ny = (sum[1] / length);
+			m_heightMap[index].nz = (sum[2] / length);
 		}
 	}
 
@@ -899,9 +819,9 @@ void TerrainMesh::LoadColorMap()
 			// Bitmaps are upside down so load bottom to top into the array.
 			index = (m_terrainWidth * (m_terrainHeight - 1 - j)) + i;
 
-			m_heightMapVector[index]->b = (float)bitmapImage[k] / 255.0f;
-			m_heightMapVector[index]->g = (float)bitmapImage[k + 1] / 255.0f;
-			m_heightMapVector[index]->r = (float)bitmapImage[k + 2] / 255.0f;
+			m_heightMap[index].b = (float)bitmapImage[k] / 255.0f;
+			m_heightMap[index].g = (float)bitmapImage[k + 1] / 255.0f;
+			m_heightMap[index].r = (float)bitmapImage[k + 2] / 255.0f;
 
 			k += 3;
 		}
@@ -932,60 +852,60 @@ void TerrainMesh::CalculateTerrainVectors()
 	for (i = 0; i < faceCount; i++)
 	{
 		// Get the three vertices for this face from the terrain model.
-		vertex1.x = m_terrainModelVector[index]->x;
-		vertex1.y = m_terrainModelVector[index]->y;
-		vertex1.z = m_terrainModelVector[index]->z;
-		vertex1.tu = m_terrainModelVector[index]->tu;
-		vertex1.tv = m_terrainModelVector[index]->tv;
-		vertex1.nx = m_terrainModelVector[index]->nx;
-		vertex1.ny = m_terrainModelVector[index]->ny;
-		vertex1.nz = m_terrainModelVector[index]->nz;
+		vertex1.x = m_terrainModel[index].x;
+		vertex1.y = m_terrainModel[index].y;
+		vertex1.z = m_terrainModel[index].z;
+		vertex1.tu = m_terrainModel[index].tu;
+		vertex1.tv = m_terrainModel[index].tv;
+		vertex1.nx = m_terrainModel[index].nx;
+		vertex1.ny = m_terrainModel[index].ny;
+		vertex1.nz = m_terrainModel[index].nz;
 		index++;
 
-		vertex2.x = m_terrainModelVector[index]->x;
-		vertex2.y = m_terrainModelVector[index]->y;
-		vertex2.z = m_terrainModelVector[index]->z;
-		vertex2.tu = m_terrainModelVector[index]->tu;
-		vertex2.tv = m_terrainModelVector[index]->tv;
-		vertex2.nx = m_terrainModelVector[index]->nx;
-		vertex2.ny = m_terrainModelVector[index]->ny;
-		vertex2.nz = m_terrainModelVector[index]->nz;
+		vertex2.x = m_terrainModel[index].x;
+		vertex2.y = m_terrainModel[index].y;
+		vertex2.z = m_terrainModel[index].z;
+		vertex2.tu = m_terrainModel[index].tu;
+		vertex2.tv = m_terrainModel[index].tv;
+		vertex2.nx = m_terrainModel[index].nx;
+		vertex2.ny = m_terrainModel[index].ny;
+		vertex2.nz = m_terrainModel[index].nz;
 		index++;
 
-		vertex3.x = m_terrainModelVector[index]->x;
-		vertex3.y = m_terrainModelVector[index]->y;
-		vertex3.z = m_terrainModelVector[index]->z;
-		vertex3.tu = m_terrainModelVector[index]->tu;
-		vertex3.tv = m_terrainModelVector[index]->tv;
-		vertex3.nx = m_terrainModelVector[index]->nx;
-		vertex3.ny = m_terrainModelVector[index]->ny;
-		vertex3.nz = m_terrainModelVector[index]->nz;
+		vertex3.x = m_terrainModel[index].x;
+		vertex3.y = m_terrainModel[index].y;
+		vertex3.z = m_terrainModel[index].z;
+		vertex3.tu = m_terrainModel[index].tu;
+		vertex3.tv = m_terrainModel[index].tv;
+		vertex3.nx = m_terrainModel[index].nx;
+		vertex3.ny = m_terrainModel[index].ny;
+		vertex3.nz = m_terrainModel[index].nz;
 		index++;
 
 		// Calculate the tangent and binormal of that face.
 		CalculateTangentBinormal(vertex1, vertex2, vertex3, tangent, binormal);
 
 		// Store the tangent and binormal for this face back in the model structure.
-		m_terrainModelVector[index - 1]->tx = tangent.x;
-		m_terrainModelVector[index - 1]->ty = tangent.y;
-		m_terrainModelVector[index - 1]->tz = tangent.z;
-		m_terrainModelVector[index - 1]->bx = binormal.x;
-		m_terrainModelVector[index - 1]->by = binormal.y;
-		m_terrainModelVector[index - 1]->bz = binormal.z;
+		m_terrainModel[index - 1].tx = tangent.x;
+		m_terrainModel[index - 1].ty = tangent.y;
+		m_terrainModel[index - 1].tz = tangent.z;
+		m_terrainModel[index - 1].bx = binormal.x;
+		m_terrainModel[index - 1].by = binormal.y;
+		m_terrainModel[index - 1].bz = binormal.z;
 
-		m_terrainModelVector[index - 2]->tx = tangent.x;
-		m_terrainModelVector[index - 2]->ty = tangent.y;
-		m_terrainModelVector[index - 2]->tz = tangent.z;
-		m_terrainModelVector[index - 2]->bx = binormal.x;
-		m_terrainModelVector[index - 2]->by = binormal.y;
-		m_terrainModelVector[index - 2]->bz = binormal.z;
+		m_terrainModel[index - 2].tx = tangent.x;
+		m_terrainModel[index - 2].ty = tangent.y;
+		m_terrainModel[index - 2].tz = tangent.z;
+		m_terrainModel[index - 2].bx = binormal.x;
+		m_terrainModel[index - 2].by = binormal.y;
+		m_terrainModel[index - 2].bz = binormal.z;
 
-		m_terrainModelVector[index - 3]->tx = tangent.x;
-		m_terrainModelVector[index - 3]->ty = tangent.y;
-		m_terrainModelVector[index - 3]->tz = tangent.z;
-		m_terrainModelVector[index - 3]->bx = binormal.x;
-		m_terrainModelVector[index - 3]->by = binormal.y;
-		m_terrainModelVector[index - 3]->bz = binormal.z;
+		m_terrainModel[index - 3].tx = tangent.x;
+		m_terrainModel[index - 3].ty = tangent.y;
+		m_terrainModel[index - 3].tz = tangent.z;
+		m_terrainModel[index - 3].bx = binormal.x;
+		m_terrainModel[index - 3].by = binormal.y;
+		m_terrainModel[index - 3].bz = binormal.z;
 	}
 }
 
@@ -1067,7 +987,7 @@ void TerrainMesh::LoadTerrainCells()
 		{
 			index = (cellRowCount * j) + i;
 
-			m_terrainCells[index]->Initialize(m_terrainModelVector, i, j, cellHeight, cellWidth, m_terrainWidth);
+			m_terrainCells[index]->Initialize(m_terrainModel, i, j, cellHeight, cellWidth, m_terrainWidth);
 		}
 	}
 }

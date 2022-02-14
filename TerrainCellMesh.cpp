@@ -14,7 +14,7 @@ TerrainCellMesh::TerrainCellMesh(std::shared_ptr<DeviceResources> deviceResource
 
 }
 
-void TerrainCellMesh::Initialize(std::vector<std::unique_ptr< TerrainModelType>>& terrainModel, int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth)
+void TerrainCellMesh::Initialize(TerrainModelType* terrainModel, int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth)
 {
 	// Load the rendering buffers with the terrain data for this cell index.
 	InitializeBuffers(nodeIndexX, nodeIndexY, cellHeight, cellWidth, terrainWidth, terrainModel);
@@ -23,7 +23,7 @@ void TerrainCellMesh::Initialize(std::vector<std::unique_ptr< TerrainModelType>>
 	CalculateCellDimensions();
 }
 
-void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth, std::vector<std::unique_ptr< TerrainModelType>>& terrainModel)
+void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth, TerrainModelType* terrainModel)
 {
 	INFOMAN(m_deviceResources);
 
@@ -57,12 +57,12 @@ void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cell
 	{
 		for (i = 0; i < ((cellWidth - 1) * 6); i++)
 		{
-			vertices[index].position = XMFLOAT3(terrainModel[modelIndex]->x, terrainModel[modelIndex]->y, terrainModel[modelIndex]->z);
-			vertices[index].texture = XMFLOAT2(terrainModel[modelIndex]->tu, terrainModel[modelIndex]->tv);
-			vertices[index].normal = XMFLOAT3(terrainModel[modelIndex]->nx, terrainModel[modelIndex]->ny, terrainModel[modelIndex]->nz);
-			vertices[index].tangent = XMFLOAT3(terrainModel[modelIndex]->tx, terrainModel[modelIndex]->ty, terrainModel[modelIndex]->tz);
-			vertices[index].binormal = XMFLOAT3(terrainModel[modelIndex]->bx, terrainModel[modelIndex]->by, terrainModel[modelIndex]->bz);
-			vertices[index].color = XMFLOAT3(terrainModel[modelIndex]->r, terrainModel[modelIndex]->g, terrainModel[modelIndex]->b);
+			vertices[index].position = XMFLOAT3(terrainModel[modelIndex].x, terrainModel[modelIndex].y, terrainModel[modelIndex].z);
+			vertices[index].texture = XMFLOAT2(terrainModel[modelIndex].tu, terrainModel[modelIndex].tv);
+			vertices[index].normal = XMFLOAT3(terrainModel[modelIndex].nx, terrainModel[modelIndex].ny, terrainModel[modelIndex].nz);
+			vertices[index].tangent = XMFLOAT3(terrainModel[modelIndex].tx, terrainModel[modelIndex].ty, terrainModel[modelIndex].tz);
+			vertices[index].binormal = XMFLOAT3(terrainModel[modelIndex].bx, terrainModel[modelIndex].by, terrainModel[modelIndex].bz);
+			vertices[index].color = XMFLOAT3(terrainModel[modelIndex].r, terrainModel[modelIndex].g, terrainModel[modelIndex].b);
 			indices[index] = index;
 			modelIndex++;
 			index++;

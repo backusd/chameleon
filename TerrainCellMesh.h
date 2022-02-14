@@ -35,7 +35,7 @@ private:
 public:
 	TerrainCellMesh(std::shared_ptr<DeviceResources> deviceResources);
 
-	void Initialize(std::vector<std::unique_ptr< TerrainModelType>>& terrainModel, int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth);
+	void Initialize(TerrainModelType* terrainModel, int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth);
 	
 
 	DirectX::XMFLOAT3 GetCenter();
@@ -54,7 +54,7 @@ public:
 	VectorType* m_vertexList;
 
 private:
-	void InitializeBuffers(int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth, std::vector<std::unique_ptr< TerrainModelType>>& terrainModel);
+	void InitializeBuffers(int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth, TerrainModelType* terrainModel);
 	void CalculateCellDimensions();
 
 
