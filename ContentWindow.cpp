@@ -154,8 +154,14 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddVertexShaderAndInputLayout(L"SkyDomeVertexShader.cso", skyDomeVertexDesc, static_cast<UINT>(std::size(skyDomeVertexDesc)), "sky-dome-vertex-shader");
 	ObjectStore::AddPixelShader(L"SkyDomePixelShader.cso", "sky-dome-pixel-shader");
 
-
-
+	// Solid color =====================================================================================================
+	const D3D11_INPUT_ELEMENT_DESC solidDesc[] =
+	{
+		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	ObjectStore::AddVertexShaderAndInputLayout(L"SolidVertexShader.cso", solidDesc, static_cast<UINT>(std::size(solidDesc)), "solid-vertex-shader");
+	ObjectStore::AddPixelShader(L"SolidPixelShader.cso", "solid-pixel-shader");
 }
 void ContentWindow::ObjectStoreAddTerrains()
 {
@@ -163,7 +169,8 @@ void ContentWindow::ObjectStoreAddTerrains()
 }
 void ContentWindow::ObjectStoreAddMeshes()
 {
-	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources), "box-mesh");
+	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources, true), "box-filled-mesh");
+	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources, false), "box-outline-mesh");
 	ObjectStore::AddMesh(std::make_shared<SkyDomeMesh>(m_deviceResources), "sky-dome-mesh");
 
 	// Add terrain meshes sequentially

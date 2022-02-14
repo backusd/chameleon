@@ -39,6 +39,7 @@ private:
 
 	void SetupCubePipeline();
 	void SetupTerrainPipeline();
+	void SetupTerrainCubePipeline();
 	void SetupSkyDomePipeline();
 
 	PhongMaterialProperties* m_material;
@@ -47,10 +48,10 @@ private:
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
 	std::shared_ptr<DrawPipeline> m_cubePipeline;
-	//std::shared_ptr<DrawPipeline> m_terrainPipeline;
 	std::shared_ptr<DrawPipeline> m_skyDomePipeline;
 	
 	std::vector<std::shared_ptr<DrawPipeline>> m_terrainPipelines;
+	std::shared_ptr<DrawPipeline> m_terrainCubePipeline;
 
 
 	std::unique_ptr<MoveLookController> m_moveLookController;

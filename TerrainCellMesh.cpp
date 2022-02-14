@@ -179,9 +179,9 @@ void TerrainCellMesh::CalculateCellDimensions()
 	}
 
 	// Calculate the center position of this cell.
-	m_positionX = (m_maxWidth - m_minWidth) + m_minWidth;
-	m_positionY = (m_maxHeight - m_minHeight) + m_minHeight;
-	m_positionZ = (m_maxDepth - m_minDepth) + m_minDepth;
+	m_positionX = ((m_maxWidth - m_minWidth) / 2.0f) + m_minWidth;
+	m_positionY = ((m_maxHeight - m_minHeight) / 2.0f) + m_minHeight;
+	m_positionZ = ((m_maxDepth - m_minDepth) / 2.0f) + m_minDepth;
 
 }
 
@@ -376,4 +376,24 @@ void TerrainCellMesh::BuildLineBuffers()
 
 	delete[] indices;
 	indices = 0;
+}
+
+XMFLOAT3 TerrainCellMesh::GetCenter()
+{
+	return XMFLOAT3(m_positionX, m_positionY, m_positionZ);
+}
+
+float TerrainCellMesh::GetXLength()
+{
+	return m_maxWidth - m_minWidth;
+}
+
+float TerrainCellMesh::GetYLength()
+{
+	return m_maxHeight - m_minHeight;
+}
+
+float TerrainCellMesh::GetZLength()
+{
+	return m_maxDepth - m_minDepth;
 }

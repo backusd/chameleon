@@ -37,6 +37,13 @@ public:
 
 	void Initialize(std::vector<std::unique_ptr< TerrainModelType>>& terrainModel, int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth);
 	
+
+	DirectX::XMFLOAT3 GetCenter();
+	float GetXLength();
+	float GetYLength();
+	float GetZLength();
+
+
 	VectorType* m_vertexList;
 
 private:
