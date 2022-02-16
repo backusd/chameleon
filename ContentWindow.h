@@ -53,7 +53,6 @@
 */
 
 
-
 class ContentWindow : public WindowBase
 {
 public:
@@ -134,17 +133,11 @@ private:
 
 	std::shared_ptr<HUD> m_hud;
 	std::shared_ptr<Scene> m_scene;
-	
 
-
-
-
-
-
-
-
-
-
-
+	// ImGui ====================================================================
+	//
+	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
+	//
+	bool m_enableImGuiWindows;
 
 };

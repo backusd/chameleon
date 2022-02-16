@@ -18,6 +18,209 @@ MoveLookController::MoveLookController() :
     m_eyeVec = { 0.0f, 0.0f, -2.0f, 0.0f };     // Start at 2 in the negative Z direction
     m_atVec = { 0.0f, 0.0f, 0.0f, 0.0f };		// look at the origin
     m_upVec = { 0.0f, 1.0f, 0.0f, 0.0f };		// Up in the positive y-direction
+
+    //
+    // Consider making this NDEBUG only
+    //
+    SetupImGui();
+}
+
+void MoveLookController::SetupImGui()
+{
+    // View Mode
+    m_mode = ViewMode::FLY_MODE;
+
+    // Fly Mode Camera
+    m_flyModeCamera.m_cameraPositionX = 50.0f;
+    m_flyModeCamera.m_cameraPositionY = 10.0f;
+    m_flyModeCamera.m_cameraPositionZ = -10.0f;
+
+    m_flyModeCamera.m_cameraLookAtX = 0.0f;
+    m_flyModeCamera.m_cameraLookAtY = 0.0f;
+    m_flyModeCamera.m_cameraLookAtZ = 0.0f;
+
+    m_flyModeCamera.m_cameraUpDirectionX = 0.0f;
+    m_flyModeCamera.m_cameraUpDirectionY = 1.0f;
+    m_flyModeCamera.m_cameraUpDirectionZ = 0.0f;
+
+    m_flyModeCamera.m_cameraPositionMaxX = 1000.0f;
+    m_flyModeCamera.m_cameraPositionMinX = -100.0f;
+    m_flyModeCamera.m_cameraPositionMaxY = 1000.0f;
+    m_flyModeCamera.m_cameraPositionMinY = -100.0f;
+    m_flyModeCamera.m_cameraPositionMaxZ = 1000.0f;
+    m_flyModeCamera.m_cameraPositionMinZ = -100.0f;
+
+    m_flyModeCamera.m_cameraLookAtMaxX = 1000.0f;
+    m_flyModeCamera.m_cameraLookAtMinX = -1000.0f;
+    m_flyModeCamera.m_cameraLookAtMaxY = 1000.0f;
+    m_flyModeCamera.m_cameraLookAtMinY = -1000.0f;
+    m_flyModeCamera.m_cameraLookAtMaxZ = 1000.0f;
+    m_flyModeCamera.m_cameraLookAtMinZ = -1000.0f;
+
+    m_flyModeCamera.m_cameraUpDirectionMaxX = 1.0f;
+    m_flyModeCamera.m_cameraUpDirectionMinX = -1.0f;
+    m_flyModeCamera.m_cameraUpDirectionMaxY = 1.0f;
+    m_flyModeCamera.m_cameraUpDirectionMinY = -1.0f;
+    m_flyModeCamera.m_cameraUpDirectionMaxZ = 1.0f;
+    m_flyModeCamera.m_cameraUpDirectionMinZ = -1.0f;
+
+    // Player Mode Camera
+    m_playerModeCamera.m_cameraPositionX = 20.0f;
+    m_playerModeCamera.m_cameraPositionY = 10.0f;
+    m_playerModeCamera.m_cameraPositionZ = 10.0f;
+
+    m_playerModeCamera.m_cameraLookAtX = 0.0f;
+    m_playerModeCamera.m_cameraLookAtY = 0.0f;
+    m_playerModeCamera.m_cameraLookAtZ = 0.0f;
+
+    m_playerModeCamera.m_cameraUpDirectionX = 0.0f;
+    m_playerModeCamera.m_cameraUpDirectionY = 1.0f;
+    m_playerModeCamera.m_cameraUpDirectionZ = 0.0f;
+
+    m_playerModeCamera.m_cameraPositionMaxX = 1000.0f;
+    m_playerModeCamera.m_cameraPositionMinX = -100.0f;
+    m_playerModeCamera.m_cameraPositionMaxY = 1000.0f;
+    m_playerModeCamera.m_cameraPositionMinY = -100.0f;
+    m_playerModeCamera.m_cameraPositionMaxZ = 1000.0f;
+    m_playerModeCamera.m_cameraPositionMinZ = -100.0f;
+
+    m_playerModeCamera.m_cameraLookAtMaxX = 1000.0f;
+    m_playerModeCamera.m_cameraLookAtMinX = -1000.0f;
+    m_playerModeCamera.m_cameraLookAtMaxY = 1000.0f;
+    m_playerModeCamera.m_cameraLookAtMinY = -1000.0f;
+    m_playerModeCamera.m_cameraLookAtMaxZ = 1000.0f;
+    m_playerModeCamera.m_cameraLookAtMinZ = -1000.0f;
+
+    m_playerModeCamera.m_cameraUpDirectionMaxX = 1.0f;
+    m_playerModeCamera.m_cameraUpDirectionMinX = -1.0f;
+    m_playerModeCamera.m_cameraUpDirectionMaxY = 1.0f;
+    m_playerModeCamera.m_cameraUpDirectionMinY = -1.0f;
+    m_playerModeCamera.m_cameraUpDirectionMaxZ = 1.0f;
+    m_playerModeCamera.m_cameraUpDirectionMinZ = -1.0f;
+
+    // Center On Origin Mode Camera
+    m_centerOnOriginCamera.m_cameraPositionX = 0.0f;
+    m_centerOnOriginCamera.m_cameraPositionY = 1.0f;
+    m_centerOnOriginCamera.m_cameraPositionZ = 2.0f;
+
+    m_centerOnOriginCamera.m_cameraLookAtX = 0.0f;
+    m_centerOnOriginCamera.m_cameraLookAtY = 1.0f;
+    m_centerOnOriginCamera.m_cameraLookAtZ = 2.0f;
+
+    m_centerOnOriginCamera.m_cameraUpDirectionX = 0.0f;
+    m_centerOnOriginCamera.m_cameraUpDirectionY = 1.0f;
+    m_centerOnOriginCamera.m_cameraUpDirectionZ = 0.0f;
+
+    m_centerOnOriginCamera.m_cameraPositionMaxX = 1000.0f;
+    m_centerOnOriginCamera.m_cameraPositionMinX = 0.0f;
+    m_centerOnOriginCamera.m_cameraPositionMaxY = 1000.0f;
+    m_centerOnOriginCamera.m_cameraPositionMinY = 0.0f;
+    m_centerOnOriginCamera.m_cameraPositionMaxZ = 1000.0f;
+    m_centerOnOriginCamera.m_cameraPositionMinZ = 0.0f;
+
+    m_centerOnOriginCamera.m_cameraLookAtMaxX = 1000.0f;
+    m_centerOnOriginCamera.m_cameraLookAtMinX = 0.0f;
+    m_centerOnOriginCamera.m_cameraLookAtMaxY = 1000.0f;
+    m_centerOnOriginCamera.m_cameraLookAtMinY = 0.0f;
+    m_centerOnOriginCamera.m_cameraLookAtMaxZ = 1000.0f;
+    m_centerOnOriginCamera.m_cameraLookAtMinZ = 0.0f;
+
+    m_centerOnOriginCamera.m_cameraUpDirectionMaxX = 1.0f;
+    m_centerOnOriginCamera.m_cameraUpDirectionMinX = -1.0f;
+    m_centerOnOriginCamera.m_cameraUpDirectionMaxY = 1.0f;
+    m_centerOnOriginCamera.m_cameraUpDirectionMinY = -1.0f;
+    m_centerOnOriginCamera.m_cameraUpDirectionMaxZ = 1.0f;
+    m_centerOnOriginCamera.m_cameraUpDirectionMinZ = -1.0f;
+}
+
+void MoveLookController::DrawImGui()
+{
+    // Draw a camera control
+    ImGui::Begin("Camera");
+
+    switch (m_mode)
+    {
+    case ViewMode::FLY_MODE:
+        ImGui::Text("Position:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionX", &m_flyModeCamera.m_cameraPositionX, m_flyModeCamera.m_cameraPositionMinX, m_flyModeCamera.m_cameraPositionMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionY", &m_flyModeCamera.m_cameraPositionY, m_flyModeCamera.m_cameraPositionMinY, m_flyModeCamera.m_cameraPositionMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionZ", &m_flyModeCamera.m_cameraPositionZ, m_flyModeCamera.m_cameraPositionMinZ, m_flyModeCamera.m_cameraPositionMaxZ, "%.3f");
+        ImGui::Text("Look At:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtX", &m_flyModeCamera.m_cameraLookAtX, m_flyModeCamera.m_cameraLookAtMinX, m_flyModeCamera.m_cameraLookAtMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtY", &m_flyModeCamera.m_cameraLookAtY, m_flyModeCamera.m_cameraLookAtMinY, m_flyModeCamera.m_cameraLookAtMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtZ", &m_flyModeCamera.m_cameraLookAtZ, m_flyModeCamera.m_cameraLookAtMinZ, m_flyModeCamera.m_cameraLookAtMaxZ, "%.3f");
+        ImGui::Text("Up Direction:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionX", &m_flyModeCamera.m_cameraUpDirectionX, m_flyModeCamera.m_cameraUpDirectionMinX, m_flyModeCamera.m_cameraUpDirectionMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionY", &m_flyModeCamera.m_cameraUpDirectionY, m_flyModeCamera.m_cameraUpDirectionMinY, m_flyModeCamera.m_cameraUpDirectionMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionZ", &m_flyModeCamera.m_cameraUpDirectionZ, m_flyModeCamera.m_cameraUpDirectionMinZ, m_flyModeCamera.m_cameraUpDirectionMaxZ, "%.3f");
+        break;
+
+    case ViewMode::PLAYER_MODE:
+        ImGui::Text("Position:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionX", &m_playerModeCamera.m_cameraPositionX, m_playerModeCamera.m_cameraPositionMinX, m_playerModeCamera.m_cameraPositionMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionY", &m_playerModeCamera.m_cameraPositionY, m_playerModeCamera.m_cameraPositionMinY, m_playerModeCamera.m_cameraPositionMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionZ", &m_playerModeCamera.m_cameraPositionZ, m_playerModeCamera.m_cameraPositionMinZ, m_playerModeCamera.m_cameraPositionMaxZ, "%.3f");
+        ImGui::Text("Look At:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtX", &m_playerModeCamera.m_cameraLookAtX, m_playerModeCamera.m_cameraLookAtMinX, m_playerModeCamera.m_cameraLookAtMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtY", &m_playerModeCamera.m_cameraLookAtY, m_playerModeCamera.m_cameraLookAtMinY, m_playerModeCamera.m_cameraLookAtMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtZ", &m_playerModeCamera.m_cameraLookAtZ, m_playerModeCamera.m_cameraLookAtMinZ, m_playerModeCamera.m_cameraLookAtMaxZ, "%.3f");
+        ImGui::Text("Up Direction:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionX", &m_playerModeCamera.m_cameraUpDirectionX, m_playerModeCamera.m_cameraUpDirectionMinX, m_playerModeCamera.m_cameraUpDirectionMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionY", &m_playerModeCamera.m_cameraUpDirectionY, m_playerModeCamera.m_cameraUpDirectionMinY, m_playerModeCamera.m_cameraUpDirectionMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionZ", &m_playerModeCamera.m_cameraUpDirectionZ, m_playerModeCamera.m_cameraUpDirectionMinZ, m_playerModeCamera.m_cameraUpDirectionMaxZ, "%.3f");
+        break;
+
+    case ViewMode::CENTER_ON_ORIGIN:
+        ImGui::Text("Position:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionX", &m_centerOnOriginCamera.m_cameraPositionX, m_centerOnOriginCamera.m_cameraPositionMinX, m_centerOnOriginCamera.m_cameraPositionMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionY", &m_centerOnOriginCamera.m_cameraPositionY, m_centerOnOriginCamera.m_cameraPositionMinY, m_centerOnOriginCamera.m_cameraPositionMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionZ", &m_centerOnOriginCamera.m_cameraPositionZ, m_centerOnOriginCamera.m_cameraPositionMinZ, m_centerOnOriginCamera.m_cameraPositionMaxZ, "%.3f");
+        ImGui::Text("Look At:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtX", &m_centerOnOriginCamera.m_cameraLookAtX, m_centerOnOriginCamera.m_cameraLookAtMinX, m_centerOnOriginCamera.m_cameraLookAtMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtY", &m_centerOnOriginCamera.m_cameraLookAtY, m_centerOnOriginCamera.m_cameraLookAtMinY, m_centerOnOriginCamera.m_cameraLookAtMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtZ", &m_centerOnOriginCamera.m_cameraLookAtZ, m_centerOnOriginCamera.m_cameraLookAtMinZ, m_centerOnOriginCamera.m_cameraLookAtMaxZ, "%.3f");
+        ImGui::Text("Up Direction:");
+        ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionX", &m_centerOnOriginCamera.m_cameraUpDirectionX, m_centerOnOriginCamera.m_cameraUpDirectionMinX, m_centerOnOriginCamera.m_cameraUpDirectionMaxX, "%.3f");
+        ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionY", &m_centerOnOriginCamera.m_cameraUpDirectionY, m_centerOnOriginCamera.m_cameraUpDirectionMinY, m_centerOnOriginCamera.m_cameraUpDirectionMaxY, "%.3f");
+        ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionZ", &m_centerOnOriginCamera.m_cameraUpDirectionZ, m_centerOnOriginCamera.m_cameraUpDirectionMinZ, m_centerOnOriginCamera.m_cameraUpDirectionMaxZ, "%.3f");
+        break;
+    }
+    ImGui::End();
+}
+
+void MoveLookController::UpdateImGui(int mode)
+{
+    // Only perform the update if there was an actual change
+    if (mode != m_mode)
+    {
+        m_mode = mode;
+
+        SetEyeAtUp();
+    }
+}
+
+void MoveLookController::SetEyeAtUp()
+{
+    switch (m_mode)
+    {
+    case ViewMode::FLY_MODE:
+        m_eyeVec = DirectX::XMVectorSet(m_flyModeCamera.m_cameraPositionX, m_flyModeCamera.m_cameraPositionY, m_flyModeCamera.m_cameraPositionZ, 1.0f);
+        m_atVec = DirectX::XMVectorSet(m_flyModeCamera.m_cameraLookAtX, m_flyModeCamera.m_cameraLookAtY, m_flyModeCamera.m_cameraLookAtZ, 1.0f);
+        m_upVec = DirectX::XMVectorSet(m_flyModeCamera.m_cameraUpDirectionX, m_flyModeCamera.m_cameraUpDirectionY, m_flyModeCamera.m_cameraUpDirectionZ, 1.0f);
+        break;
+
+    case ViewMode::PLAYER_MODE:
+        m_eyeVec = DirectX::XMVectorSet(m_playerModeCamera.m_cameraPositionX, m_playerModeCamera.m_cameraPositionY, m_playerModeCamera.m_cameraPositionZ, 1.0f);
+        m_atVec = DirectX::XMVectorSet(m_playerModeCamera.m_cameraLookAtX, m_playerModeCamera.m_cameraLookAtY, m_playerModeCamera.m_cameraLookAtZ, 1.0f);
+        m_upVec = DirectX::XMVectorSet(m_playerModeCamera.m_cameraUpDirectionX, m_playerModeCamera.m_cameraUpDirectionY, m_playerModeCamera.m_cameraUpDirectionZ, 1.0f);
+        break;
+
+    case ViewMode::CENTER_ON_ORIGIN:
+        m_eyeVec = DirectX::XMVectorSet(m_centerOnOriginCamera.m_cameraPositionX, m_centerOnOriginCamera.m_cameraPositionY, m_centerOnOriginCamera.m_cameraPositionZ, 1.0f);
+        m_atVec = DirectX::XMVectorSet(m_centerOnOriginCamera.m_cameraLookAtX, m_centerOnOriginCamera.m_cameraLookAtY, m_centerOnOriginCamera.m_cameraLookAtZ, 1.0f);
+        m_upVec = DirectX::XMVectorSet(m_centerOnOriginCamera.m_cameraUpDirectionX, m_centerOnOriginCamera.m_cameraUpDirectionY, m_centerOnOriginCamera.m_cameraUpDirectionZ, 1.0f);
+        break;
+    }
 }
 
 void MoveLookController::ResetState()
@@ -54,6 +257,14 @@ DirectX::XMMATRIX MoveLookController::ViewMatrix()
 
 void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse, HWND hWnd)
 {
+    // At the beginning of the update, load the eye/at/up values for the selected camera mode as they may
+    // have changed because of the menu sliders
+    SetEyeAtUp();
+
+
+
+
+
     m_currentTime = timer->GetTotalSeconds();
 
     Mouse::Event e;
@@ -146,6 +357,52 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
     
 
     m_previousTime = m_currentTime;
+
+
+
+
+    //
+    // Consider making this NDEBUG only
+    //
+    switch (m_mode)
+    {
+    case ViewMode::FLY_MODE:
+        m_flyModeCamera.m_cameraPositionX = DirectX::XMVectorGetX(m_eyeVec);
+        m_flyModeCamera.m_cameraPositionY = DirectX::XMVectorGetY(m_eyeVec);
+        m_flyModeCamera.m_cameraPositionZ = DirectX::XMVectorGetZ(m_eyeVec);
+        m_flyModeCamera.m_cameraLookAtX = DirectX::XMVectorGetX(m_atVec);
+        m_flyModeCamera.m_cameraLookAtY = DirectX::XMVectorGetY(m_atVec);
+        m_flyModeCamera.m_cameraLookAtZ = DirectX::XMVectorGetZ(m_atVec);
+        m_flyModeCamera.m_cameraUpDirectionX = DirectX::XMVectorGetX(m_upVec);
+        m_flyModeCamera.m_cameraUpDirectionY = DirectX::XMVectorGetY(m_upVec);
+        m_flyModeCamera.m_cameraUpDirectionZ = DirectX::XMVectorGetZ(m_upVec);
+        break;
+
+    case ViewMode::PLAYER_MODE:
+        m_playerModeCamera.m_cameraPositionX = DirectX::XMVectorGetX(m_eyeVec);
+        m_playerModeCamera.m_cameraPositionY = DirectX::XMVectorGetY(m_eyeVec);
+        m_playerModeCamera.m_cameraPositionZ = DirectX::XMVectorGetZ(m_eyeVec);
+        m_playerModeCamera.m_cameraLookAtX = DirectX::XMVectorGetX(m_atVec);
+        m_playerModeCamera.m_cameraLookAtY = DirectX::XMVectorGetY(m_atVec);
+        m_playerModeCamera.m_cameraLookAtZ = DirectX::XMVectorGetZ(m_atVec);
+        m_playerModeCamera.m_cameraUpDirectionX = DirectX::XMVectorGetX(m_upVec);
+        m_playerModeCamera.m_cameraUpDirectionY = DirectX::XMVectorGetY(m_upVec);
+        m_playerModeCamera.m_cameraUpDirectionZ = DirectX::XMVectorGetZ(m_upVec);
+        break;
+
+    case ViewMode::CENTER_ON_ORIGIN:
+        m_centerOnOriginCamera.m_cameraPositionX = DirectX::XMVectorGetX(m_eyeVec);
+        m_centerOnOriginCamera.m_cameraPositionY = DirectX::XMVectorGetY(m_eyeVec);
+        m_centerOnOriginCamera.m_cameraPositionZ = DirectX::XMVectorGetZ(m_eyeVec);
+        m_centerOnOriginCamera.m_cameraLookAtX = DirectX::XMVectorGetX(m_atVec);
+        m_centerOnOriginCamera.m_cameraLookAtY = DirectX::XMVectorGetY(m_atVec);
+        m_centerOnOriginCamera.m_cameraLookAtZ = DirectX::XMVectorGetZ(m_atVec);
+        m_centerOnOriginCamera.m_cameraUpDirectionX = DirectX::XMVectorGetX(m_upVec);
+        m_centerOnOriginCamera.m_cameraUpDirectionY = DirectX::XMVectorGetY(m_upVec);
+        m_centerOnOriginCamera.m_cameraUpDirectionZ = DirectX::XMVectorGetZ(m_upVec);
+        break;
+    }
+
 
     /*
     if (m_mouseDown)

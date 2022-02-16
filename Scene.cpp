@@ -25,8 +25,10 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 
 
 
-
-	
+	//
+	// Consider making this NDEBUG only
+	//
+	SetupImGui();	
 }
 
 void Scene::CreateStaticResources()
@@ -171,6 +173,13 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 			cell->GetMinDepth()
 		);
 	}
+
+
+
+	//
+	// Consider making this NDEBUG only
+	//
+	m_moveLookController->UpdateImGui(m_viewMode);
 }
 
 
@@ -443,4 +452,31 @@ void Scene::SetupSkyDomePipeline()
 		context->Unmap(pixelShaderBuffers[0].Get(), 0);
 	}
 	);
+}
+
+
+void Scene::SetupImGui()
+{
+	m_viewMode = ViewMode::FLY_MODE;
+}
+
+void Scene::DrawImGui()
+{
+	// Draw a view mode selector control
+	ImGui::Begin("View Mode");
+	ImGui::RadioButton("Fly Mode", &m_viewMode, 0);
+	ImGui::RadioButton("Player Mode", &m_viewMode, 1);
+	ImGui::RadioButton("Center On Origin Mode", &m_viewMode, 2);
+	ImGui::End();
+
+	// If viewing mode is center on origin, then draw the object edit control panel
+	if (m_viewMode == ViewMode::CENTER_ON_ORIGIN)
+	{
+		ImGui::Begin("Object Edit");
+
+		ImGui::End();
+	}
+
+	// Let the MoveLookController draw ImGui controls
+	m_moveLookController->DrawImGui();
 }

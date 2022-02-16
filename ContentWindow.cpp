@@ -96,6 +96,10 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	m_hud = std::make_shared<HUD>(m_deviceResources);
 	m_scene = std::make_shared<Scene>(m_deviceResources, m_hWnd);	
 
+	//
+	// Consider making this NDEBUG only
+	//
+	m_enableImGuiWindows = true;
 }
 
 ContentWindow::~ContentWindow()
@@ -338,22 +342,15 @@ bool ContentWindow::Render()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-
-	// Move Look Controller ================================================================================================
-	ImGui::Begin("Move Look Controller");
-	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-
+	// Render Stats ================================================================================================
+	ImGui::Begin("Render Stats");
+	ImGui::Checkbox("Enable all other ImGui windows", &m_enableImGuiWindows);
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / m_io.Framerate, m_io.Framerate);
 	ImGui::End();
-	
 
-
-	// Lighting ============================================================================================================
-	ImGui::Begin("Lighting");
-
-	ImGui::End();
-
-
+	// Have the scene draw the necessary ImGui controls ==============================================================
+	if (m_enableImGuiWindows)
+		m_scene->DrawImGui();
 
 
 	// Render ImGui

@@ -18,6 +18,8 @@
 
 #include <memory>
 
+
+
 class Scene
 {
 public:
@@ -76,25 +78,20 @@ private:
 	std::unique_ptr<PhongMaterialProperties>	m_velocityArrowMaterial;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		m_solidMaterialPropertiesConstantBuffer;
+
+
+	// ImGui ====================================================================
+	//
+	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
+	//
+
+public:
+	void DrawImGui();
+
+private:
+
+	void SetupImGui();
+
+	// View Mode:
+	int m_viewMode;
 };
-
-
-/*
-IASetIndexBuffer
-IASetInputLayout
-IASetPrimitiveTopology
-IASetVertexBuffers
-
-VSSetConstantBuffers
-VSSetSamplers
-VSSetShader
-VSSetShaderResources
-
-PSSetConstantBuffers
-PSSetSamplers
-PSSetShader
-PSSetShaderResources
-
-
-
-*/

@@ -199,7 +199,6 @@ void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 	BuildTerrainModel();
 
 	// We can now release the height map since it is no longer needed in memory once the 3D terrain model has been built.
-	//m_heightMapVector.clear();
 	if (m_heightMap)
 	{
 		delete[] m_heightMap;
@@ -212,11 +211,7 @@ void TerrainMesh::Tutorial2Setup(std::string setupFilename)
 	// Load the terrain data into individual cells
 	LoadTerrainCells();
 
-	// Load the rendering buffers with the terrain data.
-	// InitializeBuffers();
-
 	// Release the terrain model now that the rendering buffers have been loaded.
-	//m_terrainModelVector.clear();
 	if (m_terrainModel)
 	{
 		delete[] m_terrainModel;
@@ -966,7 +961,6 @@ void TerrainMesh::LoadTerrainCells()
 {
 	int cellHeight, cellWidth, cellRowCount, i, j, index;
 	bool result;
-
 
 	// Set the height and width of each terrain cell to a fixed 33x33 vertex array.
 	cellHeight = 33;

@@ -9,9 +9,37 @@
 #include <memory>
 #include <sstream>
 
+#include "imgui.h"
+
 // For some reason, the XMVECTOR operator* does not work unless I include the 
 // entire namespace
 using namespace DirectX;
+
+enum ViewMode
+{
+	FLY_MODE = 0,
+	PLAYER_MODE = 1,
+	CENTER_ON_ORIGIN = 2
+};
+
+struct CameraDetails
+{
+	float m_cameraPositionX, m_cameraPositionY, m_cameraPositionZ;
+	float m_cameraLookAtX, m_cameraLookAtY, m_cameraLookAtZ;
+	float m_cameraUpDirectionX, m_cameraUpDirectionY, m_cameraUpDirectionZ;
+
+	float m_cameraPositionMaxX, m_cameraPositionMinX;
+	float m_cameraPositionMaxY, m_cameraPositionMinY;
+	float m_cameraPositionMaxZ, m_cameraPositionMinZ;
+
+	float m_cameraLookAtMaxX, m_cameraLookAtMinX;
+	float m_cameraLookAtMaxY, m_cameraLookAtMinY;
+	float m_cameraLookAtMaxZ, m_cameraLookAtMinZ;
+
+	float m_cameraUpDirectionMaxX, m_cameraUpDirectionMinX;
+	float m_cameraUpDirectionMaxY, m_cameraUpDirectionMinY;
+	float m_cameraUpDirectionMaxZ, m_cameraUpDirectionMinZ;
+};
 
 class MoveLookController
 {
@@ -130,4 +158,26 @@ private:
 	// Keep track of total time to be able to compute the time delta
 	double m_elapsedTime;
 	*/
+
+
+
+	// ImGui ====================================================================
+	//
+	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
+	//
+
+public:
+	void DrawImGui();
+	void UpdateImGui(int mode);
+
+private:
+	void SetEyeAtUp();
+	void SetupImGui();
+
+	int m_mode;
+
+	// Camera
+	CameraDetails m_flyModeCamera;
+	CameraDetails m_playerModeCamera;
+	CameraDetails m_centerOnOriginCamera;
 };
