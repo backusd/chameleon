@@ -176,7 +176,7 @@ void FlyMoveLookController::MoveBackward()
     XMVECTOR diffNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(m_eyeVec, m_atVec));
 
     // Scale the diffNormalVector according to the velocity and timedelta to get the change in position
-    XMVECTOR positionChange = DirectX::XMVectorScale(diffNormal, m_moveSpeed * timeDelta);
+    XMVECTOR positionChange = DirectX::XMVectorScale(diffNormal, static_cast<float>(m_moveSpeed * timeDelta));
 
     // Add this value to the eyeVec and atVec
     m_eyeVec = DirectX::XMVectorAdd(m_eyeVec, positionChange);

@@ -78,34 +78,14 @@ protected:
 	float m_mouseDownInitialPositionX, m_mouseDownInitialPositionY;
 	float m_mouseCurrentPositionX, m_mouseCurrentPositionY;
 
-
-
 	// Eye/at/up vectors
 	DirectX::XMVECTOR m_eyeVec;
 	DirectX::XMVECTOR m_atVec;
 	DirectX::XMVECTOR m_upVec;
-	
-	// When zooming in/out, or rotating 90, etc., we simply need to set the target location and
-	// Update() will move the camera for us
-	/*
-	DirectX::XMFLOAT3 m_eyeTarget;
-	DirectX::XMFLOAT3 m_eyeInitial;
-	DirectX::XMFLOAT3 m_upTarget;
-	DirectX::XMFLOAT3 m_upInitial;
-	double m_moveStartTime;
-	bool   m_moveCompleted;
-	double m_movementMaxTime;
-	double m_timeAtLastMoveUpdate;
-	float  m_totalRotationAngle;
-	bool m_rotatingLeftRight;
-	bool m_rotatingUpDown;
 
+	// vector of characters that are read in from the keyboard
+	std::vector<char> m_charBuffer;
 	
-	bool  m_movingToNewLocation; // zooming in/out, rotating 90', centering on closest face, etc.
-
-	// Keep track of total time to be able to compute the time delta
-	double m_elapsedTime;
-	*/
 
 
 

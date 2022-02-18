@@ -137,8 +137,8 @@ void CenterOnOriginMoveLookController::MouseMove()
         // If the pointer were to move from the middle of the screen to the far right,
         // that should produce one full rotation. Therefore, set a rotationFactor = 2
         float rotationFactor = 2.0f;
-        float width = rect.right - rect.left;
-        float height = rect.bottom - rect.top;
+        float width = static_cast<float>(rect.right - rect.left);
+        float height = static_cast<float>(rect.bottom - rect.top);
 
         float radiansPerPixelX = (DirectX::XM_2PI / width) * rotationFactor;
         float radiansPerPixelY = (DirectX::XM_2PI / height) * rotationFactor;
@@ -196,27 +196,58 @@ void CenterOnOriginMoveLookController::RotateUpDown(float theta)
 
 void CenterOnOriginMoveLookController::UpdatePosition()
 {
-    /*
-    if (m_up && !m_down)
+    // Loop over the char buffer and process specific keys
+    for (char c : m_charBuffer)
     {
-        if (m_shift)
-            LookUp();
-        else
-            MoveForward();
-    }
-    else if (m_down && !m_up)
-    {
-        if (m_shift)
-            LookDown();
-        else
-            MoveBackward();
+        switch (c)
+        {
+        case 'c': CenterOnFace(); break;
+        case 'a': RotateLeft90(); break;
+        case 'd': RotateRight90(); break;
+        case 'w': RotateUp90(); break;
+        case 's': RotateDown90(); break;
+        }
     }
 
-    if (m_left && !m_right)
-        LookLeft();
-    else if (m_right && !m_left)
-        LookRight();
-    */
+    // If an arrow key is being held down, rotate
+    if (m_up || m_down || m_left || m_right)
+    {
+        // Cancel out any existing automated movement
+        m_movingToNewLocation = false;
+
+        // When a button is pressed, we must begin tracking the time before we can make an update
+        if (m_elapsedTime < 0.01f)
+        {
+            m_elapsedTime = m_currentTime;
+            return;
+        }
+
+        // Compute the time delta
+        double timeDelta = m_currentTime - m_elapsedTime;
+        m_elapsedTime = m_currentTime;
+
+        // Compute the rotation
+        float radiansPerSecond = 0.5;
+        float thetaUpDown = static_cast<float>(timeDelta * radiansPerSecond);
+        float thetaLeftRight = thetaUpDown;
+        // If rotating up or right, make the angle negative so the rest of the math is the same
+        
+        if (m_up)
+            thetaUpDown *= -1;
+
+        if (m_right)
+            thetaLeftRight *= -1;
+
+        if (m_up || m_down)
+            RotateUpDown(thetaUpDown);
+
+        if (m_left || m_right)
+            RotateLeftRight(thetaLeftRight);
+    }
+    else
+    {
+        m_elapsedTime = 0.0;
+    }
 
     // Perform any automated movements
     if (m_movingToNewLocation)
@@ -303,22 +334,6 @@ bool CenterOnOriginMoveLookController::IsMoving()
 }
 
 /*
-void CenterOnOriginMoveLookController::OnLButtonDown(float mouseX, float mouseY)
-{
-    // When the pointer is pressed begin tracking the pointer movement.
-    m_mouseDown = true;
-    m_mousePositionX = m_mousePositionXNew = mouseX;
-    m_mousePositionY = m_mousePositionYNew = mouseY;
-}
-
-void CenterOnOriginMoveLookController::OnLButtonUp(float mouseX, float mouseY)
-{
-    // Stop tracking pointer movement when the pointer is released.
-    m_mouseDown = false;
-    m_mousePositionX = m_mousePositionXNew = mouseX;
-    m_mousePositionY = m_mousePositionYNew = mouseY;
-}
-
 void CenterOnOriginMoveLookController::OnLButtonDoubleClick()
 {
     // Set automated move flags and initial data - 0.5 seconds for the move
@@ -331,58 +346,52 @@ void CenterOnOriginMoveLookController::OnLButtonDoubleClick()
 
     m_upTarget = m_upInitial;
 }
-
-void CenterOnOriginMoveLookController::OnMouseMove(float mouseX, float mouseY)
-{
-    m_mousePositionXNew = mouseX;
-    m_mousePositionYNew = mouseY;
-}
-void CenterOnOriginMoveLookController::OnMouseLeave()
-{
-
-}
-
+*/
 
 void CenterOnOriginMoveLookController::CenterOnFace()
 {
-    // Set automated move flags and initial data - 0.5 seconds for the move
-    InitializeAutomatedMove(0.5);
+    // Only allow a single left/right movement at a time
+    if (!m_movingToNewLocation)
+    {
+        // Set automated move flags and initial data - 0.5 seconds for the move
+        InitializeAutomatedMove(0.5);
 
-    // Determine the coordinate with the max value and 0 out the other ones
-    m_eyeTarget.x = m_eyeInitial.x;
-    m_eyeTarget.y = m_eyeInitial.y;
-    m_eyeTarget.z = m_eyeInitial.z;
+        // Determine the coordinate with the max value and 0 out the other ones
+        m_eyeTarget.x = m_eyeInitial.x;
+        m_eyeTarget.y = m_eyeInitial.y;
+        m_eyeTarget.z = m_eyeInitial.z;
 
-    XMFLOAT3 length3;
-    DirectX::XMStoreFloat3(&length3, DirectX::XMVector3Length(m_eyeVec));
-    float length = length3.x;
+        XMFLOAT3 length3;
+        DirectX::XMStoreFloat3(&length3, DirectX::XMVector3Length(m_eyeVec));
+        float length = length3.x;
 
-    m_eyeTarget.x = (std::abs(m_eyeInitial.x) < std::abs(m_eyeInitial.y) || std::abs(m_eyeInitial.x) < std::abs(m_eyeInitial.z)) ? 0.0f : length;
-    m_eyeTarget.y = (std::abs(m_eyeInitial.y) < std::abs(m_eyeInitial.x) || std::abs(m_eyeInitial.y) < std::abs(m_eyeInitial.z)) ? 0.0f : length;
-    m_eyeTarget.z = (std::abs(m_eyeInitial.z) < std::abs(m_eyeInitial.x) || std::abs(m_eyeInitial.z) < std::abs(m_eyeInitial.y)) ? 0.0f : length;
+        m_eyeTarget.x = (std::abs(m_eyeInitial.x) < std::abs(m_eyeInitial.y) || std::abs(m_eyeInitial.x) < std::abs(m_eyeInitial.z)) ? 0.0f : length;
+        m_eyeTarget.y = (std::abs(m_eyeInitial.y) < std::abs(m_eyeInitial.x) || std::abs(m_eyeInitial.y) < std::abs(m_eyeInitial.z)) ? 0.0f : length;
+        m_eyeTarget.z = (std::abs(m_eyeInitial.z) < std::abs(m_eyeInitial.x) || std::abs(m_eyeInitial.z) < std::abs(m_eyeInitial.y)) ? 0.0f : length;
 
-    m_eyeTarget.x *= (m_eyeInitial.x < 0.0f) ? -1.0f : 1.0f;
-    m_eyeTarget.y *= (m_eyeInitial.y < 0.0f) ? -1.0f : 1.0f;
-    m_eyeTarget.z *= (m_eyeInitial.z < 0.0f) ? -1.0f : 1.0f;
+        m_eyeTarget.x *= (m_eyeInitial.x < 0.0f) ? -1.0f : 1.0f;
+        m_eyeTarget.y *= (m_eyeInitial.y < 0.0f) ? -1.0f : 1.0f;
+        m_eyeTarget.z *= (m_eyeInitial.z < 0.0f) ? -1.0f : 1.0f;
 
 
 
-    // Determine the coordinate with the max value and 0 out the other ones
-    // Whichever coordinate for the eye target is used must not be used for the up target, so zero it out
-    float xInit = (m_eyeTarget.x == 0.0f) ? m_upInitial.x : 0.0f;
-    float yInit = (m_eyeTarget.y == 0.0f) ? m_upInitial.y : 0.0f;
-    float zInit = (m_eyeTarget.z == 0.0f) ? m_upInitial.z : 0.0f;
+        // Determine the coordinate with the max value and 0 out the other ones
+        // Whichever coordinate for the eye target is used must not be used for the up target, so zero it out
+        float xInit = (m_eyeTarget.x == 0.0f) ? m_upInitial.x : 0.0f;
+        float yInit = (m_eyeTarget.y == 0.0f) ? m_upInitial.y : 0.0f;
+        float zInit = (m_eyeTarget.z == 0.0f) ? m_upInitial.z : 0.0f;
 
-    DirectX::XMStoreFloat3(&length3, DirectX::XMVector3Length(m_upVec));
-    length = length3.x;
+        DirectX::XMStoreFloat3(&length3, DirectX::XMVector3Length(m_upVec));
+        length = length3.x;
 
-    m_upTarget.x = (std::abs(xInit) < std::abs(yInit) || std::abs(xInit) < std::abs(zInit)) ? 0.0f : length;
-    m_upTarget.y = (std::abs(yInit) < std::abs(xInit) || std::abs(yInit) < std::abs(zInit)) ? 0.0f : length;
-    m_upTarget.z = (std::abs(zInit) < std::abs(xInit) || std::abs(zInit) < std::abs(yInit)) ? 0.0f : length;
+        m_upTarget.x = (std::abs(xInit) < std::abs(yInit) || std::abs(xInit) < std::abs(zInit)) ? 0.0f : length;
+        m_upTarget.y = (std::abs(yInit) < std::abs(xInit) || std::abs(yInit) < std::abs(zInit)) ? 0.0f : length;
+        m_upTarget.z = (std::abs(zInit) < std::abs(xInit) || std::abs(zInit) < std::abs(yInit)) ? 0.0f : length;
 
-    m_upTarget.x *= (xInit < 0.0f) ? -1.0f : 1.0f;
-    m_upTarget.y *= (yInit < 0.0f) ? -1.0f : 1.0f;
-    m_upTarget.z *= (zInit < 0.0f) ? -1.0f : 1.0f;
+        m_upTarget.x *= (xInit < 0.0f) ? -1.0f : 1.0f;
+        m_upTarget.y *= (yInit < 0.0f) ? -1.0f : 1.0f;
+        m_upTarget.z *= (zInit < 0.0f) ? -1.0f : 1.0f;
+    }
 }
 void CenterOnOriginMoveLookController::RotateLeft90()
 {
@@ -428,37 +437,3 @@ void CenterOnOriginMoveLookController::RotateDown90()
         m_totalRotationAngle = -1.0f * DirectX::XM_PIDIV2;
     }
 }
-
-
-
-void CenterOnOriginMoveLookController::OnKeyDown(unsigned char keycode)
-{
-    switch (keycode)
-    {
-    case VK_UP:    m_up = true; break;
-    case VK_DOWN:  m_down = true; break;
-    case VK_LEFT:  m_left = true; break;
-    case VK_RIGHT: m_right = true; break;
-    case VK_SHIFT: m_shift = true; break;
-    case VK_CONTROL: m_ctrl = true; break;
-    }
-}
-
-void CenterOnOriginMoveLookController::OnKeyUp(unsigned char keycode)
-{
-    switch (keycode)
-    {
-    case VK_UP:    m_up = false; break;
-    case VK_DOWN:  m_down = false; break;
-    case VK_LEFT:  m_left = false; break;
-    case VK_RIGHT: m_right = false; break;
-    case VK_SHIFT: m_shift = false; break;
-    case VK_CONTROL: m_ctrl = false; break;
-    }
-
-    // If no longer moving or rotating, reset the time to 0
-    if (!(m_up || m_down || m_left || m_right))
-        m_elapsedTime = 0.0f;
-}
-*/
-

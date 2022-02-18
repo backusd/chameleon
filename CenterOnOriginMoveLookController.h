@@ -23,25 +23,6 @@ public:
 
 	bool IsMoving() override;
 
-	/*
-	void CenterOnFace();
-	void RotateLeft90();
-	void RotateRight90();
-	void RotateUp90();
-	void RotateDown90();
-
-	void OnLButtonDown(float mouseX, float mouseY);
-	void OnLButtonUp(float mouseX, float mouseY);
-	void OnLButtonDoubleClick();
-
-	void OnMouseMove(float mouseX, float mouseY);
-	void OnMouseLeave();
-	void OnMouseWheel(int wheelDelta);
-
-	void OnKeyDown(unsigned char keycode);
-	void OnKeyUp(unsigned char keycode);
-	*/
-
 private:
 	void ResetState() override;
 	void UpdatePosition() override;
@@ -54,6 +35,17 @@ private:
 	void RotateUpDown(float theta);
 
 	void InitializeAutomatedMove(double maxMoveTime);
+
+	void CenterOnFace();
+	void RotateLeft90();
+	void RotateRight90();
+	void RotateUp90();
+	void RotateDown90();
+
+	/*
+	void OnLButtonDoubleClick();
+	void OnMouseWheel(int wheelDelta);
+	*/
 
 
 	// When zooming in/out, or rotating 90, etc., we simply need to set the target location and
