@@ -162,6 +162,7 @@
     <ClCompile Include="BlackForestClass.cpp" />
     <ClCompile Include="BoxMesh.cpp" />
     <ClCompile Include="CameraClass.cpp" />
+    <ClCompile Include="CenterOnOriginMoveLookController.cpp" />
     <ClCompile Include="ChameleonException.cpp" />
     <ClCompile Include="CharacterState.cpp" />
     <ClCompile Include="ContentWindow.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="DeviceResourcesException.cpp" />
     <ClCompile Include="DrawPipeline.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
+    <ClCompile Include="FlyMoveLookController.cpp" />
     <ClCompile Include="FontClass.cpp" />
     <ClCompile Include="FontFamily.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
@@ -229,6 +231,7 @@
     <ClInclude Include="BlackForestClass.h" />
     <ClInclude Include="BoxMesh.h" />
     <ClInclude Include="CameraClass.h" />
+    <ClInclude Include="CenterOnOriginMoveLookController.h" />
     <ClInclude Include="ChameleonException.h" />
     <ClInclude Include="CharacterState.h" />
     <ClInclude Include="ContentWindow.h" />
@@ -240,6 +243,7 @@
     <ClInclude Include="DeviceResourcesException.h" />
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="DxgiInfoManager.h" />
+    <ClInclude Include="FlyMoveLookController.h" />
     <ClInclude Include="FontClass.h" />
     <ClInclude Include="FontFamily.h" />
     <ClInclude Include="FontShaderClass.h" />

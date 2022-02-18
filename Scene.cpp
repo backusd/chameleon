@@ -9,8 +9,16 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_hWnd(hWnd),
 	m_cubePipeline(nullptr)
 {
-	m_moveLookController = std::make_unique<MoveLookController>();
-	m_moveLookController->SetPosition(XMFLOAT3(50.0f, 10.0f, -10.0f));
+	//m_moveLookController = std::make_unique<MoveLookController>(m_hWnd);
+	//m_moveLookController->SetPosition(XMFLOAT3(50.0f, 10.0f, -10.0f));
+	
+	// Create the move look controllers
+	m_moveLookControllers.push_back(std::make_unique<MoveLookController>(m_hWnd));
+	m_moveLookControllerIndex = 0;
+#ifndef NDEBUG
+	m_moveLookControllers.push_back(std::make_unique<FlyMoveLookController>(m_hWnd));
+	m_moveLookControllers.push_back(std::make_unique<CenterOnOriginMoveLookController>(m_hWnd));
+#endif
 
 	CreateStaticResources();
 	CreateWindowSizeDependentResources();
@@ -22,13 +30,6 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	SetupTerrainPipeline();
 	SetupTerrainCubePipeline();
 	SetupSkyDomePipeline();
-
-
-
-	//
-	// Consider making this NDEBUG only
-	//
-	SetupImGui();	
 }
 
 void Scene::CreateStaticResources()
@@ -136,14 +137,16 @@ void Scene::CreateWindowSizeDependentResources()
 	m_projectionMatrix = perspectiveMatrix * orientationMatrix;
 
 	// Set the view matrix
-	m_viewMatrix = m_moveLookController->ViewMatrix();
+	m_viewMatrix = m_moveLookControllers[m_moveLookControllerIndex]->ViewMatrix();
 }
 
 void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
 	// Update the move look control and get back the new view matrix
-	m_moveLookController->Update(timer, keyboard, mouse, m_hWnd);
-	m_viewMatrix = m_moveLookController->ViewMatrix();
+	// m_moveLookController->Update(timer, keyboard, mouse);
+	// m_viewMatrix = m_moveLookController->ViewMatrix();
+	m_moveLookControllers[m_moveLookControllerIndex]->Update(timer, keyboard, mouse);
+	m_viewMatrix = m_moveLookControllers[m_moveLookControllerIndex]->ViewMatrix();
 
 	// Update the frustum with the new view matrix
 	m_frustum->UpdateFrustum(m_viewMatrix, m_projectionMatrix);
@@ -154,7 +157,7 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 
 	// Update the sky dome's position to that of the move look controller
 	XMFLOAT3 position;
-	DirectX::XMStoreFloat3(&position, m_moveLookController->Position());
+	DirectX::XMStoreFloat3(&position, m_moveLookControllers[m_moveLookControllerIndex]->Position());
 	m_skyDomePipeline->GetRenderable(0)->SetPosition(position);
 
 
@@ -179,7 +182,9 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	//
 	// Consider making this NDEBUG only
 	//
-	m_moveLookController->UpdateImGui(m_viewMode);
+	// m_moveLookController->UpdateImGui();
+
+
 }
 
 
@@ -455,22 +460,17 @@ void Scene::SetupSkyDomePipeline()
 }
 
 
-void Scene::SetupImGui()
-{
-	m_viewMode = ViewMode::FLY_MODE;
-}
-
 void Scene::DrawImGui()
 {
 	// Draw a view mode selector control
 	ImGui::Begin("View Mode");
-	ImGui::RadioButton("Fly Mode", &m_viewMode, 0);
-	ImGui::RadioButton("Player Mode", &m_viewMode, 1);
-	ImGui::RadioButton("Center On Origin Mode", &m_viewMode, 2);
+	ImGui::RadioButton("Player Mode", &m_moveLookControllerIndex, 0);
+	ImGui::RadioButton("Fly Mode", &m_moveLookControllerIndex, 1);
+	ImGui::RadioButton("Center On Origin Mode", &m_moveLookControllerIndex, 2);
 	ImGui::End();
 
 	// If viewing mode is center on origin, then draw the object edit control panel
-	if (m_viewMode == ViewMode::CENTER_ON_ORIGIN)
+	if (m_moveLookControllerIndex == 2)
 	{
 		ImGui::Begin("Object Edit");
 
@@ -478,5 +478,5 @@ void Scene::DrawImGui()
 	}
 
 	// Let the MoveLookController draw ImGui controls
-	m_moveLookController->DrawImGui();
+	m_moveLookControllers[m_moveLookControllerIndex]->DrawImGui();
 }

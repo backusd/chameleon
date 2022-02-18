@@ -15,6 +15,8 @@
 #include "SkyDomeMesh.h"
 #include "TerrainMesh.h"
 #include "Frustum.h"
+#include "FlyMoveLookController.h"
+#include "CenterOnOriginMoveLookController.h"
 
 #include <memory>
 
@@ -57,7 +59,7 @@ private:
 	std::vector<std::shared_ptr<DrawPipeline>> m_terrainPipelines;
 	std::shared_ptr<DrawPipeline> m_terrainCubePipeline;
 
-	std::unique_ptr<MoveLookController> m_moveLookController;
+	//std::unique_ptr<MoveLookController> m_moveLookController;
 	std::shared_ptr<Frustum> m_frustum;
 
 	CD3D11_VIEWPORT m_viewport;
@@ -79,19 +81,20 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		m_solidMaterialPropertiesConstantBuffer;
 
+	// Cameras
+	std::vector<std::unique_ptr<MoveLookController>> m_moveLookControllers;
 
 	// ImGui ====================================================================
 	//
 	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
 	//
 
+
 public:
 	void DrawImGui();
 
 private:
 
-	void SetupImGui();
-
 	// View Mode:
-	int m_viewMode;
+	int m_moveLookControllerIndex;
 };

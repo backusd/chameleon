@@ -279,6 +279,12 @@
     <ClCompile Include="Frustum.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="FlyMoveLookController.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="CenterOnOriginMoveLookController.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -489,6 +495,12 @@
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Frustum.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="FlyMoveLookController.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="CenterOnOriginMoveLookController.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
   </ItemGroup>
