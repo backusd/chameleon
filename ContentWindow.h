@@ -39,6 +39,7 @@
 #include "RasterizerState.h"
 #include "ConstantBuffer.h"
 #include "ConstantBufferArray.h"
+#include "SamplerState.h"
 
 #include "BoxMesh.h"
 #include "Terrain.h"

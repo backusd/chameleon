@@ -312,6 +312,9 @@
     <ClCompile Include="ConstantBufferArray.cpp">
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
+    <ClCompile Include="SamplerState.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -549,6 +552,9 @@
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
     <ClInclude Include="ConstantBufferArray.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerState.h">
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
   </ItemGroup>

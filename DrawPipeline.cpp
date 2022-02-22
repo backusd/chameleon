@@ -116,8 +116,7 @@ void DrawPipeline::Draw()
 	for (unsigned int iii = 0; iii < m_pixelShaderTextures.size(); ++iii)
 		context->PSSetShaderResources(iii, 1, m_pixelShaderTextures[iii]->GetTexture().GetAddressOf());
 	
-	if (m_samplerState != nullptr)
-		context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+	if (m_samplerState != nullptr) m_samplerState->Bind();
 
 	// Set the depth stencil state
 	context->OMSetDepthStencilState(m_depthStencilState->GetState().Get(), 1);

@@ -14,6 +14,7 @@
 #include "RasterizerState.h"
 #include "ConstantBuffer.h"
 #include "ConstantBufferArray.h"
+#include "SamplerState.h"
 
 #include <memory>
 #include <string>
@@ -40,10 +41,10 @@ public:
  	static void AddRasterizerState(std::string lookupName, std::shared_ptr<RasterizerState> rasterizerState) { m_rasterizerStateMap.insert(std::pair(lookupName, rasterizerState)); }
 	static void AddConstantBuffer(std::string lookupName, std::shared_ptr<ConstantBuffer> constantBuffer) { m_constantBufferMap.insert(std::pair(lookupName, constantBuffer)); }
 	static void AddConstantBufferArray(std::string lookupName, std::shared_ptr<ConstantBufferArray> constantBufferArray) { m_constantBufferArrayMap.insert(std::pair(lookupName, constantBufferArray)); }
+	static void AddSamplerState(std::string lookupName, std::shared_ptr<SamplerState> samplerState) { m_samplerStateMap.insert(std::pair(lookupName, samplerState)); }
 
 
 
-	static void AddSamplerState(D3D11_SAMPLER_DESC desc, std::string lookupName);
 	static void AddMesh(std::shared_ptr<Mesh> mesh, std::string lookupName) { m_meshMap.insert(std::pair(lookupName, mesh)); }
 	static void AddTexture(std::shared_ptr<Texture> texture, std::string lookupName) { m_textureMap.insert(std::pair(lookupName, texture)); }
 	static void AddDepthStencilState(std::shared_ptr<DepthStencilState> depthStencilState, std::string lookupName) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); }
@@ -56,9 +57,10 @@ public:
 	static std::shared_ptr<RasterizerState> GetRasterizerState(std::string lookupName) { MAP_LOOKUP(m_rasterizerStateMap, lookupName); }
 	static std::shared_ptr<ConstantBuffer> GetConstantBuffer(std::string lookupName) { MAP_LOOKUP(m_constantBufferMap, lookupName); }
 	static std::shared_ptr<ConstantBufferArray> GetConstantBufferArray(std::string lookupName) { MAP_LOOKUP(m_constantBufferArrayMap, lookupName); }
+	static std::shared_ptr<SamplerState> GetSamplerState(std::string lookupName) { MAP_LOOKUP(m_samplerStateMap, lookupName); }
 
-
-	static Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(std::string lookupName) { MAP_LOOKUP(m_samplerStateMap, lookupName); }
+	
+	
 	static std::shared_ptr<Mesh> GetMesh(std::string lookupName) { MAP_LOOKUP(m_meshMap, lookupName); }
 	static std::shared_ptr<Texture> GetTexture(std::string lookupName) { MAP_LOOKUP(m_textureMap, lookupName); }
 	static std::shared_ptr<DepthStencilState> GetDepthStencilState(std::string lookupName) { MAP_LOOKUP(m_depthStencilStateMap, lookupName); }
@@ -75,10 +77,7 @@ private:
 	static std::map<std::string, std::shared_ptr<RasterizerState>> m_rasterizerStateMap;
 	static std::map<std::string, std::shared_ptr<ConstantBuffer>> m_constantBufferMap;
 	static std::map<std::string, std::shared_ptr<ConstantBufferArray>> m_constantBufferArrayMap;
-
-	
-	
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>	m_samplerStateMap;
+	static std::map<std::string, std::shared_ptr<SamplerState>> m_samplerStateMap;
 
 	static std::map<std::string, std::shared_ptr<Mesh>> m_meshMap;
 	static std::map<std::string, std::shared_ptr<Texture>> m_textureMap;

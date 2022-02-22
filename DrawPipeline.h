@@ -93,8 +93,7 @@ private:
 	std::shared_ptr<ConstantBufferArray> m_pixelShaderConstantBufferArray;
 
 	
-	
-	Microsoft::WRL::ComPtr<ID3D11SamplerState>			m_samplerState;
+	std::shared_ptr<SamplerState> m_samplerState;
 
 
 	std::shared_ptr<InputLayout>	m_inputLayout;

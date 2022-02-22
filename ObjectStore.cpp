@@ -8,9 +8,7 @@ std::map<std::string, std::shared_ptr<PixelShader>>			ObjectStore::m_pixelShader
 std::map<std::string, std::shared_ptr<RasterizerState>>		ObjectStore::m_rasterizerStateMap;
 std::map<std::string, std::shared_ptr<ConstantBuffer>>		ObjectStore::m_constantBufferMap;
 std::map<std::string, std::shared_ptr<ConstantBufferArray>> ObjectStore::m_constantBufferArrayMap;
-
-
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>	 ObjectStore::m_samplerStateMap;
+std::map<std::string, std::shared_ptr<SamplerState>>		ObjectStore::m_samplerStateMap;
 
 std::map<std::string, std::shared_ptr<Mesh>>    ObjectStore::m_meshMap;
 std::map<std::string, std::shared_ptr<Texture>> ObjectStore::m_textureMap;
@@ -32,16 +30,4 @@ void ObjectStore::DestructObjects()
 	m_vertexShaderMap.clear();
 	m_inputLayoutMap.clear();
 	m_pixelShaderMap.clear();
-}
-
-void ObjectStore::AddSamplerState(D3D11_SAMPLER_DESC desc, std::string lookupName)
-{
-	INFOMAN(m_deviceResources);
-
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampleState;
-	GFX_THROW_INFO(
-		m_deviceResources->D3DDevice()->CreateSamplerState(&desc, sampleState.ReleaseAndGetAddressOf())
-	);
-
-	m_samplerStateMap.insert(std::pair(lookupName, sampleState));
 }
