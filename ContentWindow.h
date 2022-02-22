@@ -36,7 +36,7 @@
 #include "PixelShader.h"
 #include "VertexShader.h"
 #include "InputLayout.h"
-
+#include "RasterizerState.h"
 
 #include "BoxMesh.h"
 #include "Terrain.h"

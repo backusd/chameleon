@@ -208,23 +208,12 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 }
 void ContentWindow::ObjectStoreAddRasterStates()
 {
-	D3D11_RASTERIZER_DESC rd;
-	rd.FillMode = D3D11_FILL_SOLID; // or D3D11_FILL_WIREFRAME
-	rd.CullMode = D3D11_CULL_NONE;
-	rd.FrontCounterClockwise = true;	// This must be true for the outline effect to work properly
-	rd.DepthBias = 0;
-	rd.SlopeScaledDepthBias = 0.0f;
-	rd.DepthBiasClamp = 0.0f;
-	rd.DepthClipEnable = true;
-	rd.ScissorEnable = false;
-	rd.MultisampleEnable = false;
-	rd.AntialiasedLineEnable = false;
+	std::shared_ptr<RasterizerState> solidRS = std::make_shared<RasterizerState>(m_deviceResources);
+	ObjectStore::AddRasterizerState("solidfill", solidRS);
 
-	ObjectStore::AddRasterState(rd, "solidfill");
-
-	rd.FillMode = D3D11_FILL_WIREFRAME;
-
-	ObjectStore::AddRasterState(rd, "wireframe");
+	std::shared_ptr<RasterizerState> wireframeRS = std::make_shared<RasterizerState>(m_deviceResources);
+	wireframeRS->FillMode(D3D11_FILL_WIREFRAME);
+	ObjectStore::AddRasterizerState("wireframe", wireframeRS);
 }
 void ContentWindow::ObjectStoreAddSamplerStates()
 {

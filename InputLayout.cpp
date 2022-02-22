@@ -56,5 +56,7 @@ void InputLayout::CreateLayout()
 void InputLayout::Bind()
 {
 	INFOMAN(m_deviceResources);
-	m_deviceResources->D3DDeviceContext()->IASetInputLayout(m_inputLayout.Get());
+	GFX_THROW_INFO_ONLY(
+		m_deviceResources->D3DDeviceContext()->IASetInputLayout(m_inputLayout.Get())
+	);
 }

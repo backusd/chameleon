@@ -15,7 +15,7 @@ DrawPipeline::DrawPipeline(
 		m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
 		m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
 		m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
-		m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
+		m_rasterizerState(ObjectStore::GetRasterizerState(rasterStateName)),
 		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
 		m_samplerState(nullptr)
 {
@@ -36,7 +36,7 @@ DrawPipeline::DrawPipeline(
 		m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
 		m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
 		m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
-		m_rasterState(ObjectStore::GetRasterState(rasterStateName)),
+		m_rasterizerState(ObjectStore::GetRasterizerState(rasterStateName)),
 		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
 		m_samplerState(nullptr)
 {
@@ -77,11 +77,6 @@ void DrawPipeline::Draw()
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
 	// Set shaders and input layout
-	
-	//context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
-	//context->IASetInputLayout(m_inputLayout.Get());
-	//context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
-
 	m_inputLayout->Bind();
 	m_vertexShader->Bind();
 	m_pixelShader->Bind();
@@ -94,7 +89,7 @@ void DrawPipeline::Draw()
 	SetVSConstantBuffers();
 
 	// Set the raster state
-	context->RSSetState(m_rasterState.Get());
+	m_rasterizerState->Bind();
 
 	for (unsigned int iii = 0; iii < m_pixelShaderTextures.size(); ++iii)
 		context->PSSetShaderResources(iii, 1, m_pixelShaderTextures[iii]->GetTexture().GetAddressOf());

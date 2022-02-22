@@ -5,8 +5,6 @@
 #include <vector>
 #include <string>
 
-#include <wchar.h>
-
 class InputLayout : public Bindable
 {
 public:

@@ -107,15 +107,13 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>	m_vertexShaderConstantBuffers;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState>			m_samplerState;
 
-	//Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;
-	//Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_inputLayout;
-	//Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;
+
 	std::shared_ptr<InputLayout>	m_inputLayout;
 	std::shared_ptr<VertexShader>	m_vertexShader;
-	std::shared_ptr<PixelShader>	m_pixelShader;
+	std::shared_ptr<PixelShader>	m_pixelShader;	
 	
-	
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_rasterState;
+	//Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_rasterState;
+	std::shared_ptr<RasterizerState> m_rasterizerState;
 
 	std::vector<std::shared_ptr<Texture>>		m_pixelShaderTextures;
 	std::vector<std::shared_ptr<Renderable>>	m_renderables;

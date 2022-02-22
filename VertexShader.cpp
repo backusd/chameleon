@@ -20,5 +20,7 @@ VertexShader::VertexShader(std::shared_ptr<DeviceResources> deviceResources, Mic
 void VertexShader::Bind()
 {
 	INFOMAN(m_deviceResources);
-	m_deviceResources->D3DDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
+	GFX_THROW_INFO_ONLY(
+		m_deviceResources->D3DDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0u)
+	);
 }

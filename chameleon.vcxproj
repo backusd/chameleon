@@ -203,6 +203,7 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="PixelShader.cpp" />
     <ClCompile Include="PositionClass.cpp" />
+    <ClCompile Include="RasterizerState.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SkyDome.cpp" />
@@ -280,6 +281,7 @@
     <ClInclude Include="DrawPipeline.h" />
     <ClInclude Include="PixelShader.h" />
     <ClInclude Include="PositionClass.h" />
+    <ClInclude Include="RasterizerState.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SkyDome.h" />

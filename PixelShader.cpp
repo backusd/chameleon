@@ -21,5 +21,7 @@ PixelShader::PixelShader(std::shared_ptr<DeviceResources> deviceResources, std::
 void PixelShader::Bind()
 {
 	INFOMAN(m_deviceResources);
-	m_deviceResources->D3DDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
+	GFX_THROW_INFO_ONLY(
+		m_deviceResources->D3DDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0u)
+	);
 }

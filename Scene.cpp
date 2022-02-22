@@ -217,7 +217,7 @@ void Scene::SetupCubePipeline()
 		"box-filled-mesh",
 		"phong-vertex-shader",
 		"phong-pixel-shader",
-		"solidfill",
+		"solidfill", //"wireframe",
 		"depth-enabled-depth-stencil-state",
 		vertexConstantBuffers,
 		pixelConstantBuffers
