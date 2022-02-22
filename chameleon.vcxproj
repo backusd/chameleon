@@ -166,6 +166,8 @@
     <ClCompile Include="CenterOnOriginMoveLookController.cpp" />
     <ClCompile Include="ChameleonException.cpp" />
     <ClCompile Include="CharacterState.cpp" />
+    <ClCompile Include="ConstantBuffer.cpp" />
+    <ClCompile Include="ConstantBufferArray.cpp" />
     <ClCompile Include="ContentWindow.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CPUStatistics.cpp" />
@@ -240,6 +242,8 @@
     <ClInclude Include="CenterOnOriginMoveLookController.h" />
     <ClInclude Include="ChameleonException.h" />
     <ClInclude Include="CharacterState.h" />
+    <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="ConstantBufferArray.h" />
     <ClInclude Include="ContentWindow.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CPUStatistics.h" />

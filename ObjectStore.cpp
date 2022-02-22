@@ -2,13 +2,14 @@
 
 std::shared_ptr<DeviceResources> ObjectStore::m_deviceResources = nullptr;
 
-std::map<std::string, std::shared_ptr<VertexShader>>	ObjectStore::m_vertexShaderMap;
-std::map<std::string, std::shared_ptr<InputLayout>>		ObjectStore::m_inputLayoutMap;
-std::map<std::string, std::shared_ptr<PixelShader>>		ObjectStore::m_pixelShaderMap;
-std::map<std::string, std::shared_ptr<RasterizerState>> ObjectStore::m_rasterizerStateMap;
+std::map<std::string, std::shared_ptr<VertexShader>>		ObjectStore::m_vertexShaderMap;
+std::map<std::string, std::shared_ptr<InputLayout>>			ObjectStore::m_inputLayoutMap;
+std::map<std::string, std::shared_ptr<PixelShader>>			ObjectStore::m_pixelShaderMap;
+std::map<std::string, std::shared_ptr<RasterizerState>>		ObjectStore::m_rasterizerStateMap;
+std::map<std::string, std::shared_ptr<ConstantBuffer>>		ObjectStore::m_constantBufferMap;
+std::map<std::string, std::shared_ptr<ConstantBufferArray>> ObjectStore::m_constantBufferArrayMap;
 
 
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>>			 ObjectStore::m_constantBufferMap;
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>	 ObjectStore::m_samplerStateMap;
 
 std::map<std::string, std::shared_ptr<Mesh>>    ObjectStore::m_meshMap;

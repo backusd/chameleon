@@ -209,9 +209,6 @@ void Scene::Draw()
 
 void Scene::SetupCubePipeline()
 {
-	std::vector<std::string> vertexConstantBuffers = { "model-view-projection-buffer" };
-	std::vector<std::string> pixelConstantBuffers = { "phong-material-properties-buffer", "light-properties-buffer" };
-
 	m_cubePipeline = std::make_shared<DrawPipeline>(
 		m_deviceResources,
 		"box-filled-mesh",
@@ -219,8 +216,8 @@ void Scene::SetupCubePipeline()
 		"phong-pixel-shader",
 		"solidfill", //"wireframe",
 		"depth-enabled-depth-stencil-state",
-		vertexConstantBuffers,
-		pixelConstantBuffers
+		"cube-buffers-VS",
+		"cube-buffers-PS"
 	);
 
 	m_cubePipeline->AddRenderable(std::make_shared<Box>(1.0f));
@@ -233,8 +230,8 @@ void Scene::SetupCubePipeline()
 		[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
 	(std::shared_ptr<Renderable> renderable,
 		std::shared_ptr<Mesh> mesh,
-		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers,
-		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)
+		std::shared_ptr<ConstantBufferArray> vertexShaderBufferArray,
+		std::shared_ptr<ConstantBufferArray> pixelShaderBufferArray)
 	{
 		auto deviceResources = weakDeviceResources.lock();
 		ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
@@ -242,7 +239,7 @@ void Scene::SetupCubePipeline()
 		D3D11_MAPPED_SUBRESOURCE ms;
 
 		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		context->Map(vertexShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+		context->Map(vertexShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
 		XMMATRIX _model = renderable->GetModelMatrix();
 		ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
@@ -251,16 +248,13 @@ void Scene::SetupCubePipeline()
 		DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), _model* this->ViewProjectionMatrix());
 		DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, _model)));
 
-		context->Unmap(vertexShaderBuffers[0].Get(), 0);
+		context->Unmap(vertexShaderBufferArray->GetRawBufferPointer(0), 0);
 	}
 	);
 }
 
 void Scene::SetupTerrainPipeline()
 {
-	std::vector<std::string> vertexConstantBuffers = { "terrain-constant-buffer" };
-	std::vector<std::string> pixelConstantBuffers = { "terrain-light-buffer" };
-
 	std::shared_ptr<Terrain> terr = std::make_shared<Terrain>();
 
 	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
@@ -281,8 +275,8 @@ void Scene::SetupTerrainPipeline()
 			"terrain-texture-pixel-shader",
 			"solidfill",
 			"depth-enabled-depth-stencil-state",
-			vertexConstantBuffers,
-			pixelConstantBuffers
+			"terrain-buffers-VS",
+			"terrain-buffers-PS"
 			));
 
 		m_terrainPipelines[iii]->AddPixelShaderTexture("terrain-texture");
@@ -296,8 +290,8 @@ void Scene::SetupTerrainPipeline()
 			[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
 		(std::shared_ptr<Renderable> renderable,
 			std::shared_ptr<Mesh> mesh,
-			std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers,
-			std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)
+			std::shared_ptr<ConstantBufferArray> vertexShaderBufferArray,
+			std::shared_ptr<ConstantBufferArray> pixelShaderBufferArray)
 		{
 			auto deviceResources = weakDeviceResources.lock();
 			ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
@@ -306,7 +300,7 @@ void Scene::SetupTerrainPipeline()
 
 			// Update the vertex shader buffer
 			ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-			context->Map(vertexShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+			context->Map(vertexShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
 			XMMATRIX _model = renderable->GetModelMatrix();
 			TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
@@ -315,13 +309,13 @@ void Scene::SetupTerrainPipeline()
 			mappedBuffer->view = this->ViewMatrix();
 			mappedBuffer->projection = this->ProjectionMatrix();
 
-			context->Unmap(vertexShaderBuffers[0].Get(), 0);
+			context->Unmap(vertexShaderBufferArray->GetRawBufferPointer(0), 0);
 
 
 			// Update the pixel shader lighting buffer
 
 			ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-			context->Map(pixelShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+			context->Map(pixelShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
 
 			// Get a pointer to the data in the light constant buffer.
@@ -333,7 +327,7 @@ void Scene::SetupTerrainPipeline()
 			lightingBuffer->padding = 0.0f;
 
 			// Unlock the light constant buffer.
-			context->Unmap(pixelShaderBuffers[0].Get(), 0);
+			context->Unmap(pixelShaderBufferArray->GetRawBufferPointer(0), 0);
 		}
 		);
 	}
@@ -341,9 +335,6 @@ void Scene::SetupTerrainPipeline()
 
 void Scene::SetupTerrainCubePipeline()
 {
-	std::vector<std::string> vertexConstantBuffers = { "terrain-constant-buffer" };
-	std::vector<std::string> pixelConstantBuffers = { };
-
 	m_terrainCubePipeline = std::make_shared<DrawPipeline>(
 		m_deviceResources,
 		"box-outline-mesh",
@@ -351,8 +342,7 @@ void Scene::SetupTerrainCubePipeline()
 		"solid-pixel-shader",
 		"solidfill",
 		"depth-enabled-depth-stencil-state",
-		vertexConstantBuffers,
-		pixelConstantBuffers
+		"terrain-cube-buffers-VS"
 		);
 
 	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
@@ -369,8 +359,8 @@ void Scene::SetupTerrainCubePipeline()
 		[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
 	(std::shared_ptr<Renderable> renderable,
 		std::shared_ptr<Mesh> mesh,
-		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers,
-		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)
+		std::shared_ptr<ConstantBufferArray> vertexShaderBufferArray,
+		std::shared_ptr<ConstantBufferArray> pixelShaderBufferArray)
 	{
 		auto deviceResources = weakDeviceResources.lock();
 		ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
@@ -378,7 +368,7 @@ void Scene::SetupTerrainCubePipeline()
 		D3D11_MAPPED_SUBRESOURCE ms;
 
 		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		context->Map(vertexShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+		context->Map(vertexShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
 		XMMATRIX _model = renderable->GetModelMatrix();
 		TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
@@ -387,16 +377,13 @@ void Scene::SetupTerrainCubePipeline()
 		mappedBuffer->view = this->ViewMatrix();
 		mappedBuffer->projection = this->ProjectionMatrix();
 
-		context->Unmap(vertexShaderBuffers[0].Get(), 0);
+		context->Unmap(vertexShaderBufferArray->GetRawBufferPointer(0), 0);
 	}
 	);
 }
 
 void Scene::SetupSkyDomePipeline()
 {
-	std::vector<std::string> vertexConstantBuffers = { "sky-dome-constant-buffer" };
-	std::vector<std::string> pixelConstantBuffers = { "sky-dome-gradient-buffer" };
-
 	m_skyDomePipeline = std::make_shared<DrawPipeline>(
 		m_deviceResources,
 		"sky-dome-mesh",
@@ -404,8 +391,8 @@ void Scene::SetupSkyDomePipeline()
 		"sky-dome-pixel-shader",
 		"solidfill",			// Raster state will need to change
 		"depth-disabled-depth-stencil-state",
-		vertexConstantBuffers,
-		pixelConstantBuffers
+		"sky-dome-buffers-VS",
+		"sky-dome-buffers-PS"
 		);
 
 
@@ -415,8 +402,8 @@ void Scene::SetupSkyDomePipeline()
 		[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
 	(std::shared_ptr<Renderable> renderable,
 		std::shared_ptr<Mesh> mesh,
-		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers,
-		std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)
+		std::shared_ptr<ConstantBufferArray> vertexShaderBufferArray,
+		std::shared_ptr<ConstantBufferArray> pixelShaderBufferArray)
 	{
 		auto deviceResources = weakDeviceResources.lock();
 		ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
@@ -427,7 +414,7 @@ void Scene::SetupSkyDomePipeline()
 
 		// Update the vertex shader buffer
 		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		context->Map(vertexShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+		context->Map(vertexShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
 		XMMATRIX _model = renderable->GetModelMatrix();
 		TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
@@ -436,13 +423,13 @@ void Scene::SetupSkyDomePipeline()
 		mappedBuffer->view = this->ViewMatrix();
 		mappedBuffer->projection = this->ProjectionMatrix();
 
-		context->Unmap(vertexShaderBuffers[0].Get(), 0);
+		context->Unmap(vertexShaderBufferArray->GetRawBufferPointer(0), 0);
 
 
 		// Update the pixel shader lighting buffer
 
 		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		context->Map(pixelShaderBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+		context->Map(pixelShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
 
 		// Get a pointer to the data in the light constant buffer.
@@ -453,7 +440,7 @@ void Scene::SetupSkyDomePipeline()
 		skyDomeColorBuffer->centerColor = skyDomeMesh->GetCenterColor();
 
 		// Unlock the light constant buffer.
-		context->Unmap(pixelShaderBuffers[0].Get(), 0);
+		context->Unmap(pixelShaderBufferArray->GetRawBufferPointer(0), 0);
 	}
 	);
 }

@@ -37,6 +37,8 @@
 #include "VertexShader.h"
 #include "InputLayout.h"
 #include "RasterizerState.h"
+#include "ConstantBuffer.h"
+#include "ConstantBufferArray.h"
 
 #include "BoxMesh.h"
 #include "Terrain.h"

@@ -48,8 +48,15 @@ public:
 		std::string pixelShaderName,
 		std::string rasterStateName,
 		std::string depthStencilStateName,
-		std::vector<std::string> vertexShaderConstantBufferNames,
-		std::vector<std::string> pixelShaderConstantBufferNames);
+		std::string vertexShaderConstantBufferArrayName);
+	DrawPipeline(std::shared_ptr<DeviceResources> deviceResources,
+		std::string meshName,
+		std::string vertexShaderName,
+		std::string pixelShaderName,
+		std::string rasterStateName,
+		std::string depthStencilStateName,
+		std::string vertexShaderConstantBufferArrayName,
+		std::string pixelShaderConstantBufferArrayName);
 
 	void Update(std::shared_ptr<StepTimer> timer);
 	void Draw();
@@ -66,45 +73,27 @@ public:
 	void UpdatePSSubresource(int index, void* data);
 	void UpdateVSSubresource(int index, void* data);
 
-	void SetPerRendererableUpdate(std::function<void(std::shared_ptr<Renderable> renderable, 
+	void SetPerRendererableUpdate(std::function<void(std::shared_ptr<Renderable> renderable,
 													 std::shared_ptr<Mesh> mesh,
-													 std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&, 
-													 std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&)> function) { PerRendererableUpdate = function; }
+													 std::shared_ptr<ConstantBufferArray>,
+													 std::shared_ptr<ConstantBufferArray>)> function) { PerRendererableUpdate = function; }
 
 private:
-	void SetPSConstantBuffers();
-	void SetVSConstantBuffers();
-
-	void SetPSConstantBuffers1();
-	void SetPSConstantBuffers2();
-	void SetPSConstantBuffers3();
-	void SetPSConstantBuffers4();
-	void SetPSConstantBuffers5();
-	void SetPSConstantBuffers6();
-	void SetPSConstantBuffers7();
-	void SetPSConstantBuffers8();
-
-	void SetVSConstantBuffers1();
-	void SetVSConstantBuffers2();
-	void SetVSConstantBuffers3();
-	void SetVSConstantBuffers4();
-	void SetVSConstantBuffers5();
-	void SetVSConstantBuffers6();
-	void SetVSConstantBuffers7();
-	void SetVSConstantBuffers8();
-
-	std::function<void(std::shared_ptr<Renderable> renderable, 
-					   std::shared_ptr<Mesh> mesh, 
-					   std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& vertexShaderBuffers, 
-					   std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>& pixelShaderBuffers)> PerRendererableUpdate;
+	std::function<void(std::shared_ptr<Renderable> renderable,
+						std::shared_ptr<Mesh> mesh,
+						std::shared_ptr<ConstantBufferArray> vertexShaderBufferArray,
+						std::shared_ptr<ConstantBufferArray> pixelShaderBufferArray)> PerRendererableUpdate;
 
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
 	std::shared_ptr<Mesh> m_mesh;
 
-	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>	m_pixelShaderConstantBuffers;
-	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>	m_vertexShaderConstantBuffers;
+	std::shared_ptr<ConstantBufferArray> m_vertexShaderConstantBufferArray;
+	std::shared_ptr<ConstantBufferArray> m_pixelShaderConstantBufferArray;
+
+	
+	
 	Microsoft::WRL::ComPtr<ID3D11SamplerState>			m_samplerState;
 
 
@@ -112,7 +101,6 @@ private:
 	std::shared_ptr<VertexShader>	m_vertexShader;
 	std::shared_ptr<PixelShader>	m_pixelShader;	
 	
-	//Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_rasterState;
 	std::shared_ptr<RasterizerState> m_rasterizerState;
 
 	std::vector<std::shared_ptr<Texture>>		m_pixelShaderTextures;

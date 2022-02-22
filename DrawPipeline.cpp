@@ -17,9 +17,33 @@ DrawPipeline::DrawPipeline(
 		m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
 		m_rasterizerState(ObjectStore::GetRasterizerState(rasterStateName)),
 		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
+		m_vertexShaderConstantBufferArray(nullptr),
+		m_pixelShaderConstantBufferArray(nullptr),
 		m_samplerState(nullptr)
 {
-	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&, std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>>&) {};
+	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::shared_ptr<ConstantBufferArray>, std::shared_ptr<ConstantBufferArray>) {};
+}
+
+DrawPipeline::DrawPipeline(
+	std::shared_ptr<DeviceResources> deviceResources,
+	std::string meshName,
+	std::string vertexShaderName,
+	std::string pixelShaderName,
+	std::string rasterStateName,
+	std::string depthStencilStateName,
+	std::string vertexShaderConstantBufferArrayName) :
+	m_deviceResources(deviceResources),
+	m_mesh(ObjectStore::GetMesh(meshName)),
+	m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
+	m_inputLayout(ObjectStore::GetInputLayout(vertexShaderName)),
+	m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
+	m_rasterizerState(ObjectStore::GetRasterizerState(rasterStateName)),
+	m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
+	m_vertexShaderConstantBufferArray(ObjectStore::GetConstantBufferArray(vertexShaderConstantBufferArrayName)),
+	m_pixelShaderConstantBufferArray(nullptr),
+	m_samplerState(nullptr)
+{
+	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::shared_ptr<ConstantBufferArray>, std::shared_ptr<ConstantBufferArray>) {};
 }
 
 DrawPipeline::DrawPipeline(
@@ -29,8 +53,8 @@ DrawPipeline::DrawPipeline(
 	std::string pixelShaderName,
 	std::string rasterStateName,
 	std::string depthStencilStateName,
-	std::vector<std::string> vertexShaderConstantBufferNames,
-	std::vector<std::string> pixelShaderConstantBufferNames) :
+	std::string vertexShaderConstantBufferArrayName,
+	std::string pixelShaderConstantBufferArrayName) :
 		m_deviceResources(deviceResources),
 		m_mesh(ObjectStore::GetMesh(meshName)),
 		m_vertexShader(ObjectStore::GetVertexShader(vertexShaderName)),
@@ -38,13 +62,11 @@ DrawPipeline::DrawPipeline(
 		m_pixelShader(ObjectStore::GetPixelShader(pixelShaderName)),
 		m_rasterizerState(ObjectStore::GetRasterizerState(rasterStateName)),
 		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
+		m_vertexShaderConstantBufferArray(ObjectStore::GetConstantBufferArray(vertexShaderConstantBufferArrayName)),
+		m_pixelShaderConstantBufferArray(ObjectStore::GetConstantBufferArray(pixelShaderConstantBufferArrayName)),
 		m_samplerState(nullptr)
 {
-	for (std::string name : vertexShaderConstantBufferNames)
-		m_vertexShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
-
-	for (std::string name : pixelShaderConstantBufferNames)
-		m_pixelShaderConstantBuffers.push_back(ObjectStore::GetConstantBuffer(name));
+	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::shared_ptr<ConstantBufferArray>, std::shared_ptr<ConstantBufferArray>) {};
 }
 
 void DrawPipeline::AddPixelShaderTexture(std::string textureLookupName)
@@ -56,13 +78,13 @@ void DrawPipeline::SetSamplerState(std::string sampleStateLookupName)
 	m_samplerState = ObjectStore::GetSamplerState(sampleStateLookupName);
 }
 
-void DrawPipeline::UpdatePSSubresource(int index, void* data)
-{
-	m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_pixelShaderConstantBuffers[index].Get(), 0, nullptr, data, 0, 0);
-}
 void DrawPipeline::UpdateVSSubresource(int index, void* data)
 {
-	m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_vertexShaderConstantBuffers[index].Get(), 0, nullptr, data, 0, 0);
+	m_vertexShaderConstantBufferArray->UpdateSubresource(index, data);
+}
+void DrawPipeline::UpdatePSSubresource(int index, void* data)
+{
+	m_pixelShaderConstantBufferArray->UpdateSubresource(index, data);
 }
 
 void DrawPipeline::Update(std::shared_ptr<StepTimer> timer)
@@ -85,8 +107,8 @@ void DrawPipeline::Draw()
 	m_mesh->PreparePipeline();
 
 	// Set the pixel shader and vertex shader constant buffers
-	SetPSConstantBuffers();
-	SetVSConstantBuffers();
+	if (m_vertexShaderConstantBufferArray != nullptr) m_vertexShaderConstantBufferArray->Bind();
+	if (m_pixelShaderConstantBufferArray != nullptr) m_pixelShaderConstantBufferArray->Bind();
 
 	// Set the raster state
 	m_rasterizerState->Bind();
@@ -104,187 +126,9 @@ void DrawPipeline::Draw()
 	UINT indexCount = m_mesh->IndexCount();
 	for (std::shared_ptr<Renderable> renderable : m_renderables)
 	{	
-		PerRendererableUpdate(renderable, m_mesh, m_vertexShaderConstantBuffers, m_pixelShaderConstantBuffers);
+		//PerRendererableUpdate(renderable, m_mesh, m_vertexShaderConstantBuffers, m_pixelShaderConstantBuffers);
+		PerRendererableUpdate(renderable, m_mesh, m_vertexShaderConstantBufferArray, m_pixelShaderConstantBufferArray);
 
 		GFX_THROW_INFO_ONLY(context->DrawIndexed(indexCount, 0u, 0u));
 	}
-}
-
-
-
-void DrawPipeline::SetPSConstantBuffers()
-{
-	if (m_pixelShaderConstantBuffers.size() > 0)
-	{
-		switch (m_pixelShaderConstantBuffers.size())
-		{
-		case 1: SetPSConstantBuffers1(); break;
-		case 2: SetPSConstantBuffers2(); break;
-		case 3: SetPSConstantBuffers3(); break;
-		case 4: SetPSConstantBuffers4(); break;
-		case 5: SetPSConstantBuffers5(); break;
-		case 6: SetPSConstantBuffers6(); break;
-		case 7: SetPSConstantBuffers7(); break;
-		case 8: SetPSConstantBuffers8(); break;
-		}
-	}
-}
-
-void DrawPipeline::SetVSConstantBuffers()
-{
-	if (m_vertexShaderConstantBuffers.size() > 0)
-	{
-		switch (m_vertexShaderConstantBuffers.size())
-		{
-		case 1: SetVSConstantBuffers1(); break;
-		case 2: SetVSConstantBuffers2(); break;
-		case 3: SetVSConstantBuffers3(); break;
-		case 4: SetVSConstantBuffers4(); break;
-		case 5: SetVSConstantBuffers5(); break;
-		case 6: SetVSConstantBuffers6(); break;
-		case 7: SetVSConstantBuffers7(); break;
-		case 8: SetVSConstantBuffers8(); break;
-		}
-	}
-}
-
-void DrawPipeline::SetPSConstantBuffers1()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 1u, buffers);
-}
-void DrawPipeline::SetPSConstantBuffers2()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get(),
-								m_pixelShaderConstantBuffers[1].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 2u, buffers);
-}
-void DrawPipeline::SetPSConstantBuffers3()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get(),
-								m_pixelShaderConstantBuffers[1].Get(),
-								m_pixelShaderConstantBuffers[2].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 3u, buffers);
-}
-void DrawPipeline::SetPSConstantBuffers4()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get(),
-								m_pixelShaderConstantBuffers[1].Get(),
-								m_pixelShaderConstantBuffers[2].Get(),
-								m_pixelShaderConstantBuffers[3].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 4u, buffers);
-}
-void DrawPipeline::SetPSConstantBuffers5()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get(),
-								m_pixelShaderConstantBuffers[1].Get(),
-								m_pixelShaderConstantBuffers[2].Get(),
-								m_pixelShaderConstantBuffers[3].Get(),
-								m_pixelShaderConstantBuffers[4].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 5u, buffers);
-}
-void DrawPipeline::SetPSConstantBuffers6()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get(),
-								m_pixelShaderConstantBuffers[1].Get(),
-								m_pixelShaderConstantBuffers[2].Get(),
-								m_pixelShaderConstantBuffers[3].Get(),
-								m_pixelShaderConstantBuffers[4].Get(),
-								m_pixelShaderConstantBuffers[5].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 6u, buffers);
-}
-void DrawPipeline::SetPSConstantBuffers7()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get(),
-								m_pixelShaderConstantBuffers[1].Get(),
-								m_pixelShaderConstantBuffers[2].Get(),
-								m_pixelShaderConstantBuffers[3].Get(),
-								m_pixelShaderConstantBuffers[4].Get(),
-								m_pixelShaderConstantBuffers[5].Get(),
-								m_pixelShaderConstantBuffers[6].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 7u, buffers);
-}
-void DrawPipeline::SetPSConstantBuffers8()
-{
-	ID3D11Buffer* buffers[] = { m_pixelShaderConstantBuffers[0].Get(),
-								m_pixelShaderConstantBuffers[1].Get(),
-								m_pixelShaderConstantBuffers[2].Get(),
-								m_pixelShaderConstantBuffers[3].Get(),
-								m_pixelShaderConstantBuffers[4].Get(),
-								m_pixelShaderConstantBuffers[5].Get(),
-								m_pixelShaderConstantBuffers[6].Get(),
-								m_pixelShaderConstantBuffers[7].Get() };
-	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 8u, buffers);
-}
-
-
-
-
-void DrawPipeline::SetVSConstantBuffers1()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 1u, buffers);
-}
-void DrawPipeline::SetVSConstantBuffers2()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get(),
-								m_vertexShaderConstantBuffers[1].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 2u, buffers);
-}
-void DrawPipeline::SetVSConstantBuffers3()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get(),
-								m_vertexShaderConstantBuffers[1].Get(),
-								m_vertexShaderConstantBuffers[2].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 3u, buffers);
-}
-void DrawPipeline::SetVSConstantBuffers4()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get(),
-								m_vertexShaderConstantBuffers[1].Get(),
-								m_vertexShaderConstantBuffers[2].Get(),
-								m_vertexShaderConstantBuffers[3].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 4u, buffers);
-}
-void DrawPipeline::SetVSConstantBuffers5()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get(),
-								m_vertexShaderConstantBuffers[1].Get(),
-								m_vertexShaderConstantBuffers[2].Get(),
-								m_vertexShaderConstantBuffers[3].Get(),
-								m_vertexShaderConstantBuffers[4].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 5u, buffers);
-}
-void DrawPipeline::SetVSConstantBuffers6()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get(),
-								m_vertexShaderConstantBuffers[1].Get(),
-								m_vertexShaderConstantBuffers[2].Get(),
-								m_vertexShaderConstantBuffers[3].Get(),
-								m_vertexShaderConstantBuffers[4].Get(),
-								m_vertexShaderConstantBuffers[5].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 6u, buffers);
-}
-void DrawPipeline::SetVSConstantBuffers7()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get(),
-								m_vertexShaderConstantBuffers[1].Get(),
-								m_vertexShaderConstantBuffers[2].Get(),
-								m_vertexShaderConstantBuffers[3].Get(),
-								m_vertexShaderConstantBuffers[4].Get(),
-								m_vertexShaderConstantBuffers[5].Get(),
-								m_vertexShaderConstantBuffers[6].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 7u, buffers);
-}
-void DrawPipeline::SetVSConstantBuffers8()
-{
-	ID3D11Buffer* buffers[] = { m_vertexShaderConstantBuffers[0].Get(),
-								m_vertexShaderConstantBuffers[1].Get(),
-								m_vertexShaderConstantBuffers[2].Get(),
-								m_vertexShaderConstantBuffers[3].Get(),
-								m_vertexShaderConstantBuffers[4].Get(),
-								m_vertexShaderConstantBuffers[5].Get(),
-								m_vertexShaderConstantBuffers[6].Get(),
-								m_vertexShaderConstantBuffers[7].Get() };
-	m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 8u, buffers);
 }

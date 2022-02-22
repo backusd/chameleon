@@ -306,6 +306,12 @@
     <ClCompile Include="RasterizerState.cpp">
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
+    <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBufferArray.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -537,6 +543,12 @@
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
     <ClInclude Include="RasterizerState.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBufferArray.h">
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
   </ItemGroup>
