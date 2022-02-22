@@ -2,9 +2,14 @@
 
 std::shared_ptr<DeviceResources> ObjectStore::m_deviceResources = nullptr;
 
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>>	 ObjectStore::m_vertexShaderMap;
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>>	 ObjectStore::m_inputLayoutMap;
-std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>>	 ObjectStore::m_pixelShaderMap;
+//std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>>	 ObjectStore::m_vertexShaderMap;
+//std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>>	 ObjectStore::m_inputLayoutMap;
+//std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>>	 ObjectStore::m_pixelShaderMap;
+std::map<std::string, std::shared_ptr<VertexShader>>	ObjectStore::m_vertexShaderMap;
+std::map<std::string, std::shared_ptr<InputLayout>>		ObjectStore::m_inputLayoutMap;
+std::map<std::string, std::shared_ptr<PixelShader>>		ObjectStore::m_pixelShaderMap;
+
+
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>>			 ObjectStore::m_constantBufferMap;
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11RasterizerState>> ObjectStore::m_rasterStateMap;
 std::map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>	 ObjectStore::m_samplerStateMap;
@@ -31,6 +36,7 @@ void ObjectStore::DestructObjects()
 	m_pixelShaderMap.clear();
 }
 
+/*
 void ObjectStore::AddVertexShaderAndInputLayout(std::wstring vertexShaderFile, const D3D11_INPUT_ELEMENT_DESC* inputDescription, UINT numElements, std::string lookupName)
 {
 	INFOMAN(m_deviceResources);
@@ -66,6 +72,7 @@ void ObjectStore::AddPixelShader(std::wstring fileName, std::string lookupName)
 
 	m_pixelShaderMap.insert(std::pair(lookupName, pPixelShader));
 }
+*/
 
 void ObjectStore::AddRasterState(D3D11_RASTERIZER_DESC desc, std::string lookupName)
 {

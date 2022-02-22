@@ -32,6 +32,12 @@
 // 3D Scene
 #include "Scene.h"
 
+
+#include "PixelShader.h"
+#include "VertexShader.h"
+#include "InputLayout.h"
+
+
 #include "BoxMesh.h"
 #include "Terrain.h"
 #include "TerrainMesh.h"

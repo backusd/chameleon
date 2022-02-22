@@ -8,6 +8,9 @@
 #include "Texture.h"
 #include "DepthStencilState.h"
 #include "TerrainMesh.h"
+#include "PixelShader.h"
+#include "VertexShader.h"
+#include "InputLayout.h"
 
 #include <memory>
 #include <string>
@@ -28,8 +31,10 @@ public:
 	static void Initialize(std::shared_ptr<DeviceResources> deviceResources);
 	static void DestructObjects();
 
-	static void AddVertexShaderAndInputLayout(std::wstring vertexShaderFile, const D3D11_INPUT_ELEMENT_DESC* inputDescription, UINT numElements, std::string lookupName);
-	static void AddPixelShader(std::wstring fileName, std::string lookupName);	
+	static void AddInputLayout(std::string lookupName, std::shared_ptr<InputLayout> inputLayout) { m_inputLayoutMap.insert(std::pair(lookupName, inputLayout)); }
+	static void AddVertexShader(std::string lookupName, std::shared_ptr<VertexShader> vertexShader) { m_vertexShaderMap.insert(std::pair(lookupName, vertexShader)); }
+	static void AddPixelShader(std::string lookupName, std::shared_ptr<PixelShader> pixelShader) { m_pixelShaderMap.insert(std::pair(lookupName, pixelShader)); }
+ 
 	static void AddRasterState(D3D11_RASTERIZER_DESC desc, std::string lookupName);
 	static void AddSamplerState(D3D11_SAMPLER_DESC desc, std::string lookupName);
 	static void AddMesh(std::shared_ptr<Mesh> mesh, std::string lookupName) { m_meshMap.insert(std::pair(lookupName, mesh)); }
@@ -41,9 +46,12 @@ public:
 	template <typename T>
 	static void AddConstantBuffer(std::string lookupName, D3D11_USAGE usage, UINT CPUAccessFlags);
 
-	static Microsoft::WRL::ComPtr<ID3D11VertexShader> GetVertexShader(std::string lookupName) { MAP_LOOKUP(m_vertexShaderMap, lookupName); }
-	static Microsoft::WRL::ComPtr<ID3D11InputLayout> GetInputLayout(std::string lookupName) { MAP_LOOKUP(m_inputLayoutMap, lookupName); }
-	static Microsoft::WRL::ComPtr<ID3D11PixelShader> GetPixelShader(std::string lookupName) { MAP_LOOKUP(m_pixelShaderMap, lookupName); }
+
+	static std::shared_ptr<VertexShader> GetVertexShader(std::string lookupName) { MAP_LOOKUP(m_vertexShaderMap, lookupName); }
+	static std::shared_ptr<InputLayout> GetInputLayout(std::string lookupName) { MAP_LOOKUP(m_inputLayoutMap, lookupName); }
+	static std::shared_ptr<PixelShader> GetPixelShader(std::string lookupName) { MAP_LOOKUP(m_pixelShaderMap, lookupName); }
+
+
 	static Microsoft::WRL::ComPtr<ID3D11Buffer> GetConstantBuffer(std::string lookupName) { MAP_LOOKUP(m_constantBufferMap, lookupName); }
 	static Microsoft::WRL::ComPtr<ID3D11RasterizerState> GetRasterState(std::string lookupName) { MAP_LOOKUP(m_rasterStateMap, lookupName); }
 	static Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(std::string lookupName) { MAP_LOOKUP(m_samplerStateMap, lookupName); }
@@ -57,9 +65,11 @@ private:
 
 	static std::shared_ptr<DeviceResources> m_deviceResources;
 
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>>	m_vertexShaderMap;
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>>		m_inputLayoutMap;
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>>		m_pixelShaderMap;
+	static std::map<std::string, std::shared_ptr<VertexShader>> m_vertexShaderMap;
+	static std::map<std::string, std::shared_ptr<InputLayout>> m_inputLayoutMap;
+	static std::map<std::string, std::shared_ptr<PixelShader>> m_pixelShaderMap;
+
+
 	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11Buffer>>			m_constantBufferMap;
 	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11RasterizerState>> m_rasterStateMap;
 	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>>	m_samplerStateMap;

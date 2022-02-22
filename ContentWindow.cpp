@@ -111,61 +111,71 @@ ContentWindow::~ContentWindow()
 void ContentWindow::ObjectStoreAddShaders()
 {
 	// Basic Cube ==================================================================================================
-	const D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"VertexShader.cso", ied, static_cast<UINT>(std::size(ied)), "basic-cube-vertex-shader");
-	ObjectStore::AddPixelShader(L"PixelShader.cso", "basic-cube-pixel-shader");
+	std::shared_ptr<InputLayout> basicCubeLayout = std::make_shared<InputLayout>(m_deviceResources, L"VertexShader.cso");
+	basicCubeLayout->AddDescription("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	basicCubeLayout->CreateLayout();
+
+	ObjectStore::AddInputLayout("basic-cube-vertex-shader", basicCubeLayout);
+	ObjectStore::AddVertexShader("basic-cube-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, basicCubeLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddPixelShader("basic-cube-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PixelShader.cso"));
+
 
 	// Terrain =====================================================================================================
-	const D3D11_INPUT_ELEMENT_DESC terrainDesc[] =
-	{
-		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainVertexShader.cso", terrainDesc, static_cast<UINT>(std::size(terrainDesc)), "terrain-vertex-shader");
-	ObjectStore::AddPixelShader(L"TerrainPixelShader.cso", "terrain-pixel-shader");
+	std::shared_ptr<InputLayout> terrainLayout = std::make_shared<InputLayout>(m_deviceResources, L"TerrainVertexShader.cso");
+	terrainLayout->AddDescription("POSITION", 0,    DXGI_FORMAT_R32G32B32_FLOAT, 0,                            0, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainLayout->AddDescription(   "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainLayout->CreateLayout();
+
+	ObjectStore::AddInputLayout("terrain-vertex-shader", terrainLayout);
+	ObjectStore::AddVertexShader("terrain-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddPixelShader("terrain-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainPixelShader.cso"));
+
 
 	// Terrain Texture ==============================================================================================
-	const D3D11_INPUT_ELEMENT_DESC terrainTextureDesc[] =
-	{
-		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"TerrainTextureVertexShader.cso", terrainTextureDesc, static_cast<UINT>(std::size(terrainTextureDesc)), "terrain-texture-vertex-shader");
-	ObjectStore::AddPixelShader(L"TerrainTexturePixelShader.cso", "terrain-texture-pixel-shader");
+	std::shared_ptr<InputLayout> terrainTextureLayout = std::make_shared<InputLayout>(m_deviceResources, L"TerrainTextureVertexShader.cso");
+	terrainTextureLayout->AddDescription("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,                            0, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainTextureLayout->AddDescription("TEXCOORD", 0,    DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainTextureLayout->AddDescription(  "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainTextureLayout->AddDescription( "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainTextureLayout->AddDescription("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainTextureLayout->AddDescription(   "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	terrainTextureLayout->CreateLayout();
+
+	ObjectStore::AddInputLayout("terrain-texture-vertex-shader", terrainTextureLayout);
+	ObjectStore::AddVertexShader("terrain-texture-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainTextureLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddPixelShader("terrain-texture-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainTexturePixelShader.cso"));
+
 
 	// Phong ======================================================================================================
-	const D3D11_INPUT_ELEMENT_DESC phongVertexDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"PhongVertexShader.cso", phongVertexDesc, static_cast<UINT>(std::size(phongVertexDesc)), "phong-vertex-shader");
-	ObjectStore::AddPixelShader(L"PhongPixelShader.cso", "phong-pixel-shader");
+	std::shared_ptr<InputLayout> phongLayout = std::make_shared<InputLayout>(m_deviceResources, L"PhongVertexShader.cso");
+	phongLayout->AddDescription("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,                            0, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	phongLayout->AddDescription(  "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	phongLayout->CreateLayout();
+
+	ObjectStore::AddInputLayout("phong-vertex-shader", phongLayout);
+	ObjectStore::AddVertexShader("phong-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, phongLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddPixelShader("phong-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PhongPixelShader.cso"));
 
 
 	// Sky Dome ======================================================================================================
-	const D3D11_INPUT_ELEMENT_DESC skyDomeVertexDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"SkyDomeVertexShader.cso", skyDomeVertexDesc, static_cast<UINT>(std::size(skyDomeVertexDesc)), "sky-dome-vertex-shader");
-	ObjectStore::AddPixelShader(L"SkyDomePixelShader.cso", "sky-dome-pixel-shader");
+	std::shared_ptr<InputLayout> skyDomeLayout = std::make_shared<InputLayout>(m_deviceResources, L"SkyDomeVertexShader.cso");
+	skyDomeLayout->AddDescription("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	skyDomeLayout->CreateLayout();
+
+	ObjectStore::AddInputLayout("sky-dome-vertex-shader", skyDomeLayout);
+	ObjectStore::AddVertexShader("sky-dome-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, skyDomeLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddPixelShader("sky-dome-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SkyDomePixelShader.cso"));
+
 
 	// Solid color =====================================================================================================
-	const D3D11_INPUT_ELEMENT_DESC solidDesc[] =
-	{
-		{ "POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	ObjectStore::AddVertexShaderAndInputLayout(L"SolidVertexShader.cso", solidDesc, static_cast<UINT>(std::size(solidDesc)), "solid-vertex-shader");
-	ObjectStore::AddPixelShader(L"SolidPixelShader.cso", "solid-pixel-shader");
+	std::shared_ptr<InputLayout> solidColorLayout = std::make_shared<InputLayout>(m_deviceResources, L"SolidVertexShader.cso");
+	solidColorLayout->AddDescription("POSITION", 0,    DXGI_FORMAT_R32G32B32_FLOAT, 0,                            0, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	solidColorLayout->AddDescription(   "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	solidColorLayout->CreateLayout();
+
+	ObjectStore::AddInputLayout("solid-vertex-shader", solidColorLayout);
+	ObjectStore::AddVertexShader("solid-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, solidColorLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddPixelShader("solid-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SolidPixelShader.cso"));
 }
 void ContentWindow::ObjectStoreAddTerrains()
 {

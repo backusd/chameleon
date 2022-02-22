@@ -221,7 +221,7 @@ void Scene::SetupCubePipeline()
 		"depth-enabled-depth-stencil-state",
 		vertexConstantBuffers,
 		pixelConstantBuffers
-		);
+	);
 
 	m_cubePipeline->AddRenderable(std::make_shared<Box>(1.0f));
 	m_cubePipeline->AddRenderable(std::make_shared<Box>(XMFLOAT3(2.0f, 0.0f, 0.0f), 0.5f));
@@ -391,7 +391,6 @@ void Scene::SetupTerrainCubePipeline()
 	}
 	);
 }
-
 
 void Scene::SetupSkyDomePipeline()
 {

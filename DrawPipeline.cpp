@@ -77,9 +77,14 @@ void DrawPipeline::Draw()
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
 	// Set shaders and input layout
-	context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
-	context->IASetInputLayout(m_inputLayout.Get());
-	context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
+	
+	//context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
+	//context->IASetInputLayout(m_inputLayout.Get());
+	//context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
+
+	m_inputLayout->Bind();
+	m_vertexShader->Bind();
+	m_pixelShader->Bind();
 
 	// Set index and vertex buffers
 	m_mesh->PreparePipeline();
