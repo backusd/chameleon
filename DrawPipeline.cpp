@@ -104,7 +104,7 @@ void DrawPipeline::Draw()
 	m_pixelShader->Bind();
 
 	// Set index and vertex buffers
-	m_mesh->PreparePipeline();
+	m_mesh->Bind();
 
 	// Set the pixel shader and vertex shader constant buffers
 	if (m_vertexShaderConstantBufferArray != nullptr) m_vertexShaderConstantBufferArray->Bind();

@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
 Mesh::Mesh(std::shared_ptr<DeviceResources> deviceResources) : 
-	m_deviceResources(deviceResources),
+	Bindable(deviceResources),
 	m_topology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST),
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
@@ -11,21 +11,21 @@ Mesh::Mesh(std::shared_ptr<DeviceResources> deviceResources) :
 {
 }
 
-void Mesh::PreparePipeline()
+void Mesh::Bind()
 {
-	// Prepare the pipeline by doing the following: (NOTE: This should only be run once before rendering the mesh
-	//												 potentially many times)
-	//		IASetPrimitiveTopology
-	//		IASetVertexBuffers
-	//		IASetIndexBuffer
-
+	INFOMAN(m_deviceResources);
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 
-	context->IASetPrimitiveTopology(m_topology);
+	GFX_THROW_INFO_ONLY(
+		context->IASetPrimitiveTopology(m_topology)
+	);
 
 	const UINT stride = m_sizeOfVertex;
 	const UINT offset = 0u;
-	context->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-
-	context->IASetIndexBuffer(m_indexBuffer.Get(), m_indexFormat, 0u);
+	GFX_THROW_INFO_ONLY(
+		context->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &stride, &offset)
+	);
+	GFX_THROW_INFO_ONLY(
+		context->IASetIndexBuffer(m_indexBuffer.Get(), m_indexFormat, 0u)
+	);
 }

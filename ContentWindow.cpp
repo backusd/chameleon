@@ -183,9 +183,9 @@ void ContentWindow::ObjectStoreAddTerrains()
 }
 void ContentWindow::ObjectStoreAddMeshes()
 {
-	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources, true), "box-filled-mesh");
-	ObjectStore::AddMesh(std::make_shared<BoxMesh>(m_deviceResources, false), "box-outline-mesh");
-	ObjectStore::AddMesh(std::make_shared<SkyDomeMesh>(m_deviceResources), "sky-dome-mesh");
+	ObjectStore::AddMesh("box-filled-mesh", std::make_shared<BoxMesh>(m_deviceResources, true));
+	ObjectStore::AddMesh("box-outline-mesh", std::make_shared<BoxMesh>(m_deviceResources, false));
+	ObjectStore::AddMesh("sky-dome-mesh", std::make_shared<SkyDomeMesh>(m_deviceResources));
 
 	// Add terrain meshes sequentially
 	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
@@ -193,7 +193,7 @@ void ContentWindow::ObjectStoreAddMeshes()
 	{
 		std::ostringstream oss;
 		oss << "terrain_" << iii;
-		ObjectStore::AddMesh(terrain->GetTerrainCell(iii), oss.str());
+		ObjectStore::AddMesh(oss.str(), terrain->GetTerrainCell(iii));
 	}
 }
 void ContentWindow::ObjectStoreAddConstantBuffers()

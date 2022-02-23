@@ -1,24 +1,18 @@
 #pragma once
 #include "pch.h"
-
-#include "DeviceResources.h"
-#include "DeviceResourcesException.h"
-
-#include <memory>
+#include "Bindable.h"
 
 
-class Mesh
+class Mesh : public Bindable
 {
 public:
 	Mesh(std::shared_ptr<DeviceResources> deviceResources);
 	virtual ~Mesh() = default;
 
-	void PreparePipeline();
+	void Bind() override;
 	unsigned int IndexCount() { return m_indexCount; }
 
 protected:
-	std::shared_ptr<DeviceResources> m_deviceResources;
-
 	D3D11_PRIMITIVE_TOPOLOGY m_topology;
 	DXGI_FORMAT m_indexFormat;
 
