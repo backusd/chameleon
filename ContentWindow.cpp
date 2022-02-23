@@ -281,10 +281,6 @@ void ContentWindow::ObjectStoreAddSamplerStates()
 }
 void ContentWindow::ObjectStoreAddTextures()
 {
-	//std::string filename = "dirt01d.tga";
-	//ObjectStore::AddTexture("terrain-texture", std::make_shared<Texture>(m_deviceResources, filename));
-	//ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, "dirt01n.tga"), "terrain-normal-map-texture");
-
 	// MAKE SURE TO MODIFY THE TEXTURE DESCRIPTION STRUCT COMPLETELY PRIOR TO CALLING A LOAD* FUNCTION
 
 	std::shared_ptr<Texture> dirt = std::make_shared<Texture>(m_deviceResources);
@@ -307,8 +303,12 @@ void ContentWindow::ObjectStoreAddTextures()
 }
 void ContentWindow::ObjectStoreAddDepthStencilStates()
 {
-	ObjectStore::AddDepthStencilState(std::make_shared<DepthStencilState>(m_deviceResources, true), "depth-enabled-depth-stencil-state");
-	ObjectStore::AddDepthStencilState(std::make_shared<DepthStencilState>(m_deviceResources, false), "depth-disabled-depth-stencil-state");
+	std::shared_ptr<DepthStencilState> depthEnabled = std::make_shared<DepthStencilState>(m_deviceResources, 1);
+	ObjectStore::AddDepthStencilState("depth-enabled-depth-stencil-state", depthEnabled);
+
+	std::shared_ptr<DepthStencilState> depthDisabled = std::make_shared<DepthStencilState>(m_deviceResources, 1);
+	depthDisabled->DepthEnable(false);
+	ObjectStore::AddDepthStencilState("depth-disabled-depth-stencil-state", depthDisabled);
 }
 
 void ContentWindow::Update()

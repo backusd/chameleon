@@ -44,13 +44,13 @@ public:
 	static void AddConstantBufferArray(std::string lookupName, std::shared_ptr<ConstantBufferArray> constantBufferArray) { m_constantBufferArrayMap.insert(std::pair(lookupName, constantBufferArray)); }
 	static void AddSamplerState(std::string lookupName, std::shared_ptr<SamplerState> samplerState) { m_samplerStateMap.insert(std::pair(lookupName, samplerState)); }
 	static void AddMesh(std::string lookupName, std::shared_ptr<Mesh> mesh) { m_meshMap.insert(std::pair(lookupName, mesh)); }
-	
-	
 	static void AddTexture(std::string lookupName, std::shared_ptr<Texture> texture) { m_textureMap.insert(std::pair(lookupName, texture)); }
 	static void AddTextureArray(std::string lookupName, std::shared_ptr<TextureArray> textureArray) { m_textureArrayMap.insert(std::pair(lookupName, textureArray)); }
 	
 	
-	static void AddDepthStencilState(std::shared_ptr<DepthStencilState> depthStencilState, std::string lookupName) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); }
+	static void AddDepthStencilState(std::string lookupName, std::shared_ptr<DepthStencilState> depthStencilState) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); }
+	
+	
 	static void AddTerrain(std::shared_ptr<TerrainMesh> terrainMesh, std::string lookupName) { m_terrainMeshMap.insert(std::pair(lookupName, terrainMesh)); }
 
 
@@ -67,6 +67,8 @@ public:
 
 	
 	static std::shared_ptr<DepthStencilState> GetDepthStencilState(std::string lookupName) { MAP_LOOKUP(m_depthStencilStateMap, lookupName); }
+	
+	
 	static std::shared_ptr<TerrainMesh> GetTerrain(std::string lookupName) { MAP_LOOKUP(m_terrainMeshMap, lookupName); }
 
 private:
@@ -86,6 +88,8 @@ private:
 	static std::map<std::string, std::shared_ptr<TextureArray>> m_textureArrayMap;
 	
 	static std::map<std::string, std::shared_ptr<DepthStencilState>> m_depthStencilStateMap;
+	
+	
 	static std::map<std::string, std::shared_ptr<TerrainMesh>> m_terrainMeshMap;
 
 	

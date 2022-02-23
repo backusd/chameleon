@@ -121,7 +121,7 @@ void DrawPipeline::Draw()
 	if (m_samplerState != nullptr) m_samplerState->Bind();
 
 	// Set the depth stencil state
-	context->OMSetDepthStencilState(m_depthStencilState->GetState().Get(), 1);
+	m_depthStencilState->Bind();
 
 	// loop over each renderable and update the necessary buffers for each rendereable
 	UINT indexCount = m_mesh->IndexCount();
