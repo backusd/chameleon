@@ -22,7 +22,7 @@ class ConstantBufferArray : public Bindable
 public:
 	ConstantBufferArray(std::shared_ptr<DeviceResources> deviceResources, ConstantBufferBindingLocation bindToStage);
 
-	void AddBuffer(std::string lookupName);// { m_buffers.push_back(ObjectStore::GetConstantBuffer(lookupName)); }
+	void AddBuffer(std::string lookupName);
 	void Bind() override;
 
 	void UpdateSubresource(int index, void* data);

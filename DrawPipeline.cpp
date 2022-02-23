@@ -19,7 +19,8 @@ DrawPipeline::DrawPipeline(
 		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
 		m_vertexShaderConstantBufferArray(nullptr),
 		m_pixelShaderConstantBufferArray(nullptr),
-		m_samplerState(nullptr)
+		m_samplerState(nullptr),
+		m_pixelShaderTextureArray(nullptr)
 {
 	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::shared_ptr<ConstantBufferArray>, std::shared_ptr<ConstantBufferArray>) {};
 }
@@ -41,7 +42,8 @@ DrawPipeline::DrawPipeline(
 	m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
 	m_vertexShaderConstantBufferArray(ObjectStore::GetConstantBufferArray(vertexShaderConstantBufferArrayName)),
 	m_pixelShaderConstantBufferArray(nullptr),
-	m_samplerState(nullptr)
+	m_samplerState(nullptr),
+	m_pixelShaderTextureArray(nullptr)
 {
 	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::shared_ptr<ConstantBufferArray>, std::shared_ptr<ConstantBufferArray>) {};
 }
@@ -64,14 +66,15 @@ DrawPipeline::DrawPipeline(
 		m_depthStencilState(ObjectStore::GetDepthStencilState(depthStencilStateName)),
 		m_vertexShaderConstantBufferArray(ObjectStore::GetConstantBufferArray(vertexShaderConstantBufferArrayName)),
 		m_pixelShaderConstantBufferArray(ObjectStore::GetConstantBufferArray(pixelShaderConstantBufferArrayName)),
-		m_samplerState(nullptr)
+		m_samplerState(nullptr),
+		m_pixelShaderTextureArray(nullptr)
 {
 	PerRendererableUpdate = [](std::shared_ptr<Renderable>, std::shared_ptr<Mesh>, std::shared_ptr<ConstantBufferArray>, std::shared_ptr<ConstantBufferArray>) {};
 }
 
-void DrawPipeline::AddPixelShaderTexture(std::string textureLookupName)
+void DrawPipeline::AddPixelShaderTextureArray(std::string textureLookupName)
 {
-	m_pixelShaderTextures.push_back(ObjectStore::GetTexture(textureLookupName));
+	m_pixelShaderTextureArray = ObjectStore::GetTextureArray(textureLookupName);
 }
 void DrawPipeline::SetSamplerState(std::string sampleStateLookupName)
 {
@@ -113,9 +116,8 @@ void DrawPipeline::Draw()
 	// Set the raster state
 	m_rasterizerState->Bind();
 
-	for (unsigned int iii = 0; iii < m_pixelShaderTextures.size(); ++iii)
-		context->PSSetShaderResources(iii, 1, m_pixelShaderTextures[iii]->GetTexture().GetAddressOf());
-	
+	if (m_pixelShaderTextureArray != nullptr) m_pixelShaderTextureArray->Bind();
+
 	if (m_samplerState != nullptr) m_samplerState->Bind();
 
 	// Set the depth stencil state

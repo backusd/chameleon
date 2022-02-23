@@ -223,6 +223,7 @@
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="TextClass.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureArray.cpp" />
     <ClCompile Include="TextureClass.cpp" />
     <ClCompile Include="TextureException.cpp" />
     <ClCompile Include="UserInterfaceClass.cpp" />
@@ -305,6 +306,7 @@
     <ClInclude Include="Text.h" />
     <ClInclude Include="TextClass.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureArray.h" />
     <ClInclude Include="TextureClass.h" />
     <ClInclude Include="TextureException.h" />
     <ClInclude Include="UserInterfaceClass.h" />

@@ -88,6 +88,12 @@
     <Filter Include="Source Files\Bindable">
       <UniqueIdentifier>{4fe4b959-ef69-413f-be0c-03acc4bfe6f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Bindable\Meshes">
+      <UniqueIdentifier>{56460160-47f5-4997-a9c5-a16a78fce894}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Bindable\Meshes">
+      <UniqueIdentifier>{42abdcc3-bdb1-4c6d-9507-0f0fa077c264}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -195,9 +201,6 @@
     <ClCompile Include="MoveLookController.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
@@ -216,16 +219,10 @@
     <ClCompile Include="DrawPipeline.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="BoxMesh.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Box.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Terrain.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainMesh.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="TerrainMeshException.cpp">
@@ -237,14 +234,8 @@
     <ClCompile Include="FontFamily.cpp">
       <Filter>Source Files\HUD</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="TextureException.cpp">
       <Filter>Source Files\Exceptions</Filter>
-    </ClCompile>
-    <ClCompile Include="SkyDomeMesh.cpp">
-      <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="SkyDomeException.cpp">
       <Filter>Source Files\Exceptions</Filter>
@@ -253,9 +244,6 @@
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="DepthStencilState.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="SphereMesh.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="imgui.cpp">
@@ -278,9 +266,6 @@
     </ClCompile>
     <ClCompile Include="imgui_impl_win32.cpp">
       <Filter>Source Files\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainCellMesh.cpp">
-      <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Frustum.cpp">
       <Filter>Source Files\Scene</Filter>
@@ -313,6 +298,30 @@
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
     <ClCompile Include="SamplerState.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxMesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyDomeMesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereMesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainCellMesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainMesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureArray.cpp">
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
   </ItemGroup>
@@ -428,9 +437,6 @@
     <ClInclude Include="MoveLookController.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
@@ -452,9 +458,6 @@
     <ClInclude Include="DrawPipeline.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="BoxMesh.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Box.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
@@ -462,9 +465,6 @@
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainMesh.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="TerrainMeshException.h">
@@ -476,14 +476,8 @@
     <ClInclude Include="FontFamily.h">
       <Filter>Header Files\HUD</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="TextureException.h">
       <Filter>Header Files\Exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="SkyDomeMesh.h">
-      <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="SkyDomeException.h">
       <Filter>Header Files\Exceptions</Filter>
@@ -492,9 +486,6 @@
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="DepthStencilState.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="SphereMesh.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="imgui.h">
@@ -520,9 +511,6 @@
     </ClInclude>
     <ClInclude Include="imstb_truetype.h">
       <Filter>Source Files\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainCellMesh.h">
-      <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Frustum.h">
       <Filter>Header Files\Scene</Filter>
@@ -555,6 +543,30 @@
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
     <ClInclude Include="SamplerState.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxMesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyDomeMesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereMesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainMesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainCellMesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureArray.h">
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,6 +9,7 @@
 #include "StepTimer.h"
 #include "HLSLStructures.h"
 #include "Texture.h"
+#include "TextureArray.h"
 
 
 #include <string>
@@ -64,7 +65,7 @@ public:
 
 	void AddRenderable(std::shared_ptr<Renderable> renderable) { m_renderables.push_back(renderable); }
 	
-	void AddPixelShaderTexture(std::string textureLookupName);
+	void AddPixelShaderTextureArray(std::string textureLookupName);
 	void SetSamplerState(std::string sampleStateLookupName);
 
 	std::shared_ptr<Renderable> GetRenderable(int index) { return m_renderables[index]; }
@@ -102,7 +103,8 @@ private:
 	
 	std::shared_ptr<RasterizerState> m_rasterizerState;
 
-	std::vector<std::shared_ptr<Texture>>		m_pixelShaderTextures;
+	std::shared_ptr<TextureArray> m_pixelShaderTextureArray;
+
 	std::vector<std::shared_ptr<Renderable>>	m_renderables;
 
 	std::shared_ptr<DepthStencilState>			m_depthStencilState;

@@ -33,7 +33,7 @@ void ConstantBufferArray::BindCS()
 {
 	INFOMAN(m_deviceResources);
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->CSSetConstantBuffers(0u, m_rawBufferPointers.size(), m_rawBufferPointers.data())
+		m_deviceResources->D3DDeviceContext()->CSSetConstantBuffers(0u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
 	);
 }
 
@@ -41,7 +41,7 @@ void ConstantBufferArray::BindVS()
 {
 	INFOMAN(m_deviceResources);
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, m_rawBufferPointers.size(), m_rawBufferPointers.data())
+		m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
 	);
 }
 
@@ -49,7 +49,7 @@ void ConstantBufferArray::BindHS()
 {
 	INFOMAN(m_deviceResources);
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->HSSetConstantBuffers(0u, m_rawBufferPointers.size(), m_rawBufferPointers.data())
+		m_deviceResources->D3DDeviceContext()->HSSetConstantBuffers(0u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
 	);
 }
 
@@ -57,7 +57,7 @@ void ConstantBufferArray::BindDS()
 {
 	INFOMAN(m_deviceResources);
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->DSSetConstantBuffers(0u, m_rawBufferPointers.size(), m_rawBufferPointers.data())
+		m_deviceResources->D3DDeviceContext()->DSSetConstantBuffers(0u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
 	);
 }
 
@@ -65,7 +65,7 @@ void ConstantBufferArray::BindGS()
 {
 	INFOMAN(m_deviceResources);
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->GSSetConstantBuffers(0u, m_rawBufferPointers.size(), m_rawBufferPointers.data())
+		m_deviceResources->D3DDeviceContext()->GSSetConstantBuffers(0u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
 	);
 }
 
@@ -73,7 +73,7 @@ void ConstantBufferArray::BindPS()
 {
 	INFOMAN(m_deviceResources);
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, m_rawBufferPointers.size(), m_rawBufferPointers.data())
+		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
 	);
 }
 

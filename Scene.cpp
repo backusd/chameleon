@@ -279,8 +279,7 @@ void Scene::SetupTerrainPipeline()
 			"terrain-buffers-PS"
 			));
 
-		m_terrainPipelines[iii]->AddPixelShaderTexture("terrain-texture");
-		m_terrainPipelines[iii]->AddPixelShaderTexture("terrain-normal-map-texture");
+		m_terrainPipelines[iii]->AddPixelShaderTextureArray("dirt-terrain-texture-array");
 
 		m_terrainPipelines[iii]->SetSamplerState("terrain-texture-sampler");
 

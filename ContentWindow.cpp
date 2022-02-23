@@ -281,10 +281,29 @@ void ContentWindow::ObjectStoreAddSamplerStates()
 }
 void ContentWindow::ObjectStoreAddTextures()
 {
-	//std::string filename = "test.tga";
-	std::string filename = "dirt01d.tga";
-	ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, filename), "terrain-texture");
-	ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, "dirt01n.tga"), "terrain-normal-map-texture");
+	//std::string filename = "dirt01d.tga";
+	//ObjectStore::AddTexture("terrain-texture", std::make_shared<Texture>(m_deviceResources, filename));
+	//ObjectStore::AddTexture(std::make_shared<Texture>(m_deviceResources, "dirt01n.tga"), "terrain-normal-map-texture");
+
+	// MAKE SURE TO MODIFY THE TEXTURE DESCRIPTION STRUCT COMPLETELY PRIOR TO CALLING A LOAD* FUNCTION
+
+	std::shared_ptr<Texture> dirt = std::make_shared<Texture>(m_deviceResources);
+	dirt->LoadTarga("dirt01d.tga");
+	ObjectStore::AddTexture("terrain-texture", dirt);
+
+	std::shared_ptr<Texture> dirtNormals = std::make_shared<Texture>(m_deviceResources);
+	dirtNormals->LoadTarga("dirt01n.tga");
+	ObjectStore::AddTexture("terrain-normal-map-texture", dirtNormals);
+
+
+	// Now create a texture array that can be bound to the pipeline
+
+	std::shared_ptr<TextureArray> dirtTextureArray = std::make_shared<TextureArray>(m_deviceResources, TextureBindingLocation::PIXEL_SHADER);
+	dirtTextureArray->AddTexture("terrain-texture");
+	dirtTextureArray->AddTexture("terrain-normal-map-texture");
+	ObjectStore::AddTextureArray("dirt-terrain-texture-array", dirtTextureArray);
+
+
 }
 void ContentWindow::ObjectStoreAddDepthStencilStates()
 {

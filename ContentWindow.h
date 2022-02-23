@@ -40,6 +40,7 @@
 #include "ConstantBuffer.h"
 #include "ConstantBufferArray.h"
 #include "SamplerState.h"
+#include "TextureArray.h"
 
 #include "BoxMesh.h"
 #include "Terrain.h"

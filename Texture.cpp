@@ -1,69 +1,44 @@
 #include "Texture.h"
 
 
-Texture::Texture(std::shared_ptr<DeviceResources> deviceResources, std::string filename) :
+Texture::Texture(std::shared_ptr<DeviceResources> deviceResources) :
 	m_deviceResources(deviceResources)
+{
+	Reset();
+}
+
+void Texture::Reset()
+{
+	// Load default texture and SRV values
+	// (don't load height/width because the Load* function that loads the image file will take care of that)
+	m_textureDesc.MipLevels = 0;
+	m_textureDesc.ArraySize = 1;
+	m_textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	m_textureDesc.SampleDesc.Count = 1;
+	m_textureDesc.SampleDesc.Quality = 0;
+	m_textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	m_textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	m_textureDesc.CPUAccessFlags = 0;
+	m_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
+	m_srvDesc.Format = m_textureDesc.Format;
+	m_srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	m_srvDesc.Texture2D.MostDetailedMip = 0;
+	m_srvDesc.Texture2D.MipLevels = -1;
+}
+
+void Texture::LoadTarga(std::string filename)
 {
 	INFOMAN(m_deviceResources);
 
-	bool result;
-	int height, width;
-	D3D11_TEXTURE2D_DESC textureDesc;
-	unsigned int rowPitch;
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-
-	// Load the targa image data into memory.
-	LoadTarga(filename, height, width);
-
-	// Setup the description of the texture.
-	textureDesc.Height = height;
-	textureDesc.Width = width;
-	textureDesc.MipLevels = 0;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-	// Create the empty texture.
-	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateTexture2D(&textureDesc, NULL, &m_texture));
-
-	// Set the row pitch of the targa image data.
-	rowPitch = (width * 4) * sizeof(unsigned char);
-
-	// Copy the targa image data into the texture.
-	m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_texture.Get(), 0, NULL, m_targaData, rowPitch, 0);
-
-	// Setup the shader resource view description.
-	srvDesc.Format = textureDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = -1;
-
-	// Create the shader resource view for the texture.
-	GFX_THROW_INFO(
-		m_deviceResources->D3DDevice()->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_textureView.ReleaseAndGetAddressOf())
-	);
-
-	// Generate mipmaps for this texture.
-	m_deviceResources->D3DDeviceContext()->GenerateMips(m_textureView.Get());
-
-	// Release the targa image data now that the image data has been loaded into the texture.
-	delete[] m_targaData;
-	m_targaData = 0;
-}
-
-void Texture::LoadTarga(std::string filename, int& height, int& width)
-{
 	int error, bpp, imageSize, index, i, j, k;
 	FILE* filePtr;
 	unsigned int count;
 	TargaHeader targaFileHeader;
 	unsigned char* targaImage;
+	unsigned char* targaData;
 	std::ostringstream oss;
+	int height, width;
 
 	// Open the targa file for reading in binary.
 	error = fopen_s(&filePtr, filename.c_str(), "rb");
@@ -120,7 +95,7 @@ void Texture::LoadTarga(std::string filename, int& height, int& width)
 	}
 
 	// Allocate memory for the targa destination data.
-	m_targaData = new unsigned char[imageSize];
+	targaData = new unsigned char[imageSize];
 
 	// Initialize the index into the targa destination data array.
 	index = 0;
@@ -133,10 +108,10 @@ void Texture::LoadTarga(std::string filename, int& height, int& width)
 	{
 		for (i = 0; i < width; i++)
 		{
-			m_targaData[index + 0] = targaImage[k + 2];  // Red.
-			m_targaData[index + 1] = targaImage[k + 1];  // Green.
-			m_targaData[index + 2] = targaImage[k + 0];  // Blue
-			m_targaData[index + 3] = targaImage[k + 3];  // Alpha
+			targaData[index + 0] = targaImage[k + 2];  // Red.
+			targaData[index + 1] = targaImage[k + 1];  // Green.
+			targaData[index + 2] = targaImage[k + 0];  // Blue
+			targaData[index + 3] = targaImage[k + 3];  // Alpha
 
 			// Increment the indexes into the targa data.
 			k += 4;
@@ -150,4 +125,31 @@ void Texture::LoadTarga(std::string filename, int& height, int& width)
 	// Release the targa image data now that it was copied into the destination array.
 	delete[] targaImage;
 	targaImage = 0;
+
+	// ===================================================================
+	// Now load the data into the texture
+	m_textureDesc.Height = height;
+	m_textureDesc.Width = width;
+
+	// Create the empty texture.
+	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateTexture2D(&m_textureDesc, NULL, &m_texture));
+
+	// Set the row pitch of the targa image data.
+	unsigned int rowPitch = (width * 4) * sizeof(unsigned char);
+
+	// Copy the targa image data into the texture.
+	GFX_THROW_INFO_ONLY(
+		m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_texture.Get(), 0, NULL, targaData, rowPitch, 0)
+	);
+
+
+	// Create the shader resource view for the texture.
+	GFX_THROW_INFO(
+		m_deviceResources->D3DDevice()->CreateShaderResourceView(m_texture.Get(), &m_srvDesc, m_textureView.ReleaseAndGetAddressOf())
+	);
+
+	// Generate mipmaps for this texture.
+	GFX_THROW_INFO_ONLY(
+		m_deviceResources->D3DDeviceContext()->GenerateMips(m_textureView.Get())
+	);
 }
