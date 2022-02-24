@@ -23,11 +23,14 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 
 	m_frustum = std::make_shared<Frustum>(1000.0f, m_viewMatrix, m_projectionMatrix);
 
-	m_cube = std::make_shared<Cube>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
-	m_cube->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_cube->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	m_cube->SetProjectionMatrix(m_projectionMatrix);
+	// Cube
+	std::shared_ptr<Cube> cube = std::make_shared<Cube>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	cube->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	cube->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	cube->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(cube);
 
+	// 
 
 	//SetupCubePipeline();
 	SetupTerrainPipeline();
@@ -148,14 +151,13 @@ void Scene::WindowResized()
 	CreateWindowSizeDependentResources();
 
 	// Update the bindables to know about the new projection matrix
-	m_cube->SetProjectionMatrix(m_projectionMatrix);
+	for (std::shared_ptr<Drawable> drawable : m_drawables)
+		drawable->SetProjectionMatrix(m_projectionMatrix);
 }
 
 void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
 	// Update the move look control and get back the new view matrix
-	// m_moveLookController->Update(timer, keyboard, mouse);
-	// m_viewMatrix = m_moveLookController->ViewMatrix();
 	m_moveLookControllers[m_moveLookControllerIndex]->Update(timer, keyboard, mouse);
 	m_viewMatrix = m_moveLookControllers[m_moveLookControllerIndex]->ViewMatrix();
 
@@ -187,16 +189,19 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 			cell->GetMinDepth()
 		);
 	}
-
-	// Update the cube bindable
-	m_cube->Update(timer);
+	
+	// Update all drawables
+	for (std::shared_ptr<Drawable> drawable : m_drawables)
+		drawable->Update(timer);
 
 	// If we are in DEBUG, then the move look controller may change, so update it 
 #ifndef NDEBUG
 	if (m_moveLookControllerIndexPrevious != m_moveLookControllerIndex)
 	{
 		m_moveLookControllerIndexPrevious = m_moveLookControllerIndex;
-		m_cube->SetMoveLookController(m_moveLookControllers[m_moveLookControllerIndex]);
+
+		for (std::shared_ptr<Drawable> drawable : m_drawables)
+			drawable->SetMoveLookController(m_moveLookControllers[m_moveLookControllerIndex]);
 	}
 #endif
 
@@ -216,8 +221,8 @@ void Scene::Draw()
 	m_skyDomePipeline->Draw();
 
 
-
-	m_cube->Draw();
+	for (std::shared_ptr<Drawable> drawable : m_drawables)
+		drawable->Draw();
 
 
 	// Set the cube material once for all cubes then draw them

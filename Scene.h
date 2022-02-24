@@ -17,9 +17,12 @@
 #include "Frustum.h"
 #include "FlyMoveLookController.h"
 #include "CenterOnOriginMoveLookController.h"
+
+#include "Drawable.h"
 #include "Cube.h"
 
 #include <memory>
+#include <vector>
 
 
 
@@ -86,8 +89,8 @@ private:
 	// Cameras
 	std::vector<std::shared_ptr<MoveLookController>> m_moveLookControllers;
 
-	// Bindables
-	std::shared_ptr<Cube> m_cube;
+	// Drawables
+	std::vector<std::shared_ptr<Drawable>> m_drawables;
 
 	// ImGui ====================================================================
 	//
