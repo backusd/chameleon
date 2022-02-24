@@ -127,7 +127,6 @@ void DrawPipeline::Draw()
 	UINT indexCount = m_mesh->IndexCount();
 	for (std::shared_ptr<Renderable> renderable : m_renderables)
 	{	
-		//PerRendererableUpdate(renderable, m_mesh, m_vertexShaderConstantBuffers, m_pixelShaderConstantBuffers);
 		PerRendererableUpdate(renderable, m_mesh, m_vertexShaderConstantBufferArray, m_pixelShaderConstantBufferArray);
 
 		GFX_THROW_INFO_ONLY(context->DrawIndexed(indexCount, 0u, 0u));

@@ -94,6 +94,12 @@
     <Filter Include="Source Files\Bindable\Meshes">
       <UniqueIdentifier>{42abdcc3-bdb1-4c6d-9507-0f0fa077c264}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Drawable">
+      <UniqueIdentifier>{32032c1b-1f2c-411c-a16e-80785349008d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Drawable">
+      <UniqueIdentifier>{ebb4e4b5-b146-47f1-8895-1c7dae32d518}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -323,6 +329,12 @@
     </ClCompile>
     <ClCompile Include="DepthStencilState.cpp">
       <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawable.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
+      <Filter>Source Files\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -568,6 +580,12 @@
     </ClInclude>
     <ClInclude Include="DepthStencilState.h">
       <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Header Files\Drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

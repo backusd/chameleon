@@ -17,6 +17,7 @@
 #include "Frustum.h"
 #include "FlyMoveLookController.h"
 #include "CenterOnOriginMoveLookController.h"
+#include "Cube.h"
 
 #include <memory>
 
@@ -29,6 +30,7 @@ public:
 	Scene(const Scene&) = delete;
 	Scene& operator=(const Scene&) = delete;
 
+	void WindowResized();
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
 	void Draw();
 
@@ -82,7 +84,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		m_solidMaterialPropertiesConstantBuffer;
 
 	// Cameras
-	std::vector<std::unique_ptr<MoveLookController>> m_moveLookControllers;
+	std::vector<std::shared_ptr<MoveLookController>> m_moveLookControllers;
+
+	// Bindables
+	std::shared_ptr<Cube> m_cube;
 
 	// ImGui ====================================================================
 	//
@@ -97,4 +102,5 @@ private:
 
 	// View Mode:
 	int m_moveLookControllerIndex;
+	int m_moveLookControllerIndexPrevious;
 };

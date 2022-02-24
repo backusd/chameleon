@@ -16,6 +16,7 @@
 #include "ConstantBufferArray.h"
 #include "SamplerState.h"
 #include "TextureArray.h"
+#include "Bindable.h"
 
 #include <memory>
 #include <string>
@@ -37,21 +38,23 @@ public:
 	static void DestructObjects();
 
 	static void AddInputLayout(std::string lookupName, std::shared_ptr<InputLayout> inputLayout) { m_inputLayoutMap.insert(std::pair(lookupName, inputLayout)); }
-	static void AddVertexShader(std::string lookupName, std::shared_ptr<VertexShader> vertexShader) { m_vertexShaderMap.insert(std::pair(lookupName, vertexShader)); }
-	static void AddPixelShader(std::string lookupName, std::shared_ptr<PixelShader> pixelShader) { m_pixelShaderMap.insert(std::pair(lookupName, pixelShader)); }
- 	static void AddRasterizerState(std::string lookupName, std::shared_ptr<RasterizerState> rasterizerState) { m_rasterizerStateMap.insert(std::pair(lookupName, rasterizerState)); }
+	static void AddVertexShader(std::string lookupName, std::shared_ptr<VertexShader> vertexShader) { m_vertexShaderMap.insert(std::pair(lookupName, vertexShader)); m_bindablesMap.insert(std::pair(lookupName, vertexShader)); }
+	static void AddPixelShader(std::string lookupName, std::shared_ptr<PixelShader> pixelShader) { m_pixelShaderMap.insert(std::pair(lookupName, pixelShader)); m_bindablesMap.insert(std::pair(lookupName, pixelShader)); }
+ 	static void AddRasterizerState(std::string lookupName, std::shared_ptr<RasterizerState> rasterizerState) { m_rasterizerStateMap.insert(std::pair(lookupName, rasterizerState)); m_bindablesMap.insert(std::pair(lookupName, rasterizerState)); }
 	static void AddConstantBuffer(std::string lookupName, std::shared_ptr<ConstantBuffer> constantBuffer) { m_constantBufferMap.insert(std::pair(lookupName, constantBuffer)); }
-	static void AddConstantBufferArray(std::string lookupName, std::shared_ptr<ConstantBufferArray> constantBufferArray) { m_constantBufferArrayMap.insert(std::pair(lookupName, constantBufferArray)); }
-	static void AddSamplerState(std::string lookupName, std::shared_ptr<SamplerState> samplerState) { m_samplerStateMap.insert(std::pair(lookupName, samplerState)); }
+	static void AddConstantBufferArray(std::string lookupName, std::shared_ptr<ConstantBufferArray> constantBufferArray) { m_constantBufferArrayMap.insert(std::pair(lookupName, constantBufferArray)); m_bindablesMap.insert(std::pair(lookupName, constantBufferArray)); }
+	static void AddSamplerState(std::string lookupName, std::shared_ptr<SamplerState> samplerState) { m_samplerStateMap.insert(std::pair(lookupName, samplerState)); m_bindablesMap.insert(std::pair(lookupName, samplerState)); }
 	static void AddMesh(std::string lookupName, std::shared_ptr<Mesh> mesh) { m_meshMap.insert(std::pair(lookupName, mesh)); }
 	static void AddTexture(std::string lookupName, std::shared_ptr<Texture> texture) { m_textureMap.insert(std::pair(lookupName, texture)); }
-	static void AddTextureArray(std::string lookupName, std::shared_ptr<TextureArray> textureArray) { m_textureArrayMap.insert(std::pair(lookupName, textureArray)); }
-	
-	
-	static void AddDepthStencilState(std::string lookupName, std::shared_ptr<DepthStencilState> depthStencilState) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); }
+	static void AddTextureArray(std::string lookupName, std::shared_ptr<TextureArray> textureArray) { m_textureArrayMap.insert(std::pair(lookupName, textureArray)); m_bindablesMap.insert(std::pair(lookupName, textureArray)); }
+	static void AddDepthStencilState(std::string lookupName, std::shared_ptr<DepthStencilState> depthStencilState) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); m_bindablesMap.insert(std::pair(lookupName, depthStencilState)); }
 	
 	
 	static void AddTerrain(std::shared_ptr<TerrainMesh> terrainMesh, std::string lookupName) { m_terrainMeshMap.insert(std::pair(lookupName, terrainMesh)); }
+
+
+	static void AddBindable(std::string lookupName, std::shared_ptr<Bindable> bindable) { m_bindablesMap.insert(std::pair(lookupName, bindable)); }
+
 
 
 	static std::shared_ptr<VertexShader> GetVertexShader(std::string lookupName) { MAP_LOOKUP(m_vertexShaderMap, lookupName); }
@@ -64,12 +67,14 @@ public:
 	static std::shared_ptr<Mesh> GetMesh(std::string lookupName) { MAP_LOOKUP(m_meshMap, lookupName); }
 	static std::shared_ptr<Texture> GetTexture(std::string lookupName) { MAP_LOOKUP(m_textureMap, lookupName); }
 	static std::shared_ptr<TextureArray> GetTextureArray(std::string lookupName) { MAP_LOOKUP(m_textureArrayMap, lookupName); }
-
-	
 	static std::shared_ptr<DepthStencilState> GetDepthStencilState(std::string lookupName) { MAP_LOOKUP(m_depthStencilStateMap, lookupName); }
 	
 	
 	static std::shared_ptr<TerrainMesh> GetTerrain(std::string lookupName) { MAP_LOOKUP(m_terrainMeshMap, lookupName); }
+
+
+	static std::shared_ptr<Bindable> GetBindable(std::string lookupName) { MAP_LOOKUP(m_bindablesMap, lookupName); }
+
 
 private:
 	ObjectStore() {} // Disallow creation of an ObjectStore object
@@ -86,11 +91,12 @@ private:
 	static std::map<std::string, std::shared_ptr<Mesh>> m_meshMap;
 	static std::map<std::string, std::shared_ptr<Texture>> m_textureMap;
 	static std::map<std::string, std::shared_ptr<TextureArray>> m_textureArrayMap;
-	
 	static std::map<std::string, std::shared_ptr<DepthStencilState>> m_depthStencilStateMap;
 	
 	
 	static std::map<std::string, std::shared_ptr<TerrainMesh>> m_terrainMeshMap;
 
-	
+
+	static std::map<std::string, std::shared_ptr<Bindable>> m_bindablesMap;
+
 };

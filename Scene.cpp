@@ -9,15 +9,13 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_hWnd(hWnd),
 	m_cubePipeline(nullptr)
 {
-	//m_moveLookController = std::make_unique<MoveLookController>(m_hWnd);
-	//m_moveLookController->SetPosition(XMFLOAT3(50.0f, 10.0f, -10.0f));
-	
 	// Create the move look controllers
-	m_moveLookControllers.push_back(std::make_unique<MoveLookController>(m_hWnd));
+	m_moveLookControllers.push_back(std::make_shared<MoveLookController>(m_hWnd));
 	m_moveLookControllerIndex = 0;
+	m_moveLookControllerIndexPrevious = 0;
 #ifndef NDEBUG
-	m_moveLookControllers.push_back(std::make_unique<FlyMoveLookController>(m_hWnd));
-	m_moveLookControllers.push_back(std::make_unique<CenterOnOriginMoveLookController>(m_hWnd));
+	m_moveLookControllers.push_back(std::make_shared<FlyMoveLookController>(m_hWnd));
+	m_moveLookControllers.push_back(std::make_shared<CenterOnOriginMoveLookController>(m_hWnd));
 #endif
 
 	CreateStaticResources();
@@ -25,8 +23,13 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 
 	m_frustum = std::make_shared<Frustum>(1000.0f, m_viewMatrix, m_projectionMatrix);
 
+	m_cube = std::make_shared<Cube>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	m_cube->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_cube->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	m_cube->SetProjectionMatrix(m_projectionMatrix);
 
-	SetupCubePipeline();
+
+	//SetupCubePipeline();
 	SetupTerrainPipeline();
 	SetupTerrainCubePipeline();
 	SetupSkyDomePipeline();
@@ -140,6 +143,14 @@ void Scene::CreateWindowSizeDependentResources()
 	m_viewMatrix = m_moveLookControllers[m_moveLookControllerIndex]->ViewMatrix();
 }
 
+void Scene::WindowResized()
+{
+	CreateWindowSizeDependentResources();
+
+	// Update the bindables to know about the new projection matrix
+	m_cube->SetProjectionMatrix(m_projectionMatrix);
+}
+
 void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
 	// Update the move look control and get back the new view matrix
@@ -151,7 +162,7 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	// Update the frustum with the new view matrix
 	m_frustum->UpdateFrustum(m_viewMatrix, m_projectionMatrix);
 
-	m_cubePipeline->Update(timer);
+	//m_cubePipeline->Update(timer);
 	// m_terrainPipeline->Update(timer);
 	m_skyDomePipeline->Update(timer);
 
@@ -177,6 +188,17 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 		);
 	}
 
+	// Update the cube bindable
+	m_cube->Update(timer);
+
+	// If we are in DEBUG, then the move look controller may change, so update it 
+#ifndef NDEBUG
+	if (m_moveLookControllerIndexPrevious != m_moveLookControllerIndex)
+	{
+		m_moveLookControllerIndexPrevious = m_moveLookControllerIndex;
+		m_cube->SetMoveLookController(m_moveLookControllers[m_moveLookControllerIndex]);
+	}
+#endif
 
 
 	//
@@ -193,9 +215,14 @@ void Scene::Draw()
 	// Draw the sky dome first because depth test will be turned off
 	m_skyDomePipeline->Draw();
 
+
+
+	m_cube->Draw();
+
+
 	// Set the cube material once for all cubes then draw them
-	m_cubePipeline->UpdatePSSubresource(0, m_material);
-	m_cubePipeline->Draw();
+	//m_cubePipeline->UpdatePSSubresource(0, m_material);
+	//m_cubePipeline->Draw();
 
 	// Draw each terrain cell that is visible
 	for (unsigned int iii = 0; iii < m_terrainPipelines.size(); ++iii)

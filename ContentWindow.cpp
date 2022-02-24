@@ -119,6 +119,7 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddVertexShader("basic-cube-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, basicCubeLayout->GetVertexShaderFileBlob()));
 	ObjectStore::AddPixelShader("basic-cube-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PixelShader.cso"));
 
+	ObjectStore::AddBindable("basic-cube-vertex-shader-IA", basicCubeLayout);
 
 	// Terrain =====================================================================================================
 	std::shared_ptr<InputLayout> terrainLayout = std::make_shared<InputLayout>(m_deviceResources, L"TerrainVertexShader.cso");
@@ -130,6 +131,7 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddVertexShader("terrain-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainLayout->GetVertexShaderFileBlob()));
 	ObjectStore::AddPixelShader("terrain-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainPixelShader.cso"));
 
+	ObjectStore::AddBindable("terrain-vertex-shader-IA", terrainLayout);
 
 	// Terrain Texture ==============================================================================================
 	std::shared_ptr<InputLayout> terrainTextureLayout = std::make_shared<InputLayout>(m_deviceResources, L"TerrainTextureVertexShader.cso");
@@ -145,6 +147,8 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddVertexShader("terrain-texture-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainTextureLayout->GetVertexShaderFileBlob()));
 	ObjectStore::AddPixelShader("terrain-texture-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainTexturePixelShader.cso"));
 
+	ObjectStore::AddBindable("terrain-texture-vertex-shader-IA", terrainTextureLayout);
+
 
 	// Phong ======================================================================================================
 	std::shared_ptr<InputLayout> phongLayout = std::make_shared<InputLayout>(m_deviceResources, L"PhongVertexShader.cso");
@@ -156,6 +160,8 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddVertexShader("phong-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, phongLayout->GetVertexShaderFileBlob()));
 	ObjectStore::AddPixelShader("phong-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PhongPixelShader.cso"));
 
+	ObjectStore::AddBindable("phong-vertex-shader-IA", phongLayout);
+
 
 	// Sky Dome ======================================================================================================
 	std::shared_ptr<InputLayout> skyDomeLayout = std::make_shared<InputLayout>(m_deviceResources, L"SkyDomeVertexShader.cso");
@@ -165,6 +171,8 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddInputLayout("sky-dome-vertex-shader", skyDomeLayout);
 	ObjectStore::AddVertexShader("sky-dome-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, skyDomeLayout->GetVertexShaderFileBlob()));
 	ObjectStore::AddPixelShader("sky-dome-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SkyDomePixelShader.cso"));
+
+	ObjectStore::AddBindable("sky-dome-vertex-shader-IA", skyDomeLayout);
 
 
 	// Solid color =====================================================================================================
@@ -176,6 +184,10 @@ void ContentWindow::ObjectStoreAddShaders()
 	ObjectStore::AddInputLayout("solid-vertex-shader", solidColorLayout);
 	ObjectStore::AddVertexShader("solid-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, solidColorLayout->GetVertexShaderFileBlob()));
 	ObjectStore::AddPixelShader("solid-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SolidPixelShader.cso"));
+
+	ObjectStore::AddBindable("solid-vertex-shader-IA", solidColorLayout);
+
+
 }
 void ContentWindow::ObjectStoreAddTerrains()
 {
@@ -207,8 +219,8 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 	std::shared_ptr<ConstantBuffer> b7 = std::make_shared<ConstantBuffer>(m_deviceResources);
 
 	b1->CreateBuffer<ModelViewProjectionConstantBuffer>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
-	b2->CreateBuffer<PhongMaterialProperties>(D3D11_USAGE_DEFAULT, 0, 0, 0);
-	b3->CreateBuffer<LightProperties>(D3D11_USAGE_DEFAULT, 0, 0, 0);
+	b2->CreateBuffer<PhongMaterialProperties>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
+	b3->CreateBuffer<LightProperties>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b4->CreateBuffer<TerrainMatrixBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b5->CreateBuffer<TerrainLightBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b6->CreateBuffer<SkyDomeWorldViewProjectionBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
@@ -599,6 +611,7 @@ LRESULT ContentWindow::OnRButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 LRESULT ContentWindow::OnResize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	m_deviceResources->OnResize();
+	m_scene->WindowResized();
 	return 0;
 }
 

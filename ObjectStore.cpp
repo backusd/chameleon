@@ -12,12 +12,11 @@ std::map<std::string, std::shared_ptr<SamplerState>>		ObjectStore::m_samplerStat
 std::map<std::string, std::shared_ptr<Mesh>>				ObjectStore::m_meshMap;
 std::map<std::string, std::shared_ptr<Texture>>				ObjectStore::m_textureMap;
 std::map<std::string, std::shared_ptr<TextureArray>>		ObjectStore::m_textureArrayMap;
+std::map<std::string, std::shared_ptr<DepthStencilState>>	ObjectStore::m_depthStencilStateMap;
 
-
-std::map<std::string, std::shared_ptr<DepthStencilState>> ObjectStore::m_depthStencilStateMap;
 std::map<std::string, std::shared_ptr<TerrainMesh>> ObjectStore::m_terrainMeshMap;
 
-
+std::map<std::string, std::shared_ptr<Bindable>> ObjectStore::m_bindablesMap;
 
 
 

@@ -12,11 +12,9 @@ public:
 
 	// Every object should provide how to scale itself
 	virtual DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixIdentity(); }
-
 	DirectX::XMMATRIX GetModelMatrix();
 
 	virtual void Update(std::shared_ptr<StepTimer> timer) = 0;
-
 	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }
 
 protected:
