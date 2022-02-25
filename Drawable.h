@@ -23,11 +23,13 @@ public:
 	// within the Draw function. This allows updating of any constant buffers that may have been
 	// bound to a shader stage that need to be updated
 	virtual void PreDrawUpdate() {}
+	
 	void Draw();
 
 	// Every object should provide how to scale itself
 	virtual DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixIdentity(); }
 	DirectX::XMMATRIX GetModelMatrix();
+	DirectX::XMMATRIX GetProjectionMatrix() { return m_projectionMatrix; }
 
 	virtual void Update(std::shared_ptr<StepTimer> timer) = 0;
 	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }

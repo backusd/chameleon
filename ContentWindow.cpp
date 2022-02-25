@@ -191,7 +191,7 @@ void ContentWindow::ObjectStoreAddShaders()
 }
 void ContentWindow::ObjectStoreAddTerrains()
 {
-	ObjectStore::AddTerrain(std::make_shared<TerrainMesh>(m_deviceResources), "terrain");
+	ObjectStore::AddTerrainMesh(std::make_shared<TerrainMesh>(m_deviceResources), "terrain-mesh");
 }
 void ContentWindow::ObjectStoreAddMeshes()
 {
@@ -200,7 +200,7 @@ void ContentWindow::ObjectStoreAddMeshes()
 	ObjectStore::AddMesh("sky-dome-mesh", std::make_shared<SkyDomeMesh>(m_deviceResources));
 
 	// Add terrain meshes sequentially
-	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
+	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrainMesh("terrain-mesh");
 	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)
 	{
 		std::ostringstream oss;

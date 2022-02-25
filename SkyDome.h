@@ -1,26 +1,26 @@
 #pragma once
 #include "pch.h"
-#include "DeviceResources.h"
-#include "DeviceResourcesException.h"
-#include "Renderable.h"
+#include "Drawable.h"
 
 #include <memory>
 
 
-class SkyDome : public Renderable
+class SkyDome : public Drawable
 {
 public:
-	SkyDome();
+	SkyDome(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 	SkyDome(const SkyDome&) = delete;
 	SkyDome& operator=(const SkyDome&) = delete;
 
-	// Don't update the terrain - leave it static
-	void Update(std::shared_ptr<StepTimer> timer) override {}
+
+	void Update(std::shared_ptr<StepTimer> timer);
+	void PreDrawUpdate() override;
 
 
 private:
+	void CreateAndAddPSBufferArray(); // This is necessary because the cube will create an immutable constant buffer for the sky color
 
-
-
+	DirectX::XMFLOAT4 m_apexColor;
+	DirectX::XMFLOAT4 m_centerColor;
 
 };

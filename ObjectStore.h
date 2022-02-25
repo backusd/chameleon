@@ -50,7 +50,7 @@ public:
 	static void AddDepthStencilState(std::string lookupName, std::shared_ptr<DepthStencilState> depthStencilState) { m_depthStencilStateMap.insert(std::pair(lookupName, depthStencilState)); m_bindablesMap.insert(std::pair(lookupName, depthStencilState)); }
 	
 	
-	static void AddTerrain(std::shared_ptr<TerrainMesh> terrainMesh, std::string lookupName) { m_terrainMeshMap.insert(std::pair(lookupName, terrainMesh)); }
+	static void AddTerrainMesh(std::shared_ptr<TerrainMesh> terrainMesh, std::string lookupName) { m_terrainMeshMap.insert(std::pair(lookupName, terrainMesh)); }
 
 
 	static void AddBindable(std::string lookupName, std::shared_ptr<Bindable> bindable) { m_bindablesMap.insert(std::pair(lookupName, bindable)); }
@@ -70,7 +70,7 @@ public:
 	static std::shared_ptr<DepthStencilState> GetDepthStencilState(std::string lookupName) { MAP_LOOKUP(m_depthStencilStateMap, lookupName); }
 	
 	
-	static std::shared_ptr<TerrainMesh> GetTerrain(std::string lookupName) { MAP_LOOKUP(m_terrainMeshMap, lookupName); }
+	static std::shared_ptr<TerrainMesh> GetTerrainMesh(std::string lookupName) { MAP_LOOKUP(m_terrainMeshMap, lookupName); }
 
 
 	static std::shared_ptr<Bindable> GetBindable(std::string lookupName) { MAP_LOOKUP(m_bindablesMap, lookupName); }
