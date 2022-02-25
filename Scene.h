@@ -5,7 +5,6 @@
 #include "DeviceResourcesException.h"
 #include "ObjectStore.h"
 #include "DrawPipeline.h"
-#include "Box.h"
 #include "StepTimer.h"
 #include "HLSLStructures.h"
 #include "MoveLookController.h"
@@ -56,7 +55,6 @@ private:
 	HWND m_hWnd;
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
-	std::shared_ptr<DrawPipeline> m_cubePipeline;
 	std::shared_ptr<DrawPipeline> m_skyDomePipeline;
 	
 	std::vector<bool> m_terrainCellVisibility;

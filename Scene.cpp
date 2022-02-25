@@ -6,8 +6,7 @@ using DirectX::XMFLOAT3;
 
 Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_deviceResources(deviceResources),
-	m_hWnd(hWnd),
-	m_cubePipeline(nullptr)
+	m_hWnd(hWnd)
 {
 	// Create the move look controllers
 	m_moveLookControllers.push_back(std::make_shared<MoveLookController>(m_hWnd));
@@ -321,6 +320,7 @@ void Scene::SetupTerrainPipeline()
 
 void Scene::SetupTerrainCubePipeline()
 {
+	/*
 	m_terrainCubePipeline = std::make_shared<DrawPipeline>(
 		m_deviceResources,
 		"box-outline-mesh",
@@ -366,6 +366,7 @@ void Scene::SetupTerrainCubePipeline()
 		context->Unmap(vertexShaderBufferArray->GetRawBufferPointer(0), 0);
 	}
 	);
+	*/
 }
 
 void Scene::SetupSkyDomePipeline()

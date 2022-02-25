@@ -225,9 +225,6 @@
     <ClCompile Include="DrawPipeline.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Box.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Terrain.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
@@ -468,9 +465,6 @@
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
     <ClInclude Include="DrawPipeline.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Box.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="HLSLStructures.h">
