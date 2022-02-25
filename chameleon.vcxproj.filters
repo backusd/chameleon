@@ -330,7 +330,7 @@
     <ClCompile Include="Drawable.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
-    <ClCompile Include="Cube.cpp">
+    <ClCompile Include="Box.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
@@ -578,7 +578,7 @@
     <ClInclude Include="Drawable.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="Cube.h">
+    <ClInclude Include="Box.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
   </ItemGroup>

@@ -171,7 +171,7 @@
     <ClCompile Include="ContentWindow.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CPUStatistics.cpp" />
-    <ClCompile Include="Cube.cpp" />
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="DepthStencilState.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="DeviceResourcesException.cpp" />
@@ -250,7 +250,7 @@
     <ClInclude Include="ContentWindow.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CPUStatistics.h" />
-    <ClInclude Include="Cube.h" />
+    <ClInclude Include="Box.h" />
     <ClInclude Include="DepthStencilState.h" />
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="DeviceResourcesException.h" />

@@ -1,10 +1,10 @@
-#include "Cube.h"
+#include "Box.h"
 #include "ObjectStore.h"
 
 using DirectX::XMMATRIX;
 using DirectX::XMFLOAT4;
 
-Cube::Cube(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
+Box::Box(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController)
 {
 	// This must be run first because some of the following methods may use the material/lighting data
@@ -24,7 +24,7 @@ Cube::Cube(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<Mov
 	CreateAndAddPSBufferArray();
 }
 
-void Cube::CreateMaterialAndLightData()
+void Box::CreateMaterialAndLightData()
 {
 	m_material = new PhongMaterialProperties();
 	m_material->Material.Emissive = XMFLOAT4(0.4f, 0.14f, 0.14f, 1.0f);
@@ -83,7 +83,7 @@ void Cube::CreateMaterialAndLightData()
 	}
 }
 
-void Cube::CreateAndAddPSBufferArray()
+void Box::CreateAndAddPSBufferArray()
 {
 	// Create an immutable constant buffer and load it with the material data
 	std::shared_ptr<ConstantBuffer> materialBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
@@ -105,7 +105,7 @@ void Cube::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
-void Cube::PreDrawUpdate()
+void Box::PreDrawUpdate()
 {
 	INFOMAN(m_deviceResources);
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
@@ -195,12 +195,12 @@ void Cube::PreDrawUpdate()
 	);
 }
 
-DirectX::XMMATRIX Cube::GetScaleMatrix()
+DirectX::XMMATRIX Box::GetScaleMatrix()
 {
 	return DirectX::XMMatrixScaling(m_xSideLength, m_ySideLength, m_zSideLength);
 }
 
-void Cube::Update(std::shared_ptr<StepTimer> timer)
+void Box::Update(std::shared_ptr<StepTimer> timer)
 {
 
 }

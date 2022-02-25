@@ -4,10 +4,10 @@
 #include "HLSLStructures.h"
 
 
-class Cube : public Drawable
+class Box : public Drawable
 {
 public:
-	Cube(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
+	Box(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
 	void SetSideLengths(DirectX::XMFLOAT3 length) { m_xSideLength = length.x; m_ySideLength = length.y; m_zSideLength = length.z; }
 

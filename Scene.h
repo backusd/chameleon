@@ -18,7 +18,7 @@
 #include "CenterOnOriginMoveLookController.h"
 
 #include "Drawable.h"
-#include "Cube.h"
+#include "Box.h"
 
 #include <memory>
 #include <vector>

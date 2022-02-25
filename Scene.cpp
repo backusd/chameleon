@@ -23,17 +23,17 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_frustum = std::make_shared<Frustum>(1000.0f, m_viewMatrix, m_projectionMatrix);
 
 	// Cubes
-	std::shared_ptr<Cube> cube = std::make_shared<Cube>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
-	cube->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	cube->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	cube->SetProjectionMatrix(m_projectionMatrix);
-	m_drawables.push_back(cube);
+	std::shared_ptr<Box> box1 = std::make_shared<Box>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	box1->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	box1->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	box1->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(box1);
 
-	std::shared_ptr<Cube> cube2 = std::make_shared<Cube>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
-	cube2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
-	cube2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
-	cube2->SetProjectionMatrix(m_projectionMatrix);
-	m_drawables.push_back(cube2);
+	std::shared_ptr<Box> box2 = std::make_shared<Box>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	box2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
+	box2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
+	box2->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(box2);
 
 	// 
 
