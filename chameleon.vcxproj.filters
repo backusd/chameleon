@@ -201,9 +201,6 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Renderable.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="MoveLookController.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
@@ -221,12 +218,6 @@
     </ClCompile>
     <ClCompile Include="ObjectStoreException.cpp">
       <Filter>Source Files\Exceptions</Filter>
-    </ClCompile>
-    <ClCompile Include="DrawPipeline.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="TerrainMeshException.cpp">
       <Filter>Source Files\Exceptions</Filter>
@@ -336,6 +327,9 @@
     <ClCompile Include="TerrainCell.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -443,9 +437,6 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Renderable.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="MoveLookController.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
@@ -467,14 +458,8 @@
     <ClInclude Include="ObjectStoreException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
-    <ClInclude Include="DrawPipeline.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="HLSLStructures.h">
       <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="TerrainMeshException.h">
       <Filter>Header Files\Exceptions</Filter>
@@ -585,6 +570,9 @@
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="TerrainCell.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
   </ItemGroup>

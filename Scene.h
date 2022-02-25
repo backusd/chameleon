@@ -4,7 +4,6 @@
 #include "DeviceResources.h"
 #include "DeviceResourcesException.h"
 #include "ObjectStore.h"
-//#include "DrawPipeline.h"
 #include "StepTimer.h"
 #include "HLSLStructures.h"
 #include "MoveLookController.h"

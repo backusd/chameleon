@@ -176,7 +176,6 @@
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="DeviceResourcesException.cpp" />
     <ClCompile Include="Drawable.cpp" />
-    <ClCompile Include="DrawPipeline.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="FlyMoveLookController.cpp" />
     <ClCompile Include="FontClass.cpp" />
@@ -207,7 +206,6 @@
     <ClCompile Include="PixelShader.cpp" />
     <ClCompile Include="PositionClass.cpp" />
     <ClCompile Include="RasterizerState.cpp" />
-    <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="SamplerState.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SkyDome.cpp" />
@@ -287,11 +285,9 @@
     <ClInclude Include="ObjectStore.h" />
     <ClInclude Include="ObjectStoreException.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="DrawPipeline.h" />
     <ClInclude Include="PixelShader.h" />
     <ClInclude Include="PositionClass.h" />
     <ClInclude Include="RasterizerState.h" />
-    <ClInclude Include="Renderable.h" />
     <ClInclude Include="SamplerState.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SkyDome.h" />
