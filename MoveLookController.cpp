@@ -23,8 +23,8 @@ MoveLookController::MoveLookController(HWND hWnd) :
 
 void MoveLookController::SetupImGui()
 {
-    m_cameraPosition = XMFLOAT3(50.0f, 10.0f, -10.0f);
-    m_cameraLookAt = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    m_cameraPosition = XMFLOAT3(5.0f, 15.0f, 350.0f);
+    m_cameraLookAt = XMFLOAT3(45.0f, 7.0f, 380.0f);
     m_cameraUpDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
     m_cameraPositionMax = XMFLOAT3(1000.0f, 1000.0f, 1000.0f);

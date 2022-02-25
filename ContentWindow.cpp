@@ -115,11 +115,9 @@ void ContentWindow::ObjectStoreAddShaders()
 	basicCubeLayout->AddDescription("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0);
 	basicCubeLayout->CreateLayout();
 
-	ObjectStore::AddInputLayout("basic-cube-vertex-shader", basicCubeLayout);
-	ObjectStore::AddVertexShader("basic-cube-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, basicCubeLayout->GetVertexShaderFileBlob()));
-	ObjectStore::AddPixelShader("basic-cube-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PixelShader.cso"));
-
 	ObjectStore::AddBindable("basic-cube-vertex-shader-IA", basicCubeLayout);
+	ObjectStore::AddBindable("basic-cube-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, basicCubeLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddBindable("basic-cube-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PixelShader.cso"));
 
 	// Terrain =====================================================================================================
 	std::shared_ptr<InputLayout> terrainLayout = std::make_shared<InputLayout>(m_deviceResources, L"TerrainVertexShader.cso");
@@ -127,11 +125,9 @@ void ContentWindow::ObjectStoreAddShaders()
 	terrainLayout->AddDescription(   "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
 	terrainLayout->CreateLayout();
 
-	ObjectStore::AddInputLayout("terrain-vertex-shader", terrainLayout);
-	ObjectStore::AddVertexShader("terrain-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainLayout->GetVertexShaderFileBlob()));
-	ObjectStore::AddPixelShader("terrain-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainPixelShader.cso"));
-
 	ObjectStore::AddBindable("terrain-vertex-shader-IA", terrainLayout);
+	ObjectStore::AddBindable("terrain-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddBindable("terrain-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainPixelShader.cso"));
 
 	// Terrain Texture ==============================================================================================
 	std::shared_ptr<InputLayout> terrainTextureLayout = std::make_shared<InputLayout>(m_deviceResources, L"TerrainTextureVertexShader.cso");
@@ -143,11 +139,9 @@ void ContentWindow::ObjectStoreAddShaders()
 	terrainTextureLayout->AddDescription(   "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
 	terrainTextureLayout->CreateLayout();
 
-	ObjectStore::AddInputLayout("terrain-texture-vertex-shader", terrainTextureLayout);
-	ObjectStore::AddVertexShader("terrain-texture-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainTextureLayout->GetVertexShaderFileBlob()));
-	ObjectStore::AddPixelShader("terrain-texture-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainTexturePixelShader.cso"));
-
 	ObjectStore::AddBindable("terrain-texture-vertex-shader-IA", terrainTextureLayout);
+	ObjectStore::AddBindable("terrain-texture-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, terrainTextureLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddBindable("terrain-texture-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"TerrainTexturePixelShader.cso"));
 
 
 	// Phong ======================================================================================================
@@ -156,11 +150,9 @@ void ContentWindow::ObjectStoreAddShaders()
 	phongLayout->AddDescription(  "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
 	phongLayout->CreateLayout();
 
-	ObjectStore::AddInputLayout("phong-vertex-shader", phongLayout);
-	ObjectStore::AddVertexShader("phong-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, phongLayout->GetVertexShaderFileBlob()));
-	ObjectStore::AddPixelShader("phong-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PhongPixelShader.cso"));
-
 	ObjectStore::AddBindable("phong-vertex-shader-IA", phongLayout);
+	ObjectStore::AddBindable("phong-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, phongLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddBindable("phong-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PhongPixelShader.cso"));
 
 
 	// Sky Dome ======================================================================================================
@@ -168,11 +160,9 @@ void ContentWindow::ObjectStoreAddShaders()
 	skyDomeLayout->AddDescription("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0);
 	skyDomeLayout->CreateLayout();
 
-	ObjectStore::AddInputLayout("sky-dome-vertex-shader", skyDomeLayout);
-	ObjectStore::AddVertexShader("sky-dome-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, skyDomeLayout->GetVertexShaderFileBlob()));
-	ObjectStore::AddPixelShader("sky-dome-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SkyDomePixelShader.cso"));
-
 	ObjectStore::AddBindable("sky-dome-vertex-shader-IA", skyDomeLayout);
+	ObjectStore::AddBindable("sky-dome-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, skyDomeLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddBindable("sky-dome-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SkyDomePixelShader.cso"));
 
 
 	// Solid color =====================================================================================================
@@ -181,13 +171,9 @@ void ContentWindow::ObjectStoreAddShaders()
 	solidColorLayout->AddDescription(   "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
 	solidColorLayout->CreateLayout();
 
-	ObjectStore::AddInputLayout("solid-vertex-shader", solidColorLayout);
-	ObjectStore::AddVertexShader("solid-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, solidColorLayout->GetVertexShaderFileBlob()));
-	ObjectStore::AddPixelShader("solid-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SolidPixelShader.cso"));
-
 	ObjectStore::AddBindable("solid-vertex-shader-IA", solidColorLayout);
-
-
+	ObjectStore::AddBindable("solid-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, solidColorLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddBindable("solid-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"SolidPixelShader.cso"));
 }
 void ContentWindow::ObjectStoreAddTerrains()
 {
@@ -199,7 +185,7 @@ void ContentWindow::ObjectStoreAddMeshes()
 	ObjectStore::AddMesh("box-outline-mesh", std::make_shared<BoxMesh>(m_deviceResources, false));
 	ObjectStore::AddMesh("sky-dome-mesh", std::make_shared<SkyDomeMesh>(m_deviceResources));
 
-	// Add terrain meshes sequentially
+	// Add terrain cell meshes sequentially
 	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrainMesh("terrain-mesh");
 	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)
 	{
@@ -239,57 +225,55 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 	// Cube - VS
 	std::shared_ptr<ConstantBufferArray> ba1 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
 	ba1->AddBuffer("model-view-projection-buffer");
-	ObjectStore::AddConstantBufferArray("cube-buffers-VS", ba1);
+	ObjectStore::AddBindable("cube-buffers-VS", ba1);
 
 	// Cube - PS
 	std::shared_ptr<ConstantBufferArray> ba2 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
 	ba2->AddBuffer("phong-material-properties-buffer");
 	ba2->AddBuffer("light-properties-buffer");
-	ObjectStore::AddConstantBufferArray("cube-buffers-PS", ba2);
-
+	ObjectStore::AddBindable("cube-buffers-PS", ba2);
 
 	// Terrain - VS
 	std::shared_ptr<ConstantBufferArray> ba3 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
 	ba3->AddBuffer("terrain-constant-buffer");
-	ObjectStore::AddConstantBufferArray("terrain-buffers-VS", ba3);
+	ObjectStore::AddBindable("terrain-buffers-VS", ba3);
 
 	// Terrain - PS
 	std::shared_ptr<ConstantBufferArray> ba4 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
 	ba4->AddBuffer("terrain-light-buffer");
-	ObjectStore::AddConstantBufferArray("terrain-buffers-PS", ba4);
+	ObjectStore::AddBindable("terrain-buffers-PS", ba4);
 
 
 	// Terrain Cube - VS
 	std::shared_ptr<ConstantBufferArray> ba5 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
 	ba5->AddBuffer("terrain-constant-buffer");
-	ObjectStore::AddConstantBufferArray("terrain-cube-buffers-VS", ba3);
+	ObjectStore::AddBindable("terrain-cube-buffers-VS", ba3);
 
 
 	// Sky Dome - VS
 	std::shared_ptr<ConstantBufferArray> ba6 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
 	ba6->AddBuffer("sky-dome-constant-buffer");
-	ObjectStore::AddConstantBufferArray("sky-dome-buffers-VS", ba6);
+	ObjectStore::AddBindable("sky-dome-buffers-VS", ba6);
 
 	// Sky Dome - PS
 	std::shared_ptr<ConstantBufferArray> ba7 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
 	ba7->AddBuffer("sky-dome-gradient-buffer");
-	ObjectStore::AddConstantBufferArray("sky-dome-buffers-PS", ba7);
-
+	ObjectStore::AddBindable("sky-dome-buffers-PS", ba7);
 }
 void ContentWindow::ObjectStoreAddRasterStates()
 {
 	std::shared_ptr<RasterizerState> solidRS = std::make_shared<RasterizerState>(m_deviceResources);
-	ObjectStore::AddRasterizerState("solidfill", solidRS);
+	ObjectStore::AddBindable("solidfill", solidRS);
 
 	std::shared_ptr<RasterizerState> wireframeRS = std::make_shared<RasterizerState>(m_deviceResources);
 	wireframeRS->FillMode(D3D11_FILL_WIREFRAME);
-	ObjectStore::AddRasterizerState("wireframe", wireframeRS);
+	ObjectStore::AddBindable("wireframe", wireframeRS);
 }
 void ContentWindow::ObjectStoreAddSamplerStates()
 {
 	// This will just use the default values for a sampler, but all values can be customized
 	std::shared_ptr<SamplerState> sampler = std::make_shared<SamplerState>(m_deviceResources);
-	ObjectStore::AddSamplerState("terrain-texture-sampler", sampler);
+	ObjectStore::AddBindable("terrain-texture-sampler", sampler);
 }
 void ContentWindow::ObjectStoreAddTextures()
 {
@@ -309,18 +293,17 @@ void ContentWindow::ObjectStoreAddTextures()
 	std::shared_ptr<TextureArray> dirtTextureArray = std::make_shared<TextureArray>(m_deviceResources, TextureBindingLocation::PIXEL_SHADER);
 	dirtTextureArray->AddTexture("terrain-texture");
 	dirtTextureArray->AddTexture("terrain-normal-map-texture");
-	ObjectStore::AddTextureArray("dirt-terrain-texture-array", dirtTextureArray);
-
+	ObjectStore::AddBindable("dirt-terrain-texture-array", dirtTextureArray);
 
 }
 void ContentWindow::ObjectStoreAddDepthStencilStates()
 {
 	std::shared_ptr<DepthStencilState> depthEnabled = std::make_shared<DepthStencilState>(m_deviceResources, 1);
-	ObjectStore::AddDepthStencilState("depth-enabled-depth-stencil-state", depthEnabled);
+	ObjectStore::AddBindable("depth-enabled-depth-stencil-state", depthEnabled);
 
 	std::shared_ptr<DepthStencilState> depthDisabled = std::make_shared<DepthStencilState>(m_deviceResources, 1);
 	depthDisabled->DepthEnable(false);
-	ObjectStore::AddDepthStencilState("depth-disabled-depth-stencil-state", depthDisabled);
+	ObjectStore::AddBindable("depth-disabled-depth-stencil-state", depthDisabled);
 }
 
 void ContentWindow::Update()

@@ -18,8 +18,8 @@ FlyMoveLookController::FlyMoveLookController(HWND hWnd) :
 
 void FlyMoveLookController::SetupImGui()
 {
-    m_cameraPosition = XMFLOAT3(50.0f, 10.0f, -10.0f);
-    m_cameraLookAt = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    m_cameraPosition = XMFLOAT3(115.0f, 71.0f, 230.0f);
+    m_cameraLookAt = XMFLOAT3(150.0f, 70.0f, 270.0f);
     m_cameraUpDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
     m_cameraPositionMax = XMFLOAT3(1000.0f, 1000.0f, 1000.0f);
