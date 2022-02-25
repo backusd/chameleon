@@ -47,7 +47,6 @@ private:
 	void CreateStaticResources();
 	void CreateWindowSizeDependentResources();
 
-	void SetupCubePipeline();
 	void SetupTerrainPipeline();
 	void SetupTerrainCubePipeline();
 	void SetupSkyDomePipeline();

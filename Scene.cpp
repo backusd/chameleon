@@ -23,16 +23,21 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 
 	m_frustum = std::make_shared<Frustum>(1000.0f, m_viewMatrix, m_projectionMatrix);
 
-	// Cube
+	// Cubes
 	std::shared_ptr<Cube> cube = std::make_shared<Cube>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	cube->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	cube->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	cube->SetProjectionMatrix(m_projectionMatrix);
 	m_drawables.push_back(cube);
 
+	std::shared_ptr<Cube> cube2 = std::make_shared<Cube>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	cube2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
+	cube2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
+	cube2->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(cube2);
+
 	// 
 
-	//SetupCubePipeline();
 	SetupTerrainPipeline();
 	SetupTerrainCubePipeline();
 	SetupSkyDomePipeline();
@@ -225,10 +230,6 @@ void Scene::Draw()
 		drawable->Draw();
 
 
-	// Set the cube material once for all cubes then draw them
-	//m_cubePipeline->UpdatePSSubresource(0, m_material);
-	//m_cubePipeline->Draw();
-
 	// Draw each terrain cell that is visible
 	for (unsigned int iii = 0; iii < m_terrainPipelines.size(); ++iii)
 	{
@@ -237,52 +238,6 @@ void Scene::Draw()
 	}
 
 	// m_terrainCubePipeline->Draw();
-}
-
-void Scene::SetupCubePipeline()
-{
-	m_cubePipeline = std::make_shared<DrawPipeline>(
-		m_deviceResources,
-		"box-filled-mesh",
-		"phong-vertex-shader",
-		"phong-pixel-shader",
-		"solidfill", //"wireframe",
-		"depth-enabled-depth-stencil-state",
-		"cube-buffers-VS",
-		"cube-buffers-PS"
-	);
-
-	m_cubePipeline->AddRenderable(std::make_shared<Box>(1.0f));
-	m_cubePipeline->AddRenderable(std::make_shared<Box>(XMFLOAT3(2.0f, 0.0f, 0.0f), 0.5f));
-
-	// Try to set the light properties only once at the beginning of the application
-	m_cubePipeline->UpdatePSSubresource(1, &m_lightProperties);
-
-	m_cubePipeline->SetPerRendererableUpdate(
-		[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
-	(std::shared_ptr<Renderable> renderable,
-		std::shared_ptr<Mesh> mesh,
-		std::shared_ptr<ConstantBufferArray> vertexShaderBufferArray,
-		std::shared_ptr<ConstantBufferArray> pixelShaderBufferArray)
-	{
-		auto deviceResources = weakDeviceResources.lock();
-		ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
-
-		D3D11_MAPPED_SUBRESOURCE ms;
-
-		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		context->Map(vertexShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-
-		XMMATRIX _model = renderable->GetModelMatrix();
-		ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-
-		DirectX::XMStoreFloat4x4(&(mappedBuffer->model), _model);
-		DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), _model* this->ViewProjectionMatrix());
-		DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, _model)));
-
-		context->Unmap(vertexShaderBufferArray->GetRawBufferPointer(0), 0);
-	}
-	);
 }
 
 void Scene::SetupTerrainPipeline()

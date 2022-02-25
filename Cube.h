@@ -18,6 +18,7 @@ public:
 
 private:
 	void CreateMaterialAndLightData();
+	void CreateAndAddPSBufferArray(); // This is necessary because the cube will create an immutable constant buffer for material data
 
 	float m_xSideLength;
 	float m_ySideLength;

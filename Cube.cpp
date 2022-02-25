@@ -7,6 +7,9 @@ using DirectX::XMFLOAT4;
 Cube::Cube(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController)
 {
+	// This must be run first because some of the following methods may use the material/lighting data
+	CreateMaterialAndLightData();
+
 	SetMesh("box-filled-mesh");
 
 	AddBindable("phong-vertex-shader");					// Vertex Shader
@@ -15,9 +18,10 @@ Cube::Cube(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<Mov
 	AddBindable("solidfill"); //"wireframe",			// Rasterizer State
 	AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
 	AddBindable("cube-buffers-VS");						// VS Constant buffers
-	AddBindable("cube-buffers-PS");						// PS Constant buffers
+	// AddBindable("cube-buffers-PS");						// PS Constant buffers
 
-	CreateMaterialAndLightData();
+	// Function to create the PS constant buffer array - it will create an immutable constant buffer to hold material data
+	CreateAndAddPSBufferArray();
 }
 
 void Cube::CreateMaterialAndLightData()
@@ -79,6 +83,28 @@ void Cube::CreateMaterialAndLightData()
 	}
 }
 
+void Cube::CreateAndAddPSBufferArray()
+{
+	// Create an immutable constant buffer and load it with the material data
+	std::shared_ptr<ConstantBuffer> materialBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	materialBuffer->CreateBuffer<PhongMaterialProperties>(
+		D3D11_USAGE_IMMUTABLE,			// Usage: Read-only by the GPU. Not accessible via CPU. MUST be initialized at buffer creation
+		0,								// CPU Access: No CPU access
+		0,								// Misc Flags: No miscellaneous flags
+		0,								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		static_cast<void*>(m_material)	// Initial Data: Fill the buffer with material data
+	);
+
+	// Create a constant buffer array which will be added as a bindable
+	std::shared_ptr<ConstantBufferArray> psConstantBufferArray = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
+	
+	// Add the material constant buffer and the lighting constant buffer
+	psConstantBufferArray->AddBuffer(materialBuffer);
+	psConstantBufferArray->AddBuffer("light-properties-buffer");
+
+	m_bindables.push_back(psConstantBufferArray);
+}
+
 void Cube::PreDrawUpdate()
 {
 	INFOMAN(m_deviceResources);
@@ -114,6 +140,8 @@ void Cube::PreDrawUpdate()
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> psBuffer;
+
+	/*
 	GFX_THROW_INFO_ONLY(
 		context->PSGetConstantBuffers(0, 1, psBuffer.ReleaseAndGetAddressOf())
 	);
@@ -133,6 +161,7 @@ void Cube::PreDrawUpdate()
 	GFX_THROW_INFO_ONLY(
 		context->Unmap(psBuffer.Get(), 0)
 	);
+	*/
 
 
 
