@@ -20,6 +20,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	CreateStaticResources();
 	CreateWindowSizeDependentResources();
 	CreateAndBindLightPropertiesBuffer();
+	CreateAndBindModelViewProjectionBuffer();
 
 	// Sky Dome
 	//     MUST be added first because it needs to be rendered first because depth test is turned off
@@ -160,6 +161,31 @@ void Scene::CreateAndBindLightPropertiesBuffer()
 	ID3D11Buffer* buffer[1] = { lightConstantBuffer->GetRawBufferPointer() };
 	GFX_THROW_INFO_ONLY(
 		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 1u, buffer)
+	);
+}
+
+void Scene::CreateAndBindModelViewProjectionBuffer()
+{
+	// Basically all objects that get rendered need to bind model/view/projection matrices
+	// to the vertex shader. Instead of each object attempting to bind the same constant buffer,
+	// the scene can set this buffer once at the start of the program and each update simply needs 
+	// to update the members of the constant buffer that its vertex shader program will use
+
+	INFOMAN(m_deviceResources);
+
+	// Create a dynamic usage constant buffer that can be updated from the CPU
+	std::shared_ptr<ConstantBuffer> modelViewProjectionConstantBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	modelViewProjectionConstantBuffer->CreateBuffer<ModelViewProjectionConstantBuffer>(
+		D3D11_USAGE_DYNAMIC,			// Usage: Dynamic
+		D3D11_CPU_ACCESS_WRITE,			// CPU Access: CPU will be able to write using Map
+		0,								// Misc Flags: No miscellaneous flags
+		0								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		// Not supplying any initial data
+	);
+
+	ID3D11Buffer* buffer[1] = { modelViewProjectionConstantBuffer->GetRawBufferPointer() };
+	GFX_THROW_INFO_ONLY(
+		m_deviceResources->D3DDeviceContext()->VSSetConstantBuffers(0u, 1u, buffer)
 	);
 }
 

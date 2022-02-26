@@ -41,6 +41,7 @@ private:
 	void CreateStaticResources();
 	void CreateWindowSizeDependentResources();
 	void CreateAndBindLightPropertiesBuffer();
+	void CreateAndBindModelViewProjectionBuffer();
 
 
 	HWND												m_hWnd;

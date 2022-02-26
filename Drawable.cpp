@@ -34,6 +34,35 @@ void Drawable::Draw()
 	);
 }
 
+void Drawable::UpdateModelViewProjectionConstantBuffer()
+{
+	INFOMAN(m_deviceResources);
+	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
+	D3D11_MAPPED_SUBRESOURCE ms;
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+	// Update VS constant buffer with model/view/projection info
+	Microsoft::WRL::ComPtr<ID3D11Buffer> vsBuffer;
+	GFX_THROW_INFO_ONLY(
+		context->VSGetConstantBuffers(0, 1, vsBuffer.ReleaseAndGetAddressOf())
+	);
+
+	GFX_THROW_INFO(
+		context->Map(vsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
+	);
+
+	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
+	XMMATRIX model = this->GetModelMatrix();
+	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_projectionMatrix;
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, model)));
+
+	GFX_THROW_INFO_ONLY(
+		context->Unmap(vsBuffer.Get(), 0)
+	);
+}
+
 XMMATRIX Drawable::GetModelMatrix()
 {
 	return DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *

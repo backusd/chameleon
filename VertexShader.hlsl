@@ -1,4 +1,6 @@
-cbuffer CBuf
+#include "VSInclude.hlsli" // Declares VS constant buffer at slot 0
+
+cbuffer CBuf : register(b1)
 {
 	matrix transform;
 };

@@ -1,44 +1,11 @@
-// A constant buffer that stores the three basic column-major matrices for composing geometry.
-/*
-cbuffer ModelViewProjectionConstantBuffer : register(b0)
-{
-	matrix model;
-	matrix view;
-	matrix projection;
-};
-*/
-
-cbuffer ModelViewProjectionConstantBuffer : register(b0)
-{
-	matrix model;
-	matrix modelViewProjection;
-	matrix inverseTransposeModel;
-};
+#include "VSInclude.hlsli" // Declares VS constant buffer at slot 0
 
 
-// Per-vertex data used as input to the vertex shader.
-/*
-struct VertexShaderInput
-{
-	float3 pos : POSITION;
-	float3 color : COLOR0;
-};
-*/
 struct VertexShaderInput
 {
 	float3 position : POSITION;
 	float3 normal : NORMAL;
 };
-
-
-// Per-pixel color data passed through the pixel shader.
-/*
-struct PixelShaderInput
-{
-	float4 pos : SV_POSITION;
-	float3 color : COLOR0;
-};
-*/
 
 struct PixelShaderInput
 {

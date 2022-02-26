@@ -100,6 +100,9 @@
     <Filter Include="Source Files\Drawable">
       <UniqueIdentifier>{ebb4e4b5-b146-47f1-8895-1c7dae32d518}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Includes">
+      <UniqueIdentifier>{5f7d3ce4-f0bf-4f9e-957b-48f58670147e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -582,7 +585,10 @@
       <Filter>Data</Filter>
     </None>
     <None Include="PSInclude.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Includes</Filter>
+    </None>
+    <None Include="VSInclude.hlsli">
+      <Filter>Shaders\Includes</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

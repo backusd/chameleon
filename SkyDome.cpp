@@ -12,7 +12,7 @@ SkyDome::SkyDome(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	AddBindable("sky-dome-pixel-shader");				// Pixel Shader
 	AddBindable("solidfill"); //"wireframe",			// Rasterizer State
 	AddBindable("depth-disabled-depth-stencil-state");	// Depth Stencil State
-	AddBindable("sky-dome-buffers-VS");					// VS Constant buffers
+	//AddBindable("sky-dome-buffers-VS");					// VS Constant buffers
 	//AddBindable("sky-dome-buffers-PS");					// PS Constant buffers
 
 	CreateAndAddPSBufferArray();
@@ -45,31 +45,17 @@ void SkyDome::CreateAndAddPSBufferArray()
 
 void SkyDome::PreDrawUpdate()
 {
-	INFOMAN(m_deviceResources);
-	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
+	// Pretty much every object will need to submit model/view/projection data to the vertex shader
+	// The Scene binds a ModelViewProjectionConstantBuffer object to slot 0 of the vertex shader that
+	// can be mapped and written to by any object. The reason we don't automatically perform this update
+	// for every drawable is that not every drawable actually requires this update. For example, the Terrain
+	// is not a drawable, but instead houses many TerrainCells that are drawable. However, each of these 
+	// TerrainCells do not require this update because Terrain is able to set up the model view projection 
+	// buffer once before trying to draw each TerrainCell
+	UpdateModelViewProjectionConstantBuffer();
 
-	D3D11_MAPPED_SUBRESOURCE ms;
-	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-	// Update VS constant buffer with model/view/projection info
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vsBuffer;
-	GFX_THROW_INFO_ONLY(
-		context->VSGetConstantBuffers(0, 1, vsBuffer.ReleaseAndGetAddressOf())
-	);
-
-	GFX_THROW_INFO(
-		context->Map(vsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
-	);
-
-	TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
-
-	mappedBuffer->world = this->GetModelMatrix();
-	mappedBuffer->view = m_moveLookController->ViewMatrix();
-	mappedBuffer->projection = m_projectionMatrix;
-
-	GFX_THROW_INFO_ONLY(
-		context->Unmap(vsBuffer.Get(), 0)
-	);
+	// Updating of any additional constant buffers or other pipeline resources should go here
 }
 
 void SkyDome::Update(std::shared_ptr<StepTimer> timer)

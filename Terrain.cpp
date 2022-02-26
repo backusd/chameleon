@@ -29,7 +29,7 @@ Terrain::Terrain(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	AddBindable("terrain-texture-pixel-shader");		// Pixel Shader
 	AddBindable("solidfill"); //"wireframe",			// Rasterizer State
 	AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
-	AddBindable("terrain-buffers-VS");					// VS Constant buffers - Are controlled by Terrain
+	//AddBindable("terrain-buffers-VS");					// VS Constant buffers - Are controlled by Terrain
 	// AddBindable("terrain-buffers-PS");					// PS Constant buffers - Are controlled by Terrain
 	AddBindable("dirt-terrain-texture-array");			// Terrain Textures for PS
 	AddBindable("terrain-texture-sampler");				// Sampler State
@@ -123,11 +123,12 @@ void Terrain::UpdateBindings()
 		context->Map(vsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
 	);
 
-	TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
-
-	mappedBuffer->world = DirectX::XMMatrixIdentity();
-	mappedBuffer->view = m_moveLookController->ViewMatrix();
-	mappedBuffer->projection = m_terrainCells[0]->GetProjectionMatrix();
+	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
+	XMMATRIX model = DirectX::XMMatrixIdentity();
+	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_terrainCells[0]->GetProjectionMatrix();
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, model)));
 
 	GFX_THROW_INFO_ONLY(
 		context->Unmap(vsBuffer.Get(), 0)

@@ -119,13 +119,6 @@ struct TerrainVertexType
     DirectX::XMFLOAT3 color;
 };
 
-struct TerrainMatrixBufferType
-{
-    DirectX::XMMATRIX world;
-    DirectX::XMMATRIX view;
-    DirectX::XMMATRIX projection;
-};
-
 struct TerrainLightBufferType
 {
     DirectX::XMFLOAT4 diffuseColor;
@@ -137,13 +130,6 @@ struct TerrainLightBufferType
 struct SkyDomeVertexType
 {
     DirectX::XMFLOAT3 position;
-};
-
-struct SkyDomeWorldViewProjectionBufferType
-{
-    DirectX::XMMATRIX world;
-    DirectX::XMMATRIX view;
-    DirectX::XMMATRIX projection;
 };
 
 struct SkyDomeColorBufferType

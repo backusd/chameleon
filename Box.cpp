@@ -17,7 +17,7 @@ Box::Box(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveL
 	AddBindable("phong-pixel-shader");					// Pixel Shader
 	AddBindable("solidfill"); //"wireframe",			// Rasterizer State
 	AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
-	AddBindable("cube-buffers-VS");						// VS Constant buffers
+	// AddBindable("cube-buffers-VS");						// VS Constant buffers
 	// AddBindable("cube-buffers-PS");						// PS Constant buffers
 
 	// Function to create the PS constant buffer array - it will create an immutable constant buffer to hold material data
@@ -56,39 +56,17 @@ void Box::CreateAndAddPSBufferArray()
 
 void Box::PreDrawUpdate()
 {
-	INFOMAN(m_deviceResources);
-	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
-
-	D3D11_MAPPED_SUBRESOURCE ms;
-	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
-	// Update VS constant buffer with model/view/projection info
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vsBuffer;
-	GFX_THROW_INFO_ONLY(
-		context->VSGetConstantBuffers(0, 1, vsBuffer.ReleaseAndGetAddressOf())
-	);
-
-	GFX_THROW_INFO(
-		context->Map(vsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
-	);
-
-	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-
-	XMMATRIX model = this->GetModelMatrix();
-	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_projectionMatrix;
-	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
-	DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
-	DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, model)));
-
-	GFX_THROW_INFO_ONLY(
-		context->Unmap(vsBuffer.Get(), 0)
-	);
+	// Pretty much every object will need to submit model/view/projection data to the vertex shader
+	// The Scene binds a ModelViewProjectionConstantBuffer object to slot 0 of the vertex shader that
+	// can be mapped and written to by any object. The reason we don't automatically perform this update
+	// for every drawable is that not every drawable actually requires this update. For example, the Terrain
+	// is not a drawable, but instead houses many TerrainCells that are drawable. However, each of these 
+	// TerrainCells do not require this update because Terrain is able to set up the model view projection 
+	// buffer once before trying to draw each TerrainCell
+	UpdateModelViewProjectionConstantBuffer();
 
 
-	// Update PS constant buffer with material and light data
-	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
-	Microsoft::WRL::ComPtr<ID3D11Buffer> psBuffer;
+	// Updating of any additional constant buffers or other pipeline resources should go here
 }
 
 DirectX::XMMATRIX Box::GetScaleMatrix()

@@ -1,12 +1,4 @@
-/////////////
-// GLOBALS //
-/////////////
-cbuffer MatrixBuffer
-{
-    matrix worldMatrix;
-    matrix viewMatrix;
-    matrix projectionMatrix;
-};
+#include "VSInclude.hlsli" // Declares VS constant buffer at slot 0
 
 
 //////////////
@@ -36,9 +28,7 @@ PixelInputType main(VertexInputType input)
     input.position.w = 1.0f;
 
     // Calculate the position of the vertex against the world, view, and projection matrices.
-    output.position = mul(worldMatrix, input.position);
-    output.position = mul(viewMatrix, output.position);
-    output.position = mul(projectionMatrix, output.position);
+    output.position = mul(modelViewProjection, input.position);
 
     // Send the unmodified position through to the pixel shader.
     output.domePosition = input.position;

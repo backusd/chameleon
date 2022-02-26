@@ -321,6 +321,7 @@
     <None Include="PSInclude.hlsli" />
     <None Include="heightmap.r16" />
     <None Include="packages.config" />
+    <None Include="VSInclude.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="blackforest_cm.bmp" />

@@ -1,7 +1,9 @@
+#include "VSInclude.hlsli" // Declares VS constant buffer at slot 0
+
 /////////////
 // GLOBALS //
 /////////////
-cbuffer MatrixBuffer
+cbuffer MatrixBuffer : register(b1)
 {
     matrix worldMatrix;
     matrix viewMatrix;

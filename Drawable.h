@@ -41,6 +41,8 @@ public:
 
 
 protected:
+	void UpdateModelViewProjectionConstantBuffer();
+
 	std::shared_ptr<DeviceResources> m_deviceResources;
 	std::shared_ptr<MoveLookController> m_moveLookController;
 

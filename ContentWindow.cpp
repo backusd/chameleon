@@ -199,44 +199,38 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 	std::shared_ptr<ConstantBuffer> b1 = std::make_shared<ConstantBuffer>(m_deviceResources);
 	std::shared_ptr<ConstantBuffer> b2 = std::make_shared<ConstantBuffer>(m_deviceResources);
 	std::shared_ptr<ConstantBuffer> b3 = std::make_shared<ConstantBuffer>(m_deviceResources);
-	std::shared_ptr<ConstantBuffer> b4 = std::make_shared<ConstantBuffer>(m_deviceResources);
 	std::shared_ptr<ConstantBuffer> b5 = std::make_shared<ConstantBuffer>(m_deviceResources);
-	std::shared_ptr<ConstantBuffer> b6 = std::make_shared<ConstantBuffer>(m_deviceResources);
 	std::shared_ptr<ConstantBuffer> b7 = std::make_shared<ConstantBuffer>(m_deviceResources);
 
 	b1->CreateBuffer<ModelViewProjectionConstantBuffer>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b2->CreateBuffer<PhongMaterialProperties>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b3->CreateBuffer<LightProperties>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
-	b4->CreateBuffer<TerrainMatrixBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b5->CreateBuffer<TerrainLightBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
-	b6->CreateBuffer<SkyDomeWorldViewProjectionBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b7->CreateBuffer<SkyDomeColorBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 
 	ObjectStore::AddConstantBuffer("model-view-projection-buffer", b1);
 	ObjectStore::AddConstantBuffer("phong-material-properties-buffer", b2);
 	ObjectStore::AddConstantBuffer("light-properties-buffer", b3);
-	ObjectStore::AddConstantBuffer("terrain-constant-buffer", b4);
 	ObjectStore::AddConstantBuffer("terrain-light-buffer", b5);
-	ObjectStore::AddConstantBuffer("sky-dome-constant-buffer", b6);
 	ObjectStore::AddConstantBuffer("sky-dome-gradient-buffer", b7);
 
 	// Now create the buffer arrays
 
 	// Cube - VS
-	std::shared_ptr<ConstantBufferArray> ba1 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
-	ba1->AddBuffer("model-view-projection-buffer");
-	ObjectStore::AddBindable("cube-buffers-VS", ba1);
+	//std::shared_ptr<ConstantBufferArray> ba1 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
+	//ba1->AddBuffer("model-view-projection-buffer");
+	//ObjectStore::AddBindable("cube-buffers-VS", ba1);
 
 	// Cube - PS
-	std::shared_ptr<ConstantBufferArray> ba2 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
-	ba2->AddBuffer("phong-material-properties-buffer");
-	ba2->AddBuffer("light-properties-buffer");
-	ObjectStore::AddBindable("cube-buffers-PS", ba2);
+	//std::shared_ptr<ConstantBufferArray> ba2 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
+	//ba2->AddBuffer("phong-material-properties-buffer");
+	//ba2->AddBuffer("light-properties-buffer");
+	//ObjectStore::AddBindable("cube-buffers-PS", ba2);
 
 	// Terrain - VS
-	std::shared_ptr<ConstantBufferArray> ba3 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
-	ba3->AddBuffer("terrain-constant-buffer");
-	ObjectStore::AddBindable("terrain-buffers-VS", ba3);
+	//std::shared_ptr<ConstantBufferArray> ba3 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
+	//ba3->AddBuffer("terrain-constant-buffer");
+	//ObjectStore::AddBindable("terrain-buffers-VS", ba3);
 
 	// Terrain - PS
 	std::shared_ptr<ConstantBufferArray> ba4 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
@@ -245,20 +239,20 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 
 
 	// Terrain Cube - VS
-	std::shared_ptr<ConstantBufferArray> ba5 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
-	ba5->AddBuffer("terrain-constant-buffer");
-	ObjectStore::AddBindable("terrain-cube-buffers-VS", ba3);
+	//std::shared_ptr<ConstantBufferArray> ba5 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
+	//ba5->AddBuffer("terrain-constant-buffer");
+	//ObjectStore::AddBindable("terrain-cube-buffers-VS", ba5);
 
 
 	// Sky Dome - VS
-	std::shared_ptr<ConstantBufferArray> ba6 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
-	ba6->AddBuffer("sky-dome-constant-buffer");
-	ObjectStore::AddBindable("sky-dome-buffers-VS", ba6);
+	//std::shared_ptr<ConstantBufferArray> ba6 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::VERTEX_SHADER);
+	//ba6->AddBuffer("sky-dome-constant-buffer");
+	//ObjectStore::AddBindable("sky-dome-buffers-VS", ba6);
 
 	// Sky Dome - PS
-	std::shared_ptr<ConstantBufferArray> ba7 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
-	ba7->AddBuffer("sky-dome-gradient-buffer");
-	ObjectStore::AddBindable("sky-dome-buffers-PS", ba7);
+	//std::shared_ptr<ConstantBufferArray> ba7 = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
+	//ba7->AddBuffer("sky-dome-gradient-buffer");
+	//ObjectStore::AddBindable("sky-dome-buffers-PS", ba7);
 }
 void ContentWindow::ObjectStoreAddRasterStates()
 {
