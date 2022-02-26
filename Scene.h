@@ -40,6 +40,7 @@ public:
 private:
 	void CreateStaticResources();
 	void CreateWindowSizeDependentResources();
+	void CreateAndBindLightPropertiesBuffer();
 
 
 	HWND												m_hWnd;
@@ -56,6 +57,8 @@ private:
 	// Drawables
 	std::vector<std::shared_ptr<Drawable>>				m_drawables;
 	std::shared_ptr<Terrain>							m_terrain;
+
+
 
 	// ImGui ====================================================================
 	//

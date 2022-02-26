@@ -1,6 +1,6 @@
-//////////////
-// TYPEDEFS //
-//////////////
+#include "PSInclude.hlsli" // Declares PS constant buffer at slot 0
+
+
 struct PixelInputType
 {
     float4 position : SV_POSITION;

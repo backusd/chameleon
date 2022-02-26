@@ -1,3 +1,5 @@
+#include "PSInclude.hlsli" // Declares PS constant buffer at slot 0
+
 /////////////
 // GLOBALS //
 /////////////
@@ -8,7 +10,7 @@ SamplerState SampleType : register(s0);
 
 
 
-cbuffer LightBuffer
+cbuffer LightBuffer : register(b1)
 {
     float4 diffuseColor;
     float3 lightDirection;

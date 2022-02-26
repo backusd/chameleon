@@ -1,7 +1,7 @@
-/////////////
-// GLOBALS //
-/////////////
-cbuffer ColorBuffer
+#include "PSInclude.hlsli" // Declares PS constant buffer at slot 0
+
+// Sky dome color ================================================================================================
+cbuffer ColorBuffer : register(b1)
 {
     float4 apexColor;
     float4 centerColor;

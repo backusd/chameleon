@@ -17,7 +17,7 @@ public:
 	void Update(std::shared_ptr<StepTimer> timer);
 
 private:
-	void CreateMaterialAndLightData();
+	void CreateMaterialData();
 	void CreateAndAddPSBufferArray(); // This is necessary because the cube will create an immutable constant buffer for material data
 
 	float m_xSideLength;
@@ -25,6 +25,5 @@ private:
 	float m_zSideLength;
 
 	PhongMaterialProperties* m_material;
-	LightProperties			 m_lightProperties;
 
 };

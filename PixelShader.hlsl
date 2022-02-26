@@ -1,4 +1,6 @@
-cbuffer CBuf
+#include "PSInclude.hlsli" // Declares PS constant buffer at slot 0
+
+cbuffer CBuf : register(b1)
 {
 	float4 face_colors[6];
 };

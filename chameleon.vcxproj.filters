@@ -581,6 +581,9 @@
     <None Include="heightmap.r16">
       <Filter>Data</Filter>
     </None>
+    <None Include="PSInclude.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="blackforest_cm.bmp">

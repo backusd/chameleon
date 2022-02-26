@@ -1,3 +1,5 @@
+#include "PSInclude.hlsli" // Declares PS constant buffer at slot 0
+
 //////////////
 // TYPEDEFS //
 //////////////

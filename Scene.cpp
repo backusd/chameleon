@@ -19,6 +19,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 
 	CreateStaticResources();
 	CreateWindowSizeDependentResources();
+	CreateAndBindLightPropertiesBuffer();
 
 	// Sky Dome
 	//     MUST be added first because it needs to be rendered first because depth test is turned off
@@ -42,6 +43,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	m_terrain->SetProjectionMatrix(m_projectionMatrix);
+
 }
 
 void Scene::CreateStaticResources()
@@ -130,6 +132,35 @@ void Scene::CreateWindowSizeDependentResources()
 
 	// Projection Matrix (No Transpose)
 	m_projectionMatrix = perspectiveMatrix * orientationMatrix;
+}
+
+void Scene::CreateAndBindLightPropertiesBuffer()
+{
+	// The scene will be responsible for keeping track of all lights in the scene
+	// To reduce the number of times that the lighting data gets bound to the pipeline,
+	// the scene can simply bind the lighting data constant buffer once at program launch
+	// and then only update the buffer when necessary. ALL PS shader programs will need to 
+	// be aware that the lighting constant buffer is bound to slot 0 and they should bind
+	// additional buffers starting at slot 1
+
+	INFOMAN(m_deviceResources);
+
+	// Create a default usage constant buffer and load it with the material data
+	// NOTE: Because it is not CPU writeable, it MUST be updated using UpdateSubresource (cannot use Map)
+	std::shared_ptr<ConstantBuffer> lightConstantBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	lightConstantBuffer->CreateBuffer<LightProperties>(
+		D3D11_USAGE_DEFAULT,			// Usage: Default - will not be CPU writeable
+		0,								// CPU Access: No CPU access
+		0,								// Misc Flags: No miscellaneous flags
+		0,								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		static_cast<void*>(&m_lightProperties)	// Initial Data: Fill the buffer with light data
+		);
+
+	
+	ID3D11Buffer* buffer[1] = { lightConstantBuffer->GetRawBufferPointer() };
+	GFX_THROW_INFO_ONLY(
+		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 1u, buffer)
+	);
 }
 
 void Scene::WindowResized()

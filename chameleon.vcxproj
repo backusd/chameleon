@@ -318,6 +318,7 @@
     <ClInclude Include="WindowsMessageMap.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="PSInclude.hlsli" />
     <None Include="heightmap.r16" />
     <None Include="packages.config" />
   </ItemGroup>

@@ -1,10 +1,6 @@
-#define MAX_LIGHTS 8
+#include "PSInclude.hlsli" // Declares PS constant buffer at slot 0
 
-// Light types.
-#define DIRECTIONAL_LIGHT 0
-#define POINT_LIGHT 1
-#define SPOT_LIGHT 2
-
+// PS INPUT =================================================================================================
 struct PixelShaderInput
 {
     float4 position : SV_POSITION;
@@ -12,6 +8,7 @@ struct PixelShaderInput
     float3 normalWS : NORM_WS;
 };
 
+// Material data =============================================================================================
 struct _MyMaterial
 {
     float4  Emissive;       // 16 bytes
@@ -28,38 +25,11 @@ struct _MyMaterial
     //----------------------------------- (16 byte boundary)
 };  // Total:               // 80 bytes ( 5 * 16 )
 
-cbuffer MyMaterialProperties : register(b0)
+cbuffer MyMaterialProperties : register(b1)
 {
     _MyMaterial Material;
 };
 
-struct MyLight
-{
-    float4      Position;               // 16 bytes
-    //----------------------------------- (16 byte boundary)
-    float4      Direction;              // 16 bytes
-    //----------------------------------- (16 byte boundary)
-    float4      Color;                  // 16 bytes
-    //----------------------------------- (16 byte boundary)
-    float       SpotAngle;              // 4 bytes
-    float       ConstantAttenuation;    // 4 bytes
-    float       LinearAttenuation;      // 4 bytes
-    float       QuadraticAttenuation;   // 4 bytes
-    //----------------------------------- (16 byte boundary)
-    int         LightType;              // 4 bytes
-    bool        Enabled;                // 4 bytes
-    int2        Padding;                // 8 bytes
-    //----------------------------------- (16 byte boundary)
-};  // Total:                           // 80 bytes (5 * 16 byte boundary)
-
-cbuffer MyLightProperties : register(b1)
-{
-    float4 EyePosition;                 // 16 bytes
-    //----------------------------------- (16 byte boundary)
-    float4 GlobalAmbient;               // 16 bytes
-    //----------------------------------- (16 byte boundary)
-    MyLight Lights[MAX_LIGHTS];           // 80 * 8 = 640 bytes
-};  // Total:                           // 672 bytes (42 * 16 byte boundary)
 
 struct LightingResult
 {

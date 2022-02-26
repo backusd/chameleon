@@ -71,9 +71,10 @@ void ConstantBufferArray::BindGS()
 
 void ConstantBufferArray::BindPS()
 {
+	// IMPORTANT: Scene lighting is always bound to slot 0, so additional buffers MUST be bound starting at slot 1
 	INFOMAN(m_deviceResources);
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
+		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(1u, static_cast<unsigned int>(m_rawBufferPointers.size()), m_rawBufferPointers.data())
 	);
 }
 
