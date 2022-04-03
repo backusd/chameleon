@@ -274,11 +274,11 @@ void ContentWindow::ObjectStoreAddTextures()
 	// MAKE SURE TO MODIFY THE TEXTURE DESCRIPTION STRUCT COMPLETELY PRIOR TO CALLING A LOAD* FUNCTION
 
 	std::shared_ptr<Texture> dirt = std::make_shared<Texture>(m_deviceResources);
-	dirt->LoadTarga("dirt01d.tga");
+	dirt->Create("dirt01d.tga");
 	ObjectStore::AddTexture("terrain-texture", dirt);
 
 	std::shared_ptr<Texture> dirtNormals = std::make_shared<Texture>(m_deviceResources);
-	dirtNormals->LoadTarga("dirt01n.tga");
+	dirtNormals->Create("dirt01n.tga");
 	ObjectStore::AddTexture("terrain-normal-map-texture", dirtNormals);
 
 

@@ -40,7 +40,6 @@
 #define STRICT
 
 
-
 #include <Windows.h>
 #include <WinUser.h>
 

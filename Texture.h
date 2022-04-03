@@ -7,6 +7,10 @@
 #include <memory>
 #include <string>
 #include <stdio.h>
+#include <filesystem>
+
+#include <DirectXTex.h>
+
 
 class Texture
 {
@@ -38,11 +42,17 @@ public:
 
 	void Reset();
 
-	void LoadTarga(std::string filename);
+	void Create(std::string filename);
+
+
+	
 
 	ID3D11ShaderResourceView* GetRawTextureViewPointer() { return m_textureView.Get(); }
 
 private:
+	std::unique_ptr<DirectX::ScratchImage> LoadTGAImage(std::string filename);
+	std::unique_ptr<DirectX::ScratchImage> LoadWICImage(std::string filename);
+
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
 	D3D11_TEXTURE2D_DESC			m_textureDesc;

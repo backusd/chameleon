@@ -1,5 +1,7 @@
 #include "Texture.h"
 
+using DirectX::ScratchImage;
+using DirectX::TexMetadata;
 
 Texture::Texture(std::shared_ptr<DeviceResources> deviceResources) :
 	m_deviceResources(deviceResources)
@@ -27,121 +29,41 @@ void Texture::Reset()
 	m_srvDesc.Texture2D.MipLevels = -1;
 }
 
-void Texture::LoadTarga(std::string filename)
+void Texture::Create(std::string filename)
 {
 	INFOMAN(m_deviceResources);
 
-	int error, bpp, imageSize, index, i, j, k;
-	FILE* filePtr;
-	unsigned int count;
-	TargaHeader targaFileHeader;
-	unsigned char* targaImage;
-	unsigned char* targaData;
-	std::ostringstream oss;
-	int height, width;
+	std::unique_ptr<DirectX::ScratchImage> scratchImage;
 
-	// Open the targa file for reading in binary.
-	error = fopen_s(&filePtr, filename.c_str(), "rb");
-	if (error != 0)
+	const std::filesystem::path filePath = filename;
+	std::string extension = filePath.extension().string();
+	if (extension == ".tga")
 	{
-		oss << "Failed to open file: " << filename;
-		throw TextureException(__LINE__, __FILE__, oss.str());
+		scratchImage = LoadTGAImage(filename);
+	}
+	else if (extension == ".bmp" || extension == ".jpeg" || extension == ".png")
+	{
+		scratchImage = LoadWICImage(filename);
 	}
 
-	// Read in the file header.
-	count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
-	if (count != 1)
-	{
-		oss << "Failed to read in the file header for file: " << filename;
-		throw TextureException(__LINE__, __FILE__, oss.str());
-	}
 
-	// Get the important information from the header.
-	height = (int)targaFileHeader.height;
-	width = (int)targaFileHeader.width;
-	bpp = (int)targaFileHeader.bpp;
+	const DirectX::Image* img = scratchImage->GetImage(0, 0, 0);
+	assert(img);
 
-	// Check that it is 32 bit and not 24 bit.
-	if (bpp != 32)
-	{
-		oss << "bpp is NOT 32 for file: " << filename << std::endl;
-		oss << "    bpp = " << bpp;
-		throw TextureException(__LINE__, __FILE__, oss.str());
-	}
 
-	// Calculate the size of the 32 bit image data.
-	imageSize = width * height * 4;
-
-	// Allocate memory for the targa image data.
-	targaImage = new unsigned char[imageSize];
-
-	// Read in the targa image data.
-	count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
-	if (count != imageSize)
-	{
-		oss << "Failed to read in expected amount of data:" << std::endl;
-		oss << "    File:     " << filename << std::endl;
-		oss << "    Expected: " << imageSize << std::endl;
-		oss << "    Actual:   " << count << std::endl;
-		throw TextureException(__LINE__, __FILE__, oss.str());
-	}
-
-	// Close the file.
-	error = fclose(filePtr);
-	if (error != 0)
-	{
-		oss << "Failed to close the file: " << filename;
-		throw TextureException(__LINE__, __FILE__, oss.str());
-	}
-
-	// Allocate memory for the targa destination data.
-	targaData = new unsigned char[imageSize];
-
-	// Initialize the index into the targa destination data array.
-	index = 0;
-
-	// Initialize the index into the targa image data.
-	k = (width * height * 4) - (width * 4);
-
-	// Now copy the targa image data into the targa destination array in the correct order since the targa format is stored upside down.
-	for (j = 0; j < height; j++)
-	{
-		for (i = 0; i < width; i++)
-		{
-			targaData[index + 0] = targaImage[k + 2];  // Red.
-			targaData[index + 1] = targaImage[k + 1];  // Green.
-			targaData[index + 2] = targaImage[k + 0];  // Blue
-			targaData[index + 3] = targaImage[k + 3];  // Alpha
-
-			// Increment the indexes into the targa data.
-			k += 4;
-			index += 4;
-		}
-
-		// Set the targa image data index back to the preceding row at the beginning of the column since its reading it in upside down.
-		k -= (width * 8);
-	}
-
-	// Release the targa image data now that it was copied into the destination array.
-	delete[] targaImage;
-	targaImage = 0;
-
-	// ===================================================================
-	// Now load the data into the texture
-	m_textureDesc.Height = height;
-	m_textureDesc.Width = width;
+	m_textureDesc.Height = img->height;
+	m_textureDesc.Width = img->width;
 
 	// Create the empty texture.
-	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateTexture2D(&m_textureDesc, NULL, &m_texture));
+	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateTexture2D(&m_textureDesc, nullptr, &m_texture));
 
 	// Set the row pitch of the targa image data.
-	unsigned int rowPitch = (width * 4) * sizeof(unsigned char);
+	unsigned int _rowPitch = (img->width * 4) * sizeof(unsigned char);
 
 	// Copy the targa image data into the texture.
 	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_texture.Get(), 0, NULL, targaData, rowPitch, 0)
+		m_deviceResources->D3DDeviceContext()->UpdateSubresource(m_texture.Get(), 0, NULL, img->pixels, _rowPitch, 0)
 	);
-
 
 	// Create the shader resource view for the texture.
 	GFX_THROW_INFO(
@@ -152,4 +74,32 @@ void Texture::LoadTarga(std::string filename)
 	GFX_THROW_INFO_ONLY(
 		m_deviceResources->D3DDeviceContext()->GenerateMips(m_textureView.Get())
 	);
+}
+
+std::unique_ptr<ScratchImage> Texture::LoadWICImage(std::string filename)
+{
+	INFOMAN(m_deviceResources);
+
+	std::unique_ptr<ScratchImage> image = std::make_unique<DirectX::ScratchImage>();
+	DirectX::TexMetadata metadata;
+	std::wstring wideFilename = std::wstring(filename.begin(), filename.end());
+	GFX_THROW_INFO(
+		DirectX::LoadFromWICFile(wideFilename.c_str(), DirectX::WIC_FLAGS::WIC_FLAGS_NONE, &metadata, *image)
+	);
+
+	return std::move(image);
+}
+
+std::unique_ptr<ScratchImage> Texture::LoadTGAImage(std::string filename)
+{
+	INFOMAN(m_deviceResources);
+
+	std::unique_ptr<ScratchImage> image = std::make_unique<DirectX::ScratchImage>();
+	DirectX::TexMetadata metadata;
+	std::wstring wideFilename = std::wstring(filename.begin(), filename.end());
+	GFX_THROW_INFO(
+		DirectX::LoadFromTGAFile(wideFilename.c_str(), DirectX::TGA_FLAGS::TGA_FLAGS_NONE, &metadata, *image)
+	);
+
+	return std::move(image);
 }
