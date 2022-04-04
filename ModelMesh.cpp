@@ -22,14 +22,13 @@ ModelMesh::ModelMesh(std::shared_ptr<DeviceResources> deviceResources, std::stri
 
 void ModelMesh::LoadOBJ(std::string filename)
 {
-	// For now, we are not creating indices for OBJ objects, so do not use DrawIndexed
-	m_drawIndexed = false;
-
 	std::vector<XMFLOAT3> positions;
 	std::vector<XMFLOAT2> textures;
 	std::vector<XMFLOAT3> normals;
+	std::vector<int> indexLookup;
 
 	std::vector<OBJVertex> vertices;
+	std::vector<unsigned short> indices;
 
 	std::string line;
 	std::ifstream file(filename);
@@ -46,6 +45,8 @@ void ModelMesh::LoadOBJ(std::string filename)
 	std::istringstream faceISS;
 	std::string item;
 	int lineNumber = 0;
+	unsigned short parsedPositionIndex, parsedTextureIndex, parsedNormalIndex;
+
 	while (std::getline(file, line))
 	{
 		++lineNumber;
@@ -70,6 +71,8 @@ void ModelMesh::LoadOBJ(std::string filename)
 			positions[positions.size() - 1].x = std::stof(tokens[1]);
 			positions[positions.size() - 1].y = std::stof(tokens[2]);
 			positions[positions.size() - 1].z = std::stof(tokens[3]);
+
+			indexLookup.push_back(-1);
 		}
 		else if (tokens[0] == "vt")
 		{
@@ -122,10 +125,30 @@ void ModelMesh::LoadOBJ(std::string filename)
 					throw ModelMeshException(__LINE__, __FILE__, oss.str());
 				}
 
-				vertices.push_back(OBJVertex());
-				vertices[vertices.size() - 1].position = positions[std::stoi(faceTokens[0]) - 1]; // OBJ is NOT 0 indexed - index starts at 1 so we need to subtract 1 here
-				vertices[vertices.size() - 1].texture  = textures[std::stoi(faceTokens[1]) - 1];
-				vertices[vertices.size() - 1].normal   = normals[std::stoi(faceTokens[2]) - 1];
+				parsedPositionIndex = static_cast<unsigned short>(std::stoi(faceTokens[0]) - 1); // OBJ is NOT 0 indexed - index starts at 1 so we need to subtract 1 here
+				parsedTextureIndex = static_cast<unsigned short>(std::stoi(faceTokens[1]) - 1);
+				parsedNormalIndex = static_cast<unsigned short>(std::stoi(faceTokens[2]) - 1);
+
+				// If the position was not used to create a previous vertex, then create a new one
+				if (indexLookup[parsedPositionIndex] == -1)
+				{
+					// Create and add new vertex
+					vertices.push_back(OBJVertex());
+					vertices[vertices.size() - 1].position = positions[parsedPositionIndex];
+					vertices[vertices.size() - 1].texture = textures[parsedTextureIndex];
+					vertices[vertices.size() - 1].normal = normals[parsedNormalIndex];
+
+					// Add new index for the vertex
+					indices.push_back(static_cast<unsigned short>(vertices.size() - 1));
+
+					// Update the lookup list so we know not to create a duplicate vertex for this position
+					indexLookup[parsedPositionIndex] = static_cast<int>(vertices.size() - 1);
+				}
+				else
+				{
+					// Vertex was already added - just add the index
+					indices.push_back(static_cast<unsigned short>(indexLookup[parsedPositionIndex]));
+				}
 			}
 		}
 	}
@@ -149,23 +172,18 @@ void ModelMesh::LoadOBJ(std::string filename)
 	sd.pSysMem = vertices.data();
 	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateBuffer(&bd, &sd, &m_vertexBuffer));
 
-}
 
-void ModelMesh::Bind()
-{
-	INFOMAN(m_deviceResources);
-	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
+	// Index Buffer
+	D3D11_BUFFER_DESC ibd = {};
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.CPUAccessFlags = 0u;
+	ibd.MiscFlags = 0u;
+	ibd.ByteWidth = static_cast<UINT>(indices.size() * sizeof(unsigned short)); //sizeof(indices);
+	ibd.StructureByteStride = sizeof(unsigned short);
+	D3D11_SUBRESOURCE_DATA isd = {};
+	isd.pSysMem = indices.data();
+	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateBuffer(&ibd, &isd, &m_indexBuffer));
 
-	GFX_THROW_INFO_ONLY(
-		context->IASetPrimitiveTopology(m_topology)
-	);
-
-	const UINT stride = m_sizeOfVertex;
-	const UINT offset = 0u;
-	GFX_THROW_INFO_ONLY(
-		context->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &stride, &offset)
-	);
-	//GFX_THROW_INFO_ONLY(
-	//	context->IASetIndexBuffer(m_indexBuffer.Get(), m_indexFormat, 0u)
-	//);
+	m_indexCount = static_cast<unsigned int>(indices.size());
 }

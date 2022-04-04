@@ -38,7 +38,9 @@ void Drawable::Draw()
 	}
 	else
 	{
-		m_deviceResources->D3DDeviceContext()->Draw(m_mesh->VertexCount(), 0u);
+		GFX_THROW_INFO_ONLY(
+			m_deviceResources->D3DDeviceContext()->Draw(m_mesh->VertexCount(), 0u)
+		);
 	}
 }
 

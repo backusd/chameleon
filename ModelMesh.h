@@ -23,9 +23,6 @@ private:
 public:
 	ModelMesh(std::shared_ptr<DeviceResources> deviceResources, std::string filename);
 
-	// Override the Bind call because we are not binding an index buffer yet
-	void Bind() override;
-
 private:
 	void LoadOBJ(std::string filename);
 
