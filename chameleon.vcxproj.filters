@@ -611,6 +611,9 @@
     <None Include="models\suzanne.obj">
       <Filter>Data</Filter>
     </None>
+    <None Include="models\nanosuit.obj">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="blackforest_cm.bmp">
