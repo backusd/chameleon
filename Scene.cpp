@@ -29,6 +29,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_drawables.push_back(skyDome);
 
 	// Cubes
+	/*
 	std::shared_ptr<Box> box1 = std::make_shared<Box>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	box1->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	box1->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
@@ -40,6 +41,12 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	box2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
 	box2->SetProjectionMatrix(m_projectionMatrix);
 	m_drawables.push_back(box2);
+	*/
+
+	// Suzanne
+	std::shared_ptr<Suzanne> suzanne = std::make_shared<Suzanne>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	suzanne->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(suzanne);
 
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);

@@ -150,9 +150,18 @@ void ContentWindow::ObjectStoreAddShaders()
 	phongLayout->AddDescription(  "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
 	phongLayout->CreateLayout();
 
+	std::shared_ptr<InputLayout> phongTextureLayout = std::make_shared<InputLayout>(m_deviceResources, L"PhongTextureVertexShader.cso");
+	phongTextureLayout->AddDescription("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	phongTextureLayout->AddDescription("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	phongTextureLayout->AddDescription("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0);
+	phongTextureLayout->CreateLayout();
+
 	ObjectStore::AddBindable("phong-vertex-shader-IA", phongLayout);
 	ObjectStore::AddBindable("phong-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, phongLayout->GetVertexShaderFileBlob()));
 	ObjectStore::AddBindable("phong-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PhongPixelShader.cso"));
+
+	ObjectStore::AddBindable("phong-texture-vertex-shader-IA", phongTextureLayout);
+	ObjectStore::AddBindable("phong-texture-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, phongTextureLayout->GetVertexShaderFileBlob()));
 
 
 	// Sky Dome ======================================================================================================
@@ -184,6 +193,8 @@ void ContentWindow::ObjectStoreAddMeshes()
 	ObjectStore::AddMesh("box-filled-mesh", std::make_shared<BoxMesh>(m_deviceResources, true));
 	ObjectStore::AddMesh("box-outline-mesh", std::make_shared<BoxMesh>(m_deviceResources, false));
 	ObjectStore::AddMesh("sky-dome-mesh", std::make_shared<SkyDomeMesh>(m_deviceResources));
+
+	ObjectStore::AddMesh("suzanne-mesh", std::make_shared<ModelMesh>(m_deviceResources, "models/suzanne.obj"));
 
 	// Add terrain cell meshes sequentially
 	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrainMesh("terrain-mesh");

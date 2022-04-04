@@ -333,6 +333,15 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="ModelMesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelMeshException.cpp">
+      <Filter>Source Files\Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="Suzanne.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -578,6 +587,15 @@
     <ClInclude Include="Terrain.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="ModelMesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelMeshException.h">
+      <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="Suzanne.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -589,6 +607,9 @@
     </None>
     <None Include="VSInclude.hlsli">
       <Filter>Shaders\Includes</Filter>
+    </None>
+    <None Include="models\suzanne.obj">
+      <Filter>Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -677,15 +698,13 @@
     <FxCompile Include="SolidPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="PhongTextureVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="imgui.natvis">
       <Filter>Source Files\ImGUI</Filter>
     </Natvis>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="models\suzanne.obj">
-      <Filter>Data</Filter>
-    </Object>
   </ItemGroup>
 </Project>

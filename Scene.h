@@ -20,6 +20,7 @@
 #include "Box.h"
 #include "SkyDome.h"
 #include "Terrain.h"
+#include "Suzanne.h"
 
 #include <memory>
 #include <vector>

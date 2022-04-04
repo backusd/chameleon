@@ -6,8 +6,10 @@ Mesh::Mesh(std::shared_ptr<DeviceResources> deviceResources) :
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
 	m_indexCount(0),
+	m_vertexCount(0),
 	m_sizeOfVertex(0),
-	m_indexFormat(DXGI_FORMAT_R16_UINT)
+	m_indexFormat(DXGI_FORMAT_R16_UINT),
+	m_drawIndexed(true)
 {
 }
 

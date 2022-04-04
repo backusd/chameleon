@@ -28,10 +28,18 @@ void Drawable::Draw()
 	// before submitting the vertices to be rendered
 	PreDrawUpdate();
 
-	UINT indexCount = m_mesh->IndexCount();
-	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->DrawIndexed(indexCount, 0u, 0u)
-	);
+	// Determine the type of draw call from the mesh
+	if (m_mesh->DrawIndexed())
+	{
+		UINT indexCount = m_mesh->IndexCount();
+		GFX_THROW_INFO_ONLY(
+			m_deviceResources->D3DDeviceContext()->DrawIndexed(indexCount, 0u, 0u)
+		);
+	}
+	else
+	{
+		m_deviceResources->D3DDeviceContext()->Draw(m_mesh->VertexCount(), 0u);
+	}
 }
 
 void Drawable::UpdateModelViewProjectionConstantBuffer()
