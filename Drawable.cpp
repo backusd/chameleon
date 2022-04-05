@@ -31,9 +31,8 @@ void Drawable::Draw()
 	// Determine the type of draw call from the mesh
 	if (m_mesh->DrawIndexed())
 	{
-		UINT indexCount = m_mesh->IndexCount();
 		GFX_THROW_INFO_ONLY(
-			m_deviceResources->D3DDeviceContext()->DrawIndexed(indexCount, 0u, 0u)
+			m_deviceResources->D3DDeviceContext()->DrawIndexed(m_mesh->IndexCount(), 0u, 0u)
 		);
 	}
 	else
@@ -47,6 +46,7 @@ void Drawable::Draw()
 void Drawable::UpdateModelViewProjectionConstantBuffer()
 {
 	INFOMAN(m_deviceResources);
+
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
 	D3D11_MAPPED_SUBRESOURCE ms;
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));

@@ -11,10 +11,11 @@ class SphereMesh : public Mesh
 {
 public:
 	SphereMesh(std::shared_ptr<DeviceResources> deviceResources);
+	SphereMesh(std::shared_ptr<DeviceResources> deviceResources, bool solidColorSphere);
 
 
 private:
 	void InitializeBuffers();
-
+	void InitializeBuffersSolidColor();
 	
 };

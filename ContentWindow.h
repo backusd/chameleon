@@ -48,6 +48,7 @@
 #include "SkyDomeMesh.h"
 #include "DepthStencilState.h"
 #include "ModelMesh.h"
+#include "SphereMesh.h"
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"

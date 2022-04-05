@@ -21,6 +21,8 @@
 #include "SkyDome.h"
 #include "Terrain.h"
 #include "Suzanne.h"
+#include "Lighting.h"
+#include "Sphere.h"
 
 #include <memory>
 #include <vector>
@@ -39,9 +41,9 @@ public:
 	void Draw();
 
 private:
-	void CreateStaticResources();
+	//void CreateStaticResources();
 	void CreateWindowSizeDependentResources();
-	void CreateAndBindLightPropertiesBuffer();
+	//void CreateAndBindLightPropertiesBuffer();
 	void CreateAndBindModelViewProjectionBuffer();
 
 
@@ -51,7 +53,8 @@ private:
 	DirectX::XMMATRIX									m_projectionMatrix;
 
 	// Light Properties
-	LightProperties										m_lightProperties;
+	//LightProperties										m_lightProperties;
+	std::shared_ptr<Lighting>							m_lighting;
 
 	// Cameras
 	std::vector<std::shared_ptr<MoveLookController>>	m_moveLookControllers;

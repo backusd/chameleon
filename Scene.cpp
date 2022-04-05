@@ -17,9 +17,9 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_moveLookControllers.push_back(std::make_shared<CenterOnOriginMoveLookController>(m_hWnd));
 #endif
 
-	CreateStaticResources();
+	//CreateStaticResources();
 	CreateWindowSizeDependentResources();
-	CreateAndBindLightPropertiesBuffer();
+	//CreateAndBindLightPropertiesBuffer();
 	CreateAndBindModelViewProjectionBuffer();
 
 	// Sky Dome
@@ -28,32 +28,41 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	skyDome->SetProjectionMatrix(m_projectionMatrix);
 	m_drawables.push_back(skyDome);
 
+	// Lighting
+	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
+	m_lighting = std::make_shared<Lighting>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	m_lighting->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(m_lighting);
+
+	// Sphere
+	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	sphere->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(sphere);
+
 	// Cubes
-	/*
 	std::shared_ptr<Box> box1 = std::make_shared<Box>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	box1->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	box1->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	box1->SetProjectionMatrix(m_projectionMatrix);
-	m_drawables.push_back(box1);
+	//m_drawables.push_back(box1);
 
 	std::shared_ptr<Box> box2 = std::make_shared<Box>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	box2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
 	box2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
 	box2->SetProjectionMatrix(m_projectionMatrix);
-	m_drawables.push_back(box2);
-	*/
+	//m_drawables.push_back(box2);
 
 	// Suzanne
 	std::shared_ptr<Suzanne> suzanne = std::make_shared<Suzanne>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	suzanne->SetProjectionMatrix(m_projectionMatrix);
-	m_drawables.push_back(suzanne);
+	//m_drawables.push_back(suzanne);
 
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	m_terrain->SetProjectionMatrix(m_projectionMatrix);
 
 }
-
+/*
 void Scene::CreateStaticResources()
 {
 	m_lightProperties = LightProperties();
@@ -105,6 +114,7 @@ void Scene::CreateStaticResources()
 		m_lightProperties.Lights[i] = light;
 	}
 }
+*/
 
 void Scene::CreateWindowSizeDependentResources()
 {
@@ -142,6 +152,7 @@ void Scene::CreateWindowSizeDependentResources()
 	m_projectionMatrix = perspectiveMatrix * orientationMatrix;
 }
 
+/*
 void Scene::CreateAndBindLightPropertiesBuffer()
 {
 	// The scene will be responsible for keeping track of all lights in the scene
@@ -170,6 +181,7 @@ void Scene::CreateAndBindLightPropertiesBuffer()
 		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 1u, buffer)
 	);
 }
+*/
 
 void Scene::CreateAndBindModelViewProjectionBuffer()
 {
@@ -209,17 +221,6 @@ void Scene::WindowResized()
 
 void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
-	// Update the move look control and get back the new view matrix
-	m_moveLookControllers[m_moveLookControllerIndex]->Update(timer, keyboard, mouse);
-	//m_viewMatrix = m_moveLookControllers[m_moveLookControllerIndex]->ViewMatrix();
-	
-	// Update all drawables
-	for (std::shared_ptr<Drawable> drawable : m_drawables)
-		drawable->Update(timer);
-
-	// Update the terrain
-	m_terrain->Update(timer);
-
 	// If we are in DEBUG, then the move look controller may change, so update it 
 #ifndef NDEBUG
 	if (m_moveLookControllerIndexPrevious != m_moveLookControllerIndex)
@@ -233,11 +234,15 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	}
 #endif
 
+	// Update the move look control and get back the new view matrix
+	m_moveLookControllers[m_moveLookControllerIndex]->Update(timer, keyboard, mouse);
+	
+	// Update all drawables
+	for (std::shared_ptr<Drawable> drawable : m_drawables)
+		drawable->Update(timer);
 
-	//
-	// Consider making this NDEBUG only
-	//
-	// m_moveLookController->UpdateImGui();
+	// Update the terrain
+	m_terrain->Update(timer);
 }
 
 void Scene::Draw()
@@ -316,8 +321,11 @@ void Scene::DrawImGui()
 		ImGui::Begin("Object Edit");
 
 		ImGui::End();
+
+		// Draw the Center-on-origin lighting control menu
+		m_lighting->DrawImGui();
 	}
 
 	// Let the MoveLookController draw ImGui controls
-	m_moveLookControllers[m_moveLookControllerIndex]->DrawImGui();
+	m_moveLookControllers[m_moveLookControllerIndex]->DrawImGui();	
 }

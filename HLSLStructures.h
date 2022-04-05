@@ -137,3 +137,10 @@ struct SkyDomeColorBufferType
     DirectX::XMFLOAT4 apexColor;
     DirectX::XMFLOAT4 centerColor;
 };
+
+// Solid Color ==========================================================
+struct SolidColorVertexType
+{
+    DirectX::XMFLOAT4 position;
+    DirectX::XMFLOAT4 color;
+};

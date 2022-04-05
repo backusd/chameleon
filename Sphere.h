@@ -1,15 +1,17 @@
 #pragma once
 #include "pch.h"
 #include "Drawable.h"
+
 #include "HLSLStructures.h"
 
 
-class Suzanne : public Drawable
+class Sphere : public Drawable
 {
 public:
-	Suzanne(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
+	Sphere(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
-	void SetSideLengths(DirectX::XMFLOAT3 length) { m_xSideLength = length.x; m_ySideLength = length.y; m_zSideLength = length.z; }
+	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(m_radius, m_radius, m_radius); }
+	void SetRadius(float radius) { m_radius = radius; }
 
 	void PreDrawUpdate() override;
 
@@ -19,10 +21,7 @@ private:
 	void CreateMaterialData();
 	void CreateAndAddPSBufferArray(); // This is necessary because the cube will create an immutable constant buffer for material data
 
-	float m_xSideLength;
-	float m_ySideLength;
-	float m_zSideLength;
-
+	float m_radius;
 	PhongMaterialProperties* m_material;
 
 };
