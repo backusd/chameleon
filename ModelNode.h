@@ -21,11 +21,13 @@ public:
 	void SetName(std::string name) { m_nodeName = name; }
 	void SetMesh(std::shared_ptr<Mesh> mesh) { m_mesh = mesh; }
 
-	void CreateMesh(std::vector<OBJVertex>& vertices, std::vector<unsigned short>& indices);
+	template <typename T, typename A>
+	void CreateMesh(std::vector<T, A>& vertices, std::vector<unsigned short>& indices);	
+
+	template <typename T, typename A>
+	void CreateChildNode(std::string nodeName, std::vector<T, A>& vertices, std::vector<unsigned short>& indices);
+
 	std::shared_ptr<Mesh> GetMesh() { return m_mesh; }
-
-	void CreateChildNode(std::string nodeName, std::vector<OBJVertex>& vertices, std::vector<unsigned short>& indices);
-
 
 #ifndef NDEBUG
 	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc);
@@ -52,3 +54,18 @@ private:
 	DirectX::XMMATRIX m_accumulatedModelMatrix;
 
 };
+
+template <typename T, typename A>
+void ModelNode::CreateMesh(std::vector<T, A>& vertices, std::vector<unsigned short>& indices)
+{
+	m_mesh = std::make_shared<Mesh>(m_deviceResources);
+	m_mesh->LoadBuffers<T, A>(vertices, indices);
+}
+
+template <typename T, typename A>
+void ModelNode::CreateChildNode(std::string nodeName, std::vector<T, A>& vertices, std::vector<unsigned short>& indices)
+{
+	m_childNodes.push_back(std::make_unique<ModelNode>(m_deviceResources, m_moveLookController));
+	m_childNodes.back()->SetName(nodeName);
+	m_childNodes.back()->CreateMesh<T, A>(vertices, indices);
+}

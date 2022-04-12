@@ -17,19 +17,6 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	// will check to see if m_mesh is nullptr to know if it has loaded the mesh yet
 }
 
-void ModelNode::CreateMesh(std::vector<OBJVertex>& vertices, std::vector<unsigned short>& indices)
-{
-	m_mesh = std::make_shared<Mesh>(m_deviceResources);
-	m_mesh->LoadBuffers<OBJVertex>(vertices, indices);
-}
-
-void ModelNode::CreateChildNode(std::string nodeName, std::vector<OBJVertex>& vertices, std::vector<unsigned short>& indices)
-{
-	m_childNodes.push_back(std::make_unique<ModelNode>(m_deviceResources, m_moveLookController));
-	m_childNodes.back()->SetName(nodeName);
-	m_childNodes.back()->CreateMesh(vertices, indices);
-}
-
 void ModelNode::Draw(XMMATRIX modelMatrix, XMMATRIX projectionMatrix)
 {
 	INFOMAN(m_deviceResources);

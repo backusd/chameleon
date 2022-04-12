@@ -217,10 +217,10 @@ void Model::OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT
 			{
 				// if the mesh for the root node is still nullptr, then the data that has been gathered belongs to the root node
 				if (m_rootNode->GetMesh() == nullptr)
-					m_rootNode->CreateMesh(vertices, indices);
+					m_rootNode->CreateMesh<OBJVertex>(vertices, indices);
 				// The root node has already been created, so add the data as a child node
 				else
-					m_rootNode->CreateChildNode(childNodeName, vertices, indices);
+					m_rootNode->CreateChildNode<OBJVertex>(childNodeName, vertices, indices);
 
 				// keep track of the name of the next node, which will be a child node
 				childNodeName = lineTokens[1];
@@ -286,10 +286,10 @@ void Model::OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT
 
 	// if the mesh for the root node is still nullptr, then the data that has been gathered belongs to the root node
 	if (m_rootNode->GetMesh() == nullptr)
-		m_rootNode->CreateMesh(vertices, indices);
+		m_rootNode->CreateMesh<OBJVertex>(vertices, indices);
 	// The root node has already been created, so add the data as a child node
 	else
-		m_rootNode->CreateChildNode(childNodeName, vertices, indices);
+		m_rootNode->CreateChildNode<OBJVertex>(childNodeName, vertices, indices);
 
 	// clean up the data for the vertices and indices
 	vertices.clear();
