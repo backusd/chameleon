@@ -23,6 +23,7 @@
 #include "Suzanne.h"
 #include "Lighting.h"
 #include "Sphere.h"
+#include "Nanosuit.h"
 
 #include <memory>
 #include <vector>
@@ -41,9 +42,7 @@ public:
 	void Draw();
 
 private:
-	//void CreateStaticResources();
 	void CreateWindowSizeDependentResources();
-	//void CreateAndBindLightPropertiesBuffer();
 	void CreateAndBindModelViewProjectionBuffer();
 
 
@@ -53,7 +52,6 @@ private:
 	DirectX::XMMATRIX									m_projectionMatrix;
 
 	// Light Properties
-	//LightProperties										m_lightProperties;
 	std::shared_ptr<Lighting>							m_lighting;
 
 	// Cameras

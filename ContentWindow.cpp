@@ -196,8 +196,6 @@ void ContentWindow::ObjectStoreAddMeshes()
 	ObjectStore::AddMesh("box-outline-mesh", std::make_shared<BoxMesh>(m_deviceResources, false));
 	ObjectStore::AddMesh("sky-dome-mesh", std::make_shared<SkyDomeMesh>(m_deviceResources));
 
-	ObjectStore::AddMesh("suzanne-mesh", std::make_shared<ModelMesh>(m_deviceResources, "models/suzanne.obj"));
-
 	// Add terrain cell meshes sequentially
 	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrainMesh("terrain-mesh");
 	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)

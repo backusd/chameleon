@@ -31,7 +31,7 @@ public:
 
 	// If we are in DEBUG, then the move look controller may change, so allow it to be updated
 #ifndef NDEBUG
-	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; }
+	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc);
 #endif
 
 private:

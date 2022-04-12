@@ -47,7 +47,6 @@
 #include "TerrainMesh.h"
 #include "SkyDomeMesh.h"
 #include "DepthStencilState.h"
-#include "ModelMesh.h"
 #include "SphereMesh.h"
 
 #include "imgui.h"

@@ -18,29 +18,16 @@ void Drawable::Draw()
 {
 	INFOMAN(m_deviceResources);
 
+	// Bind all bindables and then draw the model
 	for (std::shared_ptr<Bindable> bindable : m_bindables)
 		bindable->Bind();
-
-	m_mesh->Bind();
 
 	// The PreDrawUpdate function will execute immediately prior to performing the actual Draw call. 
 	// This allows updating of any constant buffers or other necessary updates that need to take place
 	// before submitting the vertices to be rendered
 	PreDrawUpdate();
 
-	// Determine the type of draw call from the mesh
-	if (m_mesh->DrawIndexed())
-	{
-		GFX_THROW_INFO_ONLY(
-			m_deviceResources->D3DDeviceContext()->DrawIndexed(m_mesh->IndexCount(), 0u, 0u)
-		);
-	}
-	else
-	{
-		GFX_THROW_INFO_ONLY(
-			m_deviceResources->D3DDeviceContext()->Draw(m_mesh->VertexCount(), 0u)
-		);
-	}
+	m_model->Draw(GetModelMatrix(), m_projectionMatrix);
 }
 
 void Drawable::UpdateModelViewProjectionConstantBuffer()
@@ -79,3 +66,4 @@ XMMATRIX Drawable::GetModelMatrix()
 		GetScaleMatrix() *
 		DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 }
+

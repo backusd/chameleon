@@ -134,3 +134,13 @@ void Terrain::UpdateBindings()
 		context->Unmap(vsBuffer.Get(), 0)
 	);
 }
+
+#ifndef NDEBUG
+void Terrain::SetMoveLookController(std::shared_ptr<MoveLookController> mlc) 
+{ 
+	m_moveLookController = mlc;
+
+	for (std::shared_ptr<TerrainCell> cell : m_terrainCells)
+		cell->SetMoveLookController(mlc);
+}
+#endif

@@ -5,5 +5,5 @@ TerrainCell::TerrainCell(std::shared_ptr<DeviceResources> deviceResources,
 	std::string meshLookupName) :
 		Drawable(deviceResources, moveLookController)
 {
-	SetMesh(meshLookupName);
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh(meshLookupName));
 }

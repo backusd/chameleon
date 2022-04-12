@@ -10,7 +10,8 @@ Box::Box(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveL
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
 
-	SetMesh("box-filled-mesh");
+	//SetMesh("box-filled-mesh");
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("box-filled-mesh"));
 
 	AddBindable("phong-vertex-shader");					// Vertex Shader
 	AddBindable("phong-vertex-shader-IA");				// Input Layout

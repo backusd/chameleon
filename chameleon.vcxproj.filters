@@ -330,9 +330,6 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
-    <ClCompile Include="ModelMesh.cpp">
-      <Filter>Source Files\Bindable\Meshes</Filter>
-    </ClCompile>
     <ClCompile Include="ModelMeshException.cpp">
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
@@ -343,6 +340,18 @@
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
     <ClCompile Include="Sphere.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelNode.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelException.cpp">
+      <Filter>Source Files\Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="Nanosuit.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
@@ -587,9 +596,6 @@
     <ClInclude Include="Terrain.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="ModelMesh.h">
-      <Filter>Header Files\Bindable\Meshes</Filter>
-    </ClInclude>
     <ClInclude Include="ModelMeshException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
@@ -600,6 +606,18 @@
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="Sphere.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelNode.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelException.h">
+      <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="Nanosuit.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,7 +8,7 @@ Suzanne::Suzanne(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
 
-	SetMesh("suzanne-mesh");
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/suzanne.obj");
 
 	AddBindable("phong-texture-vertex-shader");			// Vertex Shader
 	AddBindable("phong-texture-vertex-shader-IA");		// Input Layout

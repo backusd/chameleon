@@ -12,7 +12,9 @@ Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared
 
 	// Can't seem to get solid coloring for the sphere, so I'm just going to use phong shading for now
 	// with material settings that make it solid white
-	SetMesh("sphere-mesh");
+	//SetMesh("sphere-mesh");
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh"));
+
 	AddBindable("phong-vertex-shader");					// Vertex Shader
 	AddBindable("phong-vertex-shader-IA");				// Input Layout
 	AddBindable("phong-pixel-shader");					// Pixel Shader
@@ -158,16 +160,6 @@ void Lighting::CreateAndAddPSBufferArray()
 
 void Lighting::PreDrawUpdate()
 {
-	// Pretty much every object will need to submit model/view/projection data to the vertex shader
-	// The Scene binds a ModelViewProjectionConstantBuffer object to slot 0 of the vertex shader that
-	// can be mapped and written to by any object. The reason we don't automatically perform this update
-	// for every drawable is that not every drawable actually requires this update. For example, the Terrain
-	// is not a drawable, but instead houses many TerrainCells that are drawable. However, each of these 
-	// TerrainCells do not require this update because Terrain is able to set up the model view projection 
-	// buffer once before trying to draw each TerrainCell
-	UpdateModelViewProjectionConstantBuffer();
-
-
 	// Updating of any additional constant buffers or other pipeline resources should go here
 	UpdatePSConstantBuffer();
 }

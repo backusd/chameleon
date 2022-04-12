@@ -1,35 +1,28 @@
-#include "Sphere.h"
+#include "Nanosuit.h"
 
 
-Sphere::Sphere(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController),
-	m_radius(1.0f)
+
+Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
+	Drawable(deviceResources, moveLookController)
 {
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
 
-	//SetMesh("sphere-mesh");
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh"));
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.obj");
 
-	AddBindable("phong-vertex-shader");					// Vertex Shader
-	AddBindable("phong-vertex-shader-IA");				// Input Layout
+	AddBindable("phong-texture-vertex-shader");			// Vertex Shader
+	AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
 	AddBindable("phong-pixel-shader");					// Pixel Shader
-
-	//SetMesh("solid-sphere-mesh");
-	//AddBindable("solid-vertex-shader");					// Vertex Shader
-	//AddBindable("solid-vertex-shader-IA");				// Input Layout
-	//AddBindable("solid-pixel-shader");					// Pixel Shader
-
-
 	AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
 	AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
-
+	// AddBindable("cube-buffers-VS");						// VS Constant buffers
+	// AddBindable("cube-buffers-PS");						// PS Constant buffers
 
 	// Function to create the PS constant buffer array - it will create an immutable constant buffer to hold material data
 	CreateAndAddPSBufferArray();
 }
 
-void Sphere::CreateMaterialData()
+void Nanosuit::CreateMaterialData()
 {
 	m_material = new PhongMaterialProperties();
 	m_material->Material.Emissive = XMFLOAT4(0.4f, 0.14f, 0.14f, 1.0f);
@@ -39,7 +32,7 @@ void Sphere::CreateMaterialData()
 	m_material->Material.SpecularPower = 6.0f;
 }
 
-void Sphere::CreateAndAddPSBufferArray()
+void Nanosuit::CreateAndAddPSBufferArray()
 {
 	// Create an immutable constant buffer and load it with the material data
 	std::shared_ptr<ConstantBuffer> materialBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
@@ -59,7 +52,7 @@ void Sphere::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
-void Sphere::PreDrawUpdate()
+void Nanosuit::PreDrawUpdate()
 {
 	// Pretty much every object will need to submit model/view/projection data to the vertex shader
 	// The Scene binds a ModelViewProjectionConstantBuffer object to slot 0 of the vertex shader that
@@ -74,7 +67,7 @@ void Sphere::PreDrawUpdate()
 	// Updating of any additional constant buffers or other pipeline resources should go here
 }
 
-void Sphere::Update(std::shared_ptr<StepTimer> timer)
+void Nanosuit::Update(std::shared_ptr<StepTimer> timer)
 {
 
 }
