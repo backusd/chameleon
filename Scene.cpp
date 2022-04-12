@@ -53,12 +53,24 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	// Suzanne
 	std::shared_ptr<Suzanne> suzanne = std::make_shared<Suzanne>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	suzanne->SetProjectionMatrix(m_projectionMatrix);
+	suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 3.0f));
 	//m_drawables.push_back(suzanne);
+
+	std::shared_ptr<Suzanne> suzanne2 = std::make_shared<Suzanne>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	suzanne2->SetProjectionMatrix(m_projectionMatrix);
+	suzanne2->SetPosition(XMFLOAT3(3.0f, 0.0f, 3.0f));
+	//m_drawables.push_back(suzanne2);
 
 	// Nanosuit
 	std::shared_ptr<Nanosuit> nanosuit = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	nanosuit->SetProjectionMatrix(m_projectionMatrix);
+	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
 	m_drawables.push_back(nanosuit);
+
+	std::shared_ptr<Nanosuit> nanosuit2 = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	nanosuit2->SetProjectionMatrix(m_projectionMatrix);
+	nanosuit2->SetPosition(XMFLOAT3(10.0f, -5.0f, 0.0f));
+	m_drawables.push_back(nanosuit2);
 
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);

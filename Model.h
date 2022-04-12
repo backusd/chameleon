@@ -29,6 +29,8 @@ private:
 
 	// OBJ specific loading methods
 	void OBJLoadFile(std::string filename);
+	bool OBJMeshesAlreadyLoaded(std::string filename);
+	void OBJLoadMeshesFromObjectStore(std::string filename);
 	void OBJGetPositionsTexturesNormals(std::string filename, std::vector<DirectX::XMFLOAT3>& positions, std::vector<DirectX::XMFLOAT2>& textures, std::vector<DirectX::XMFLOAT3>& normals);
 	void OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT3>& positions, std::vector<DirectX::XMFLOAT2>& textures, std::vector<DirectX::XMFLOAT3>& normals);
 

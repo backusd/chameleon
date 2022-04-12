@@ -41,6 +41,12 @@ void Model::OBJLoadFile(std::string filename)
 	// Therefore, parse the first one as the root node and all subsequent ones will be added
 	// as children to the root node
 
+	// If the meshes were already saved in ObjectStore, then just get a shared_ptr to the existing meshes
+	if (OBJMeshesAlreadyLoaded(filename))
+	{
+		OBJLoadMeshesFromObjectStore(filename);
+		return;
+	}
 
 	// Parse all positions, texture coordinates, and normals first before creating the final vertices
 	std::vector<XMFLOAT3> positions;
@@ -59,6 +65,134 @@ void Model::OBJLoadFile(std::string filename)
 
 	// Loop over the face values in the file and create the ModelNodes
 	OBJCreateVertices(filename, positions, textures, normals);
+}
+
+bool Model::OBJMeshesAlreadyLoaded(std::string filename)
+{
+	// Open the file -------------------------------------------------
+	std::ifstream file(filename);
+	if (!file.is_open())
+	{
+		std::ostringstream oss;
+		oss << "Could not open file: " << filename;
+		throw ModelException(__LINE__, __FILE__, oss.str());
+	}
+
+	// Parsing variables ---------------------------------------------
+	int lineNumber = 0;						// Used in exception messages for debugging
+	std::vector<std::string> lineTokens;	// vector to hold each string parsed from a line
+	std::istringstream lineISS;				// istringstream for parsing line tokens
+	std::string lineItem;					// temporary string to hold parsed token to be added to token vector
+
+	std::string firstModelNodeName = "";	// Variable to hold the first model node name
+
+	// Loop over each line in the file -------------------------------
+	std::string line;
+	while (std::getline(file, line))
+	{
+		// Update the line number
+		++lineNumber;
+
+		// Get each string in the line, splitting on space character ' '
+		lineTokens.clear();
+		lineISS = std::istringstream(line);
+		while (std::getline(lineISS, lineItem, ' '))
+			lineTokens.push_back(lineItem);
+
+		if (lineTokens.size() == 0)
+			continue;
+
+		// If token is 'o', the next value is the name of the node
+		if (lineTokens[0] == "o")
+		{
+			// Make sure the number of tokens in the line is exactly 2
+			if (lineTokens.size() != 2)
+			{
+				std::ostringstream oss;
+				oss << "File '" << filename << "' has invalid number of node name parameters at line " << lineNumber;
+				throw ModelException(__LINE__, __FILE__, oss.str());
+			}
+
+			// Get the name of the first model node and break because we only need the first one
+			firstModelNodeName = lineTokens[1];
+			break;
+		}
+	}
+
+	// Determine if the first modelnode already has a mesh saved in ObjectStore
+	std::string meshLookupName = (firstModelNodeName == "") ? filename : filename + "-" + firstModelNodeName;
+	return ObjectStore::MeshExists(meshLookupName);
+}
+
+void Model::OBJLoadMeshesFromObjectStore(std::string filename)
+{
+	// Open the file -------------------------------------------------
+	std::ifstream file(filename);
+	if (!file.is_open())
+	{
+		std::ostringstream oss;
+		oss << "Could not open file: " << filename;
+		throw ModelException(__LINE__, __FILE__, oss.str());
+	}
+
+	// Parsing variables ---------------------------------------------
+	int lineNumber = 0;						// Used in exception messages for debugging
+	std::vector<std::string> lineTokens;	// vector to hold each string parsed from a line
+	std::istringstream lineISS;				// istringstream for parsing line tokens
+	std::string lineItem;					// temporary string to hold parsed token to be added to token vector
+
+	std::string modelNodeName = "";			// Name of the model node to use to lookup the mesh
+
+	// Loop over each line in the file -------------------------------
+	std::string line;
+	while (std::getline(file, line))
+	{
+		// Update the line number
+		++lineNumber;
+
+		// Get each string in the line, splitting on space character ' '
+		lineTokens.clear();
+		lineISS = std::istringstream(line);
+		while (std::getline(lineISS, lineItem, ' '))
+			lineTokens.push_back(lineItem);
+
+		if (lineTokens.size() == 0)
+			continue;
+
+		// If token is 'o', the next value is the name of the node
+		if (lineTokens[0] == "o")
+		{
+			// Make sure the number of tokens in the line is exactly 2
+			if (lineTokens.size() != 2)
+			{
+				std::ostringstream oss;
+				oss << "File '" << filename << "' has invalid number of node name parameters at line " << lineNumber;
+				throw ModelException(__LINE__, __FILE__, oss.str());
+			}
+
+			// Get the name of the first model node and break because we only need the first one
+			modelNodeName = lineTokens[1];
+			
+			// If the root node is still nullptr, then create it and assign it this mesh
+			if (m_rootNode == nullptr)
+			{
+				m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
+				m_rootNode->SetName(modelNodeName);
+				m_rootNode->SetMesh(ObjectStore::GetMesh(filename + "-" + modelNodeName));
+			}
+			// Else, add a child node and get the mesh from ObjectStore
+			else
+				m_rootNode->CreateChildNode(modelNodeName, ObjectStore::GetMesh(filename + "-" + modelNodeName));
+		}
+	}
+
+	// If the root node is still nullptr, then there is only one mesh to create. So create it and get it from ObjectStore
+	if (m_rootNode == nullptr)
+	{
+		m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
+		m_rootNode->SetName(modelNodeName);
+		m_rootNode->SetMesh(ObjectStore::GetMesh(filename));	// For this case, there must not have been any 'o' in the file, so the lookup name is just the filename
+	}
 }
 
 void Model::OBJGetPositionsTexturesNormals(std::string filename, std::vector<XMFLOAT3>& positions, std::vector<XMFLOAT2>& textures, std::vector<XMFLOAT3>& normals)
@@ -212,15 +346,18 @@ void Model::OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT
 
 			// If no vertices have been gathered yet, then this must be the first 'o' in the file, which means it is for the root node
 			if (vertices.size() == 0)
+			{
 				m_rootNode->SetName(lineTokens[1]);
+				childNodeName = lineTokens[1];	// Keep track of the childNodeName because we will need it for adding the mesh to ObjectStore
+			}
 			else
 			{
 				// if the mesh for the root node is still nullptr, then the data that has been gathered belongs to the root node
 				if (m_rootNode->GetMesh() == nullptr)
-					m_rootNode->CreateMesh<OBJVertex>(vertices, indices);
-				// The root node has already been created, so add the data as a child node
+					ObjectStore::AddMesh(filename + "-" + childNodeName, m_rootNode->CreateMesh<OBJVertex>(vertices, indices));
+				// The root node has already been created, so add the data as a child node and add it to ObjectStore
 				else
-					m_rootNode->CreateChildNode<OBJVertex>(childNodeName, vertices, indices);
+					ObjectStore::AddMesh(filename + "-" + childNodeName, m_rootNode->CreateChildNode<OBJVertex>(childNodeName, vertices, indices));
 
 				// keep track of the name of the next node, which will be a child node
 				childNodeName = lineTokens[1];
@@ -285,11 +422,12 @@ void Model::OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT
 	}
 
 	// if the mesh for the root node is still nullptr, then the data that has been gathered belongs to the root node
+	// Add this mesh to ObjectStore
 	if (m_rootNode->GetMesh() == nullptr)
-		m_rootNode->CreateMesh<OBJVertex>(vertices, indices);
-	// The root node has already been created, so add the data as a child node
+		ObjectStore::AddMesh(filename, m_rootNode->CreateMesh<OBJVertex>(vertices, indices));
+	// The root node has already been created, so add the data as a child node and add it to ObjectStore
 	else
-		m_rootNode->CreateChildNode<OBJVertex>(childNodeName, vertices, indices);
+		ObjectStore::AddMesh(filename + "-" + childNodeName, m_rootNode->CreateChildNode<OBJVertex>(childNodeName, vertices, indices));
 
 	// clean up the data for the vertices and indices
 	vertices.clear();

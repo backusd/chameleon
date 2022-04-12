@@ -94,3 +94,13 @@ void ModelNode::SetMoveLookController(std::shared_ptr<MoveLookController> mlc)
 		node->SetMoveLookController(mlc);
 }
 #endif
+
+std::shared_ptr<Mesh> ModelNode::CreateChildNode(std::string nodeName, std::shared_ptr<Mesh> mesh)
+{
+	m_childNodes.push_back(std::make_unique<ModelNode>(m_deviceResources, m_moveLookController));
+	m_childNodes.back()->SetName(nodeName);
+	m_childNodes.back()->SetMesh(mesh);
+
+	// Return the mesh so that the loading code can optionally add this mesh to ObjectStore
+	return mesh;
+}

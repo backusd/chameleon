@@ -51,6 +51,7 @@ public:
 	static std::shared_ptr<TerrainMesh> GetTerrainMesh(std::string lookupName) { MAP_LOOKUP(m_terrainMeshMap, lookupName); }
 	static std::shared_ptr<Bindable> GetBindable(std::string lookupName) { MAP_LOOKUP(m_bindablesMap, lookupName); }
 
+	static bool MeshExists(std::string lookupName) { return m_meshMap.find(lookupName) != m_meshMap.end(); }
 
 private:
 	ObjectStore() {} // Disallow creation of an ObjectStore object
