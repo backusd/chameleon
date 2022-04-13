@@ -67,7 +67,7 @@ private:
 	//
 	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
 	//
-
+	void DrawImGui(std::string id);
 
 public:
 	void DrawImGui();

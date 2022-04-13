@@ -1,18 +1,22 @@
 #include "Lighting.h"
 
+using DirectX::XMFLOAT3;
+
 Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController),
-	m_positionMax(20.0f, 20.0f, 20.0f),
-	m_positionMin(-20.0f, -20.0f, -20.0f)
+	Drawable(deviceResources, moveLookController)
 {
 	m_position = XMFLOAT3(0.0f, 5.0f, 10.0f);
+
+#ifndef NDEBUG
+	m_positionMax = XMFLOAT3(20.0f, 20.0f, 20.0f);
+	m_positionMin = XMFLOAT3(-20.0f, -20.0f, -20.0f);
+#endif
 
 	// This must be run first because some of the following methods may use the lighting data
 	CreateLightProperties();
 
 	// Can't seem to get solid coloring for the sphere, so I'm just going to use phong shading for now
 	// with material settings that make it solid white
-	//SetMesh("sphere-mesh");
 	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh"));
 
 	AddBindable("phong-vertex-shader");					// Vertex Shader
@@ -215,15 +219,21 @@ void Lighting::Update(std::shared_ptr<StepTimer> timer)
 	m_lightProperties.Lights[0].Position = XMFLOAT4(m_position.x, m_position.y, m_position.z, 1.0f);
 }
 
-void Lighting::DrawImGui()
+
+
+#ifndef NDEBUG
+void Lighting::DrawImGui(std::string id)
 {
-	// Control the position of the light
-	ImGui::Begin("Light");
-
-	ImGui::Text("Position:");
-	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##lightPositionX", &m_position.x, m_positionMin.x, m_positionMax.x, "%.3f");
-	ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##lightPositionY", &m_position.y, m_positionMin.y, m_positionMax.y, "%.3f");
-	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##lightPositionZ", &m_position.z, m_positionMin.z, m_positionMax.z, "%.3f");
-
-	ImGui::End();
+	if (ImGui::CollapsingHeader(("Lighting##" + id).c_str(), ImGuiTreeNodeFlags_None))
+	{
+		ImGui::Text("Position:");
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##lightPositionX" + id).c_str(), &m_position.x, m_positionMin.x, m_positionMax.x, "%.3f");
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat(("##lightPositionY" + id).c_str(), &m_position.y, m_positionMin.y, m_positionMax.y, "%.3f");
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##lightPositionZ" + id).c_str(), &m_position.z, m_positionMin.z, m_positionMax.z, "%.3f");
+	
+		ImGui::Text("");
+		ImGui::Text("Could make this an array of lights and be able to change");
+		ImGui::Text("color and light type");
+	}
 }
+#endif

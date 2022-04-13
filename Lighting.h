@@ -11,8 +11,6 @@ public:
 
 	void Update(std::shared_ptr<StepTimer> timer);
 
-	void DrawImGui();
-
 private:
 	void CreateLightProperties();
 	void CreateAndBindLightPropertiesBuffer();
@@ -24,6 +22,15 @@ private:
 
 	std::shared_ptr<ConstantBuffer> m_lightConstantBuffer;
 
+
+
+	// DEBUG SPECIFIC --------------------------------------------------------
+#ifndef NDEBUG
+public:
+	void DrawImGui(std::string id) override;
+
+private:
 	DirectX::XMFLOAT3 m_positionMax;
 	DirectX::XMFLOAT3 m_positionMin;
+#endif
 };

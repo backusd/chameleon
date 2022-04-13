@@ -443,3 +443,12 @@ void Model::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
 	m_rootNode->Draw(parentModelMatrix, projectionMatrix);
 }
 
+
+#ifndef NDEBUG
+void Model::DrawImGui(std::string id)
+{
+	// There is no specific data to present from the model class itself, it is just a container
+	// to hold the root node
+	m_rootNode->DrawImGui(id);
+}
+#endif

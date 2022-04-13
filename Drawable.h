@@ -34,14 +34,9 @@ public:
 	virtual void Update(std::shared_ptr<StepTimer> timer) = 0;
 	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }
 
-	// If we are in DEBUG, then the move look controller may change, so allow it to be updated
-#ifndef NDEBUG
-	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_model->SetMoveLookController(mlc); }
-#endif
-
-
 protected:
 	void UpdateModelViewProjectionConstantBuffer();
+
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 	std::shared_ptr<MoveLookController> m_moveLookController;
@@ -58,4 +53,18 @@ protected:
 	float m_roll;
 	float m_pitch;
 	float m_yaw;
+
+
+	// DEBUG SPECIFIC --------------------------------------------------------
+#ifndef NDEBUG
+public:
+	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_model->SetMoveLookController(mlc); }
+	virtual void DrawImGui(std::string id);
+
+protected:
+	void DrawImGuiPosition(std::string id);
+	void DrawImGuiRollPitchYaw(std::string id);
+
+
+#endif
 };

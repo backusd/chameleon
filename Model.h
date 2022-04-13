@@ -38,4 +38,12 @@ private:
 	std::shared_ptr<MoveLookController> m_moveLookController;
 
 	std::unique_ptr<ModelNode> m_rootNode;
+
+
+	// DEBUG SPECIFIC --------------------------------------------------------
+#ifndef NDEBUG
+public:
+	void DrawImGui(std::string id);
+
+#endif
 };

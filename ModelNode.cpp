@@ -84,17 +84,6 @@ XMMATRIX ModelNode::GetModelMatrix()
 		DirectX::XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
 }
 
-#ifndef NDEBUG
-void ModelNode::SetMoveLookController(std::shared_ptr<MoveLookController> mlc)
-{
-	m_moveLookController = mlc;
-
-	// NOTE: Must reference the unique_ptr (cannot be copied)
-	for (std::unique_ptr<ModelNode>& node : m_childNodes)
-		node->SetMoveLookController(mlc);
-}
-#endif
-
 std::shared_ptr<Mesh> ModelNode::CreateChildNode(std::string nodeName, std::shared_ptr<Mesh> mesh)
 {
 	m_childNodes.push_back(std::make_unique<ModelNode>(m_deviceResources, m_moveLookController));
@@ -104,3 +93,41 @@ std::shared_ptr<Mesh> ModelNode::CreateChildNode(std::string nodeName, std::shar
 	// Return the mesh so that the loading code can optionally add this mesh to ObjectStore
 	return mesh;
 }
+
+
+
+
+
+#ifndef NDEBUG
+void ModelNode::SetMoveLookController(std::shared_ptr<MoveLookController> mlc)
+{
+	m_moveLookController = mlc;
+
+	// NOTE: Must reference the unique_ptr (cannot be copied)
+	for (std::unique_ptr<ModelNode>& node : m_childNodes)
+		node->SetMoveLookController(mlc);
+}
+
+void ModelNode::DrawImGui(std::string id)
+{
+	std::string treeNodeName = (m_nodeName == "") ? "Unnamed Node##" + id : m_nodeName + "##" + id;
+	if (ImGui::TreeNode(treeNodeName.c_str()))
+	{
+		ImGui::Text("Position:");
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePositionX" + m_nodeName + id).c_str(), &m_translation.x, -100.0f, 100.0f, "%.3f");
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePositionY" + m_nodeName + id).c_str(), &m_translation.y, -100.0f, 100.0f, "%.3f");
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePositionZ" + m_nodeName + id).c_str(), &m_translation.z, -100.0f, 100.0f, "%.3f");
+
+		ImGui::Text("Orientation:");
+		ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeRoll"  + m_nodeName + id).c_str(), &m_roll,  -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+		ImGui::Text("   Pitch: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePitch" + m_nodeName + id).c_str(), &m_pitch, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+		ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeYaw"   + m_nodeName + id).c_str(), &m_yaw,   -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+
+		// NOTE: Must reference the unique_ptr (cannot be copied)
+		for (std::unique_ptr<ModelNode>& node : m_childNodes)
+			node->DrawImGui(id);
+
+		ImGui::TreePop();
+	}
+}
+#endif

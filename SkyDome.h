@@ -23,4 +23,12 @@ private:
 	DirectX::XMFLOAT4 m_apexColor;
 	DirectX::XMFLOAT4 m_centerColor;
 
+
+
+	// DEBUG SPECIFIC --------------------------------------------------------
+#ifndef NDEBUG
+public:
+	void DrawImGui(std::string id) override;
+#endif
+
 };

@@ -251,10 +251,11 @@ void Scene::DrawImGui()
 	{
 		ImGui::Begin("Object Edit");
 
-		ImGui::End();
+		// Easiest way to make each drawable unique is to pass the number of the drawable to the DrawImGui function
+		for (unsigned int iii = 0; iii < m_drawables.size(); ++iii)
+			m_drawables[iii]->DrawImGui(std::to_string(iii));
 
-		// Draw the Center-on-origin lighting control menu
-		m_lighting->DrawImGui();
+		ImGui::End();
 	}
 
 	// Let the MoveLookController draw ImGui controls

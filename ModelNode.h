@@ -54,6 +54,14 @@ private:
 	DirectX::XMFLOAT3 m_translation;
 	DirectX::XMMATRIX m_accumulatedModelMatrix;
 
+
+	// DEBUG SPECIFIC --------------------------------------------------------
+#ifndef NDEBUG
+public:
+	void DrawImGui(std::string id);
+
+#endif
+
 };
 
 template <typename T, typename A>

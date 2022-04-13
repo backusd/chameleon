@@ -67,3 +67,29 @@ XMMATRIX Drawable::GetModelMatrix()
 		DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 }
 
+#ifndef NDEBUG
+void Drawable::DrawImGui(std::string id)
+{
+	if (ImGui::CollapsingHeader(("Unnamed Drawable##" + id).c_str(), ImGuiTreeNodeFlags_None))
+	{
+		DrawImGuiPosition(id);
+		DrawImGuiRollPitchYaw(id);
+	}
+}
+
+void Drawable::DrawImGuiPosition(std::string id)
+{
+	ImGui::Text("Position:");
+	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionX" + id).c_str(), &m_position.x, -100.0f, 100.0f, "%.3f");
+	ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionY" + id).c_str(), &m_position.y, -100.0f, 100.0f, "%.3f");
+	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionZ" + id).c_str(), &m_position.z, -100.0f, 100.0f, "%.3f");
+}
+
+void Drawable::DrawImGuiRollPitchYaw(std::string id)
+{
+	ImGui::Text("Orientation:");
+	ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##drawableRoll" + id).c_str(), &m_roll, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+	ImGui::Text("   Pitch: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePitch" + id).c_str(), &m_pitch, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+	ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##drawableYaw" + id).c_str(), &m_yaw, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+}
+#endif
