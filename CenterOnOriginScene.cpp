@@ -12,7 +12,7 @@ CenterOnOriginScene::CenterOnOriginScene(std::shared_ptr<DeviceResources> device
 
 	CreateWindowSizeDependentResources();
 	CreateAndBindModelViewProjectionBuffer();
-
+	/*
 	// Sky Dome
 	//     MUST be added first because it needs to be rendered first because depth test is turned off
 	std::shared_ptr<SkyDome> skyDome = std::make_shared<SkyDome>(m_deviceResources, m_moveLookController);
@@ -25,6 +25,7 @@ CenterOnOriginScene::CenterOnOriginScene(std::shared_ptr<DeviceResources> device
 	m_lighting->SetProjectionMatrix(m_projectionMatrix);
 	m_drawables.push_back(m_lighting);
 
+	
 	// Sphere
 	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(m_deviceResources, m_moveLookController);
 	sphere->SetProjectionMatrix(m_projectionMatrix);
@@ -64,6 +65,7 @@ CenterOnOriginScene::CenterOnOriginScene(std::shared_ptr<DeviceResources> device
 	nanosuit2->SetProjectionMatrix(m_projectionMatrix);
 	nanosuit2->SetPosition(XMFLOAT3(10.0f, -5.0f, 0.0f));
 	m_drawables.push_back(nanosuit2);
+	*/
 
 }
 
@@ -147,9 +149,14 @@ void CenterOnOriginScene::Update(std::shared_ptr<StepTimer> timer, std::shared_p
 	// Update the move look control and get back the new view matrix
 	m_moveLookController->Update(timer, keyboard, mouse);
 
+	// 
+	// Drawables should NOT need updating when being displayed in Center On Origin mode
+	//
+	m_drawables[0]->Update(timer, nullptr); // Update SkyDome because it needs to follow the camera
+	m_drawables[1]->Update(timer, nullptr);	// Update the Lighting because it needs to know about the camera location
 	// Update all drawables
-	for (std::shared_ptr<Drawable> drawable : m_drawables)
-		drawable->Update(timer);
+	//for (std::shared_ptr<Drawable> drawable : m_drawables)
+	//	drawable->Update(timer);
 }
 
 void CenterOnOriginScene::Draw()

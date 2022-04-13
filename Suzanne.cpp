@@ -57,7 +57,7 @@ void Suzanne::PreDrawUpdate()
 
 }
 
-void Suzanne::Update(std::shared_ptr<StepTimer> timer)
+void Suzanne::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
 
 }

@@ -39,7 +39,8 @@ public:
 	void WindowResized();
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
 	void Draw();
-
+	template <typename T>
+	std::shared_ptr<T> AddDrawable();
 private:
 	void CreateWindowSizeDependentResources();
 	void CreateAndBindModelViewProjectionBuffer();
@@ -51,7 +52,7 @@ private:
 	DirectX::XMMATRIX									m_projectionMatrix;
 
 	// Light Properties
-	std::shared_ptr<Lighting>							m_lighting;
+	//std::shared_ptr<Lighting>							m_lighting;
 
 	// Cameras
 	std::shared_ptr<CenterOnOriginMoveLookController>	m_moveLookController;
@@ -69,3 +70,12 @@ public:
 	void DrawImGui();
 
 };
+
+template <typename T>
+std::shared_ptr<T> CenterOnOriginScene::AddDrawable()
+{
+	std::shared_ptr<T> newItem = std::make_shared<T>(m_deviceResources, m_moveLookController);
+	newItem->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(newItem);
+	return newItem;
+}

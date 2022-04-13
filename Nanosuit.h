@@ -12,7 +12,7 @@ public:
 	void PreDrawUpdate() override;
 	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f); }
 
-	void Update(std::shared_ptr<StepTimer> timer);
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
 
 private:
 	void CreateMaterialData();

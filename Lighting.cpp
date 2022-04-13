@@ -212,7 +212,7 @@ void Lighting::UpdatePSConstantBuffer()
 	*/
 }
 
-void Lighting::Update(std::shared_ptr<StepTimer> timer)
+void Lighting::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
 	// Update the light location as well as the eye position of the camera
 	DirectX::XMStoreFloat4(&m_lightProperties.EyePosition, m_moveLookController->Position());

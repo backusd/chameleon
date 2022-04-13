@@ -74,7 +74,7 @@ void Sphere::PreDrawUpdate()
 	// Updating of any additional constant buffers or other pipeline resources should go here
 }
 
-void Sphere::Update(std::shared_ptr<StepTimer> timer)
+void Sphere::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
 
 }

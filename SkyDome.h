@@ -13,7 +13,7 @@ public:
 	SkyDome& operator=(const SkyDome&) = delete;
 
 
-	void Update(std::shared_ptr<StepTimer> timer);
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
 	void PreDrawUpdate() override;
 
 

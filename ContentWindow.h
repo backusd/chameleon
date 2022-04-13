@@ -120,6 +120,9 @@ private:
 	void ObjectStoreAddTextures();
 	void ObjectStoreAddDepthStencilStates();
 
+	void AddSceneObjects();
+	
+
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
 	bool m_show_demo_window;
@@ -147,6 +150,7 @@ private:
 	std::shared_ptr<Scene> m_scene;
 
 #ifndef NDEBUG
+	void AddCenterOnOriginSceneObjects();
 	std::shared_ptr<CenterOnOriginScene> m_centerOnOriginScene;
 	bool m_useCenterOnOriginScene;
 #endif

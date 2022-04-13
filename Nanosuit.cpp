@@ -79,7 +79,7 @@ void Nanosuit::PreDrawUpdate()
 #endif
 }
 
-void Nanosuit::Update(std::shared_ptr<StepTimer> timer)
+void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
 
 }

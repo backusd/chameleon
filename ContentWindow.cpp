@@ -97,10 +97,15 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 
 	m_hud = std::make_shared<HUD>(m_deviceResources);
 	m_scene = std::make_shared<Scene>(m_deviceResources, m_hWnd);
+	AddSceneObjects();
 
 #ifndef NDEBUG
 	m_centerOnOriginScene = std::make_shared<CenterOnOriginScene>(m_deviceResources, m_hWnd);
+	AddCenterOnOriginSceneObjects();
 #endif
+
+
+
 
 	//
 	// Consider making this NDEBUG only
@@ -113,6 +118,76 @@ ContentWindow::~ContentWindow()
 	// Have to make sure to delete objects on close
 	ObjectStore::DestructObjects();
 }
+
+void ContentWindow::AddSceneObjects()
+{
+	// Sky Dome
+	//     MUST be added first because it needs to be rendered first because depth test is turned off
+	std::shared_ptr<SkyDome> skyDome = m_scene->AddDrawable<SkyDome>();
+
+
+	std::shared_ptr<Nanosuit> nanosuit = m_scene->AddDrawable<Nanosuit>();
+	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
+	/*
+
+	// Sphere
+	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(m_deviceResources, mlc);
+	sphere->SetProjectionMatrix(m_projectionMatrix);
+	//m_drawables.push_back(sphere);
+
+	// Cubes
+	std::shared_ptr<Box> box1 = std::make_shared<Box>(m_deviceResources, mlc);
+	box1->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	box1->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	box1->SetProjectionMatrix(m_projectionMatrix);
+	//m_drawables.push_back(box1);
+
+	std::shared_ptr<Box> box2 = std::make_shared<Box>(m_deviceResources, mlc);
+	box2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
+	box2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
+	box2->SetProjectionMatrix(m_projectionMatrix);
+	//m_drawables.push_back(box2);
+
+	// Suzanne
+	std::shared_ptr<Suzanne> suzanne = std::make_shared<Suzanne>(m_deviceResources, mlc);
+	suzanne->SetProjectionMatrix(m_projectionMatrix);
+	suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 3.0f));
+	//m_drawables.push_back(suzanne);
+
+	std::shared_ptr<Suzanne> suzanne2 = std::make_shared<Suzanne>(m_deviceResources, mlc);
+	suzanne2->SetProjectionMatrix(m_projectionMatrix);
+	suzanne2->SetPosition(XMFLOAT3(3.0f, 0.0f, 3.0f));
+	//m_drawables.push_back(suzanne2);
+
+	// Nanosuit
+	std::shared_ptr<Nanosuit> nanosuit = std::make_shared<Nanosuit>(m_deviceResources, mlc);
+	nanosuit->SetProjectionMatrix(m_projectionMatrix);
+	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
+	//m_drawables.push_back(nanosuit);
+
+	std::shared_ptr<Nanosuit> nanosuit2 = std::make_shared<Nanosuit>(m_deviceResources, mlc);
+	nanosuit2->SetProjectionMatrix(m_projectionMatrix);
+	nanosuit2->SetPosition(XMFLOAT3(10.0f, -5.0f, 0.0f));
+	//m_drawables.push_back(nanosuit2);
+	*/
+}
+
+#ifndef NDEBUG
+void ContentWindow::AddCenterOnOriginSceneObjects()
+{
+	// Sky Dome
+	//     MUST be added first because it needs to be rendered first because depth test is turned off
+	std::shared_ptr<SkyDome> skyDome = m_centerOnOriginScene->AddDrawable<SkyDome>();
+
+	// Lighting
+	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
+	std::shared_ptr<Lighting> lighting = m_centerOnOriginScene->AddDrawable<Lighting>();
+
+
+	std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
+	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
+}
+#endif
 
 void ContentWindow::ObjectStoreAddShaders()
 {

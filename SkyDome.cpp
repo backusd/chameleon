@@ -59,7 +59,7 @@ void SkyDome::PreDrawUpdate()
 	// Updating of any additional constant buffers or other pipeline resources should go here
 }
 
-void SkyDome::Update(std::shared_ptr<StepTimer> timer)
+void SkyDome::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
 	DirectX::XMStoreFloat3(&m_position, m_moveLookController->Position());
 }

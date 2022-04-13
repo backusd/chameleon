@@ -41,6 +41,9 @@ public:
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
 	void Draw();
 
+	template <typename T>
+	std::shared_ptr<T> AddDrawable();
+
 private:
 	void CreateWindowSizeDependentResources();
 	void CreateAndBindModelViewProjectionBuffer();
@@ -75,3 +78,12 @@ private:
 	bool												m_useFlyMoveLookController;
 #endif
 };
+
+template <typename T>
+std::shared_ptr<T> Scene::AddDrawable()
+{
+	std::shared_ptr<T> newItem = std::make_shared<T>(m_deviceResources, m_moveLookController);
+	newItem->SetProjectionMatrix(m_projectionMatrix);
+	m_drawables.push_back(newItem);
+	return newItem;
+}

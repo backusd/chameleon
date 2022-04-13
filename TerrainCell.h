@@ -13,7 +13,7 @@ public:
 				std::string meshLookupName);
 
 	void PreDrawUpdate() override {}
-	void Update(std::shared_ptr<StepTimer> timer) override {}
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override {}
 
 private:
 

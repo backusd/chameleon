@@ -11,6 +11,10 @@
 #include <memory>
 #include <string>
 
+// Forward declare the Terrain class because we will be passing a pointer to Terrain
+// to the pure virtual Update function
+class Terrain;
+
 class Drawable
 {
 public:
@@ -31,7 +35,7 @@ public:
 	DirectX::XMMATRIX GetModelMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() { return m_projectionMatrix; }
 
-	virtual void Update(std::shared_ptr<StepTimer> timer) = 0;
+	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) = 0;
 	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }
 
 protected:

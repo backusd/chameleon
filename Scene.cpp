@@ -19,57 +19,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	CreateWindowSizeDependentResources();
 	CreateAndBindModelViewProjectionBuffer();
 
-	// Sky Dome
-	//     MUST be added first because it needs to be rendered first because depth test is turned off
-	std::shared_ptr<SkyDome> skyDome = std::make_shared<SkyDome>(m_deviceResources, m_moveLookController);
-	skyDome->SetProjectionMatrix(m_projectionMatrix);
-	m_drawables.push_back(skyDome);
 
-	// Lighting
-	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
-	m_lighting = std::make_shared<Lighting>(m_deviceResources, m_moveLookController);
-	m_lighting->SetProjectionMatrix(m_projectionMatrix);
-	//m_drawables.push_back(m_lighting);
-
-	// Sphere
-	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(m_deviceResources, m_moveLookController);
-	sphere->SetProjectionMatrix(m_projectionMatrix);
-	//m_drawables.push_back(sphere);
-
-	// Cubes
-	std::shared_ptr<Box> box1 = std::make_shared<Box>(m_deviceResources, m_moveLookController);
-	box1->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	box1->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	box1->SetProjectionMatrix(m_projectionMatrix);
-	//m_drawables.push_back(box1);
-
-	std::shared_ptr<Box> box2 = std::make_shared<Box>(m_deviceResources, m_moveLookController);
-	box2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
-	box2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
-	box2->SetProjectionMatrix(m_projectionMatrix);
-	//m_drawables.push_back(box2);
-
-	// Suzanne
-	std::shared_ptr<Suzanne> suzanne = std::make_shared<Suzanne>(m_deviceResources, m_moveLookController);
-	suzanne->SetProjectionMatrix(m_projectionMatrix);
-	suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 3.0f));
-	//m_drawables.push_back(suzanne);
-
-	std::shared_ptr<Suzanne> suzanne2 = std::make_shared<Suzanne>(m_deviceResources, m_moveLookController);
-	suzanne2->SetProjectionMatrix(m_projectionMatrix);
-	suzanne2->SetPosition(XMFLOAT3(3.0f, 0.0f, 3.0f));
-	//m_drawables.push_back(suzanne2);
-
-	// Nanosuit
-	std::shared_ptr<Nanosuit> nanosuit = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookController);
-	nanosuit->SetProjectionMatrix(m_projectionMatrix);
-	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
-	//m_drawables.push_back(nanosuit);
-
-	std::shared_ptr<Nanosuit> nanosuit2 = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookController);
-	nanosuit2->SetProjectionMatrix(m_projectionMatrix);
-	nanosuit2->SetPosition(XMFLOAT3(10.0f, -5.0f, 0.0f));
-	//m_drawables.push_back(nanosuit2);
 
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookController);
@@ -159,13 +109,13 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 #else
 	m_moveLookController->Update(timer, keyboard, mouse);
 #endif
-	
-	// Update all drawables
-	for (std::shared_ptr<Drawable> drawable : m_drawables)
-		drawable->Update(timer);
 
 	// Update the terrain
 	m_terrain->Update(timer);
+
+	// Update all drawables
+	for (std::shared_ptr<Drawable> drawable : m_drawables)
+		drawable->Update(timer, m_terrain);
 }
 
 void Scene::Draw()

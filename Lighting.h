@@ -9,7 +9,7 @@ public:
 
 	void PreDrawUpdate() override;
 
-	void Update(std::shared_ptr<StepTimer> timer);
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
 
 private:
 	void CreateLightProperties();
