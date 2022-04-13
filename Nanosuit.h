@@ -18,11 +18,22 @@ private:
 	void CreateAndAddPSBufferArray(); // This is necessary because the cube will create an immutable constant buffer for material data
 
 	PhongMaterialProperties* m_material;
+	std::shared_ptr<ConstantBuffer> m_materialConstantBuffer;
 
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG
 public:
 	void DrawImGui(std::string id) override;
+
+private:
+	void DrawImGuiMaterialSettings(std::string id);
+
+	bool m_materialNeedsUpdate = false;
+	float m_emmissive[4] = { 0.91f, 0.91f, 0.91f, 1.0f };
+	float m_ambient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	float m_diffuse[4] = { 0.197f, 0.197f, 0.197f, 1.0f };
+	float m_specular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float m_specularPower = 7.0f;
 
 #endif
 
