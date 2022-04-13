@@ -14,7 +14,9 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	m_mouse(nullptr),
 	m_network(nullptr),
 	m_hud(nullptr),
-	m_scene(nullptr)
+	m_scene(nullptr),
+	m_centerOnOriginScene(nullptr),
+	m_useCenterOnOriginScene(false)
 {
 	// Create the device resources
 	m_deviceResources = std::make_shared<DeviceResources>(m_hWnd);
@@ -94,7 +96,11 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	// m_network = std::make_shared<Network>("155.248.215.180", 7000, m_timer);
 
 	m_hud = std::make_shared<HUD>(m_deviceResources);
-	m_scene = std::make_shared<Scene>(m_deviceResources, m_hWnd);	
+	m_scene = std::make_shared<Scene>(m_deviceResources, m_hWnd);
+
+#ifndef NDEBUG
+	m_centerOnOriginScene = std::make_shared<CenterOnOriginScene>(m_deviceResources, m_hWnd);
+#endif
 
 	//
 	// Consider making this NDEBUG only
@@ -340,8 +346,18 @@ void ContentWindow::Update()
 
 			//m_network->Update();
 
+#ifndef NDEBUG
+			if (m_useCenterOnOriginScene)
+				m_centerOnOriginScene->Update(m_timer, m_keyboard, m_mouse);
+			else
+			{
+				m_hud->Update(m_timer);
+				m_scene->Update(m_timer, m_keyboard, m_mouse);
+			}
+#else
 			m_hud->Update(m_timer);
 			m_scene->Update(m_timer, m_keyboard, m_mouse);
+#endif
 
 			/*
 			m_cpuStatistics->Update(m_timer);
@@ -397,7 +413,14 @@ bool ContentWindow::Render()
 	context->OMSetRenderTargets(1, targets, m_deviceResources->GetDepthStencilView());
 
 	// Draw the scene before rendering the ImGui controls so you have the option to have ImGui rendered over the scene
+#ifndef NDEBUG
+	if (m_useCenterOnOriginScene)
+		m_centerOnOriginScene->Draw();
+	else
+		m_scene->Draw();
+#else
 	m_scene->Draw();
+#endif
 
 
 	// Start the Dear ImGui frame =========================================================================================
@@ -408,13 +431,32 @@ bool ContentWindow::Render()
 	// Render Stats ================================================================================================
 	ImGui::Begin("Render Stats");
 	ImGui::Checkbox("Enable all other ImGui windows", &m_enableImGuiWindows);
+
+	if (ImGui::RadioButton("Normal Scene", !m_useCenterOnOriginScene)) m_useCenterOnOriginScene = false;
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Center On Origin Scene", m_useCenterOnOriginScene)) m_useCenterOnOriginScene = true;
+
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / m_io.Framerate, m_io.Framerate);
 	ImGui::End();
 
 	// Have the scene draw the necessary ImGui controls ==============================================================
+
+
+#ifndef NDEBUG
+	if (m_useCenterOnOriginScene)
+	{
+		if (m_enableImGuiWindows)
+			m_centerOnOriginScene->DrawImGui();
+	}
+	else
+	{
+		if (m_enableImGuiWindows)
+			m_scene->DrawImGui();
+	}
+#else
 	if (m_enableImGuiWindows)
 		m_scene->DrawImGui();
-
+#endif
 
 	// Render ImGui
 	ImGui::Render();

@@ -168,6 +168,7 @@
     <ClCompile Include="BoxMesh.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="CenterOnOriginMoveLookController.cpp" />
+    <ClCompile Include="CenterOnOriginScene.cpp" />
     <ClCompile Include="ChameleonException.cpp" />
     <ClCompile Include="CharacterState.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
@@ -253,6 +254,7 @@
     <ClInclude Include="BoxMesh.h" />
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="CenterOnOriginMoveLookController.h" />
+    <ClInclude Include="CenterOnOriginScene.h" />
     <ClInclude Include="ChameleonException.h" />
     <ClInclude Include="CharacterState.h" />
     <ClInclude Include="ConstantBuffer.h" />

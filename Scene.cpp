@@ -14,7 +14,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_moveLookControllerIndexPrevious = 0;
 #ifndef NDEBUG
 	m_moveLookControllers.push_back(std::make_shared<FlyMoveLookController>(m_hWnd));
-	m_moveLookControllers.push_back(std::make_shared<CenterOnOriginMoveLookController>(m_hWnd));
+	// m_moveLookControllers.push_back(std::make_shared<CenterOnOriginMoveLookController>(m_hWnd));
 #endif
 
 	CreateWindowSizeDependentResources();
@@ -30,7 +30,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
 	m_lighting = std::make_shared<Lighting>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	m_lighting->SetProjectionMatrix(m_projectionMatrix);
-	m_drawables.push_back(m_lighting);
+	//m_drawables.push_back(m_lighting);
 
 	// Sphere
 	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
@@ -65,12 +65,12 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	std::shared_ptr<Nanosuit> nanosuit = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	nanosuit->SetProjectionMatrix(m_projectionMatrix);
 	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
-	m_drawables.push_back(nanosuit);
+	//m_drawables.push_back(nanosuit);
 
 	std::shared_ptr<Nanosuit> nanosuit2 = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
 	nanosuit2->SetProjectionMatrix(m_projectionMatrix);
 	nanosuit2->SetPosition(XMFLOAT3(10.0f, -5.0f, 0.0f));
-	m_drawables.push_back(nanosuit2);
+	//m_drawables.push_back(nanosuit2);
 
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
@@ -243,7 +243,7 @@ void Scene::DrawImGui()
 	ImGui::Begin("View Mode");
 	ImGui::RadioButton("Player Mode", &m_moveLookControllerIndex, 0);
 	ImGui::RadioButton("Fly Mode", &m_moveLookControllerIndex, 1);
-	ImGui::RadioButton("Center On Origin Mode", &m_moveLookControllerIndex, 2);
+	// ImGui::RadioButton("Center On Origin Mode", &m_moveLookControllerIndex, 2);
 	ImGui::End();
 
 	// If viewing mode is center on origin, then draw the object edit control panel

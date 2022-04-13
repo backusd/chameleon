@@ -13,7 +13,6 @@
 #include "SkyDomeMesh.h"
 #include "TerrainMesh.h"
 #include "Frustum.h"
-#include "FlyMoveLookController.h"
 #include "CenterOnOriginMoveLookController.h"
 
 #include "Drawable.h"
@@ -30,12 +29,12 @@
 
 
 
-class Scene
+class CenterOnOriginScene
 {
 public:
-	Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd);
-	Scene(const Scene&) = delete;
-	Scene& operator=(const Scene&) = delete;
+	CenterOnOriginScene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd);
+	CenterOnOriginScene(const CenterOnOriginScene&) = delete;
+	CenterOnOriginScene& operator=(const CenterOnOriginScene&) = delete;
 
 	void WindowResized();
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
@@ -55,26 +54,18 @@ private:
 	std::shared_ptr<Lighting>							m_lighting;
 
 	// Cameras
-	std::vector<std::shared_ptr<MoveLookController>>	m_moveLookControllers;
+	std::shared_ptr<CenterOnOriginMoveLookController>	m_moveLookController;
 
 	// Drawables
 	std::vector<std::shared_ptr<Drawable>>				m_drawables;
-	std::shared_ptr<Terrain>							m_terrain;
-
 
 
 	// ImGui ====================================================================
 	//
 	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
 	//
-	void DrawImGui(std::string id);
 
 public:
 	void DrawImGui();
 
-private:
-
-	// View Mode:
-	int m_moveLookControllerIndex;
-	int m_moveLookControllerIndexPrevious;
 };

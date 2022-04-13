@@ -31,6 +31,7 @@
 
 // 3D Scene
 #include "Scene.h"
+#include "CenterOnOriginScene.h"
 
 
 #include "PixelShader.h"
@@ -144,6 +145,11 @@ private:
 
 	std::shared_ptr<HUD> m_hud;
 	std::shared_ptr<Scene> m_scene;
+
+#ifndef NDEBUG
+	std::shared_ptr<CenterOnOriginScene> m_centerOnOriginScene;
+	bool m_useCenterOnOriginScene;
+#endif
 
 	// ImGui ====================================================================
 	//

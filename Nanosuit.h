@@ -10,6 +10,7 @@ public:
 	Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
 	void PreDrawUpdate() override;
+	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f); }
 
 	void Update(std::shared_ptr<StepTimer> timer);
 
@@ -29,7 +30,7 @@ private:
 	void DrawImGuiMaterialSettings(std::string id);
 
 	bool m_materialNeedsUpdate = false;
-	float m_emmissive[4] = { 0.91f, 0.91f, 0.91f, 1.0f };
+	float m_emmissive[4] = { 0.091f, 0.091f, 0.091f, 1.0f };
 	float m_ambient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	float m_diffuse[4] = { 0.197f, 0.197f, 0.197f, 1.0f };
 	float m_specular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
