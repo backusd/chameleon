@@ -453,9 +453,6 @@ bool ContentWindow::Render()
 		if (m_enableImGuiWindows)
 			m_scene->DrawImGui();
 	}
-#else
-	if (m_enableImGuiWindows)
-		m_scene->DrawImGui();
 #endif
 
 	// Render ImGui

@@ -9,12 +9,11 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_hWnd(hWnd)
 {
 	// Create the move look controllers
-	m_moveLookControllers.push_back(std::make_shared<MoveLookController>(m_hWnd));
-	m_moveLookControllerIndex = 0;
-	m_moveLookControllerIndexPrevious = 0;
+	m_moveLookController = std::make_shared<MoveLookController>(m_hWnd);
+
 #ifndef NDEBUG
-	m_moveLookControllers.push_back(std::make_shared<FlyMoveLookController>(m_hWnd));
-	// m_moveLookControllers.push_back(std::make_shared<CenterOnOriginMoveLookController>(m_hWnd));
+	m_flyMoveLookController = std::make_shared<FlyMoveLookController>(m_hWnd);
+	m_useFlyMoveLookController = false;
 #endif
 
 	CreateWindowSizeDependentResources();
@@ -22,60 +21,59 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 
 	// Sky Dome
 	//     MUST be added first because it needs to be rendered first because depth test is turned off
-	std::shared_ptr<SkyDome> skyDome = std::make_shared<SkyDome>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<SkyDome> skyDome = std::make_shared<SkyDome>(m_deviceResources, m_moveLookController);
 	skyDome->SetProjectionMatrix(m_projectionMatrix);
 	m_drawables.push_back(skyDome);
 
 	// Lighting
 	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
-	m_lighting = std::make_shared<Lighting>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	m_lighting = std::make_shared<Lighting>(m_deviceResources, m_moveLookController);
 	m_lighting->SetProjectionMatrix(m_projectionMatrix);
 	//m_drawables.push_back(m_lighting);
 
 	// Sphere
-	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(m_deviceResources, m_moveLookController);
 	sphere->SetProjectionMatrix(m_projectionMatrix);
 	//m_drawables.push_back(sphere);
 
 	// Cubes
-	std::shared_ptr<Box> box1 = std::make_shared<Box>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<Box> box1 = std::make_shared<Box>(m_deviceResources, m_moveLookController);
 	box1->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	box1->SetSideLengths(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	box1->SetProjectionMatrix(m_projectionMatrix);
 	//m_drawables.push_back(box1);
 
-	std::shared_ptr<Box> box2 = std::make_shared<Box>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<Box> box2 = std::make_shared<Box>(m_deviceResources, m_moveLookController);
 	box2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
 	box2->SetSideLengths(XMFLOAT3(1.0f, 2.0f, 1.0f));
 	box2->SetProjectionMatrix(m_projectionMatrix);
 	//m_drawables.push_back(box2);
 
 	// Suzanne
-	std::shared_ptr<Suzanne> suzanne = std::make_shared<Suzanne>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<Suzanne> suzanne = std::make_shared<Suzanne>(m_deviceResources, m_moveLookController);
 	suzanne->SetProjectionMatrix(m_projectionMatrix);
 	suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 3.0f));
 	//m_drawables.push_back(suzanne);
 
-	std::shared_ptr<Suzanne> suzanne2 = std::make_shared<Suzanne>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<Suzanne> suzanne2 = std::make_shared<Suzanne>(m_deviceResources, m_moveLookController);
 	suzanne2->SetProjectionMatrix(m_projectionMatrix);
 	suzanne2->SetPosition(XMFLOAT3(3.0f, 0.0f, 3.0f));
 	//m_drawables.push_back(suzanne2);
 
 	// Nanosuit
-	std::shared_ptr<Nanosuit> nanosuit = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<Nanosuit> nanosuit = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookController);
 	nanosuit->SetProjectionMatrix(m_projectionMatrix);
 	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
 	//m_drawables.push_back(nanosuit);
 
-	std::shared_ptr<Nanosuit> nanosuit2 = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	std::shared_ptr<Nanosuit> nanosuit2 = std::make_shared<Nanosuit>(m_deviceResources, m_moveLookController);
 	nanosuit2->SetProjectionMatrix(m_projectionMatrix);
 	nanosuit2->SetPosition(XMFLOAT3(10.0f, -5.0f, 0.0f));
 	//m_drawables.push_back(nanosuit2);
 
 	// Terrain
-	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookControllers[m_moveLookControllerIndex]);
+	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookController);
 	m_terrain->SetProjectionMatrix(m_projectionMatrix);
-
 }
 
 void Scene::CreateWindowSizeDependentResources()
@@ -152,21 +150,15 @@ void Scene::WindowResized()
 
 void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
-	// If we are in DEBUG, then the move look controller may change, so update it 
-#ifndef NDEBUG
-	if (m_moveLookControllerIndexPrevious != m_moveLookControllerIndex)
-	{
-		m_moveLookControllerIndexPrevious = m_moveLookControllerIndex;
-
-		for (std::shared_ptr<Drawable> drawable : m_drawables)
-			drawable->SetMoveLookController(m_moveLookControllers[m_moveLookControllerIndex]);
-
-		m_terrain->SetMoveLookController(m_moveLookControllers[m_moveLookControllerIndex]);
-	}
-#endif
-
 	// Update the move look control and get back the new view matrix
-	m_moveLookControllers[m_moveLookControllerIndex]->Update(timer, keyboard, mouse);
+#ifndef NDEBUG
+	if (m_useFlyMoveLookController)
+		m_flyMoveLookController->Update(timer, keyboard, mouse);
+	else
+		m_moveLookController->Update(timer, keyboard, mouse);
+#else
+	m_moveLookController->Update(timer, keyboard, mouse);
+#endif
 	
 	// Update all drawables
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
@@ -237,27 +229,44 @@ void Scene::SetupTerrainCubePipeline()
 }
 */
 
+
+
+
+#ifndef NDEBUG
 void Scene::DrawImGui()
 {
 	// Draw a view mode selector control
 	ImGui::Begin("View Mode");
-	ImGui::RadioButton("Player Mode", &m_moveLookControllerIndex, 0);
-	ImGui::RadioButton("Fly Mode", &m_moveLookControllerIndex, 1);
-	// ImGui::RadioButton("Center On Origin Mode", &m_moveLookControllerIndex, 2);
-	ImGui::End();
 
-	// If viewing mode is center on origin, then draw the object edit control panel
-	if (m_moveLookControllerIndex == 2)
+	if (ImGui::RadioButton("Player Mode", !m_useFlyMoveLookController))
 	{
-		ImGui::Begin("Object Edit");
-
-		// Easiest way to make each drawable unique is to pass the number of the drawable to the DrawImGui function
-		for (unsigned int iii = 0; iii < m_drawables.size(); ++iii)
-			m_drawables[iii]->DrawImGui(std::to_string(iii));
-
-		ImGui::End();
+		m_useFlyMoveLookController = false;
+		UpdateMoveLookControllerSelection();
+	}
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Fly Mode", m_useFlyMoveLookController))
+	{
+		m_useFlyMoveLookController = true;
+		UpdateMoveLookControllerSelection();
 	}
 
+	ImGui::End();
+
+
 	// Let the MoveLookController draw ImGui controls
-	m_moveLookControllers[m_moveLookControllerIndex]->DrawImGui();	
+	if (m_useFlyMoveLookController)
+		m_flyMoveLookController->DrawImGui();
+	else
+		m_moveLookController->DrawImGui();	
 }
+
+void Scene::UpdateMoveLookControllerSelection()
+{
+	std::shared_ptr<MoveLookController> mlc = (m_useFlyMoveLookController) ? m_flyMoveLookController : m_moveLookController;
+
+	for (std::shared_ptr<Drawable> drawable : m_drawables)
+		drawable->SetMoveLookController(mlc);
+
+	m_terrain->SetMoveLookController(mlc);
+}
+#endif

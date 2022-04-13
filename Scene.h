@@ -55,7 +55,8 @@ private:
 	std::shared_ptr<Lighting>							m_lighting;
 
 	// Cameras
-	std::vector<std::shared_ptr<MoveLookController>>	m_moveLookControllers;
+	std::shared_ptr<MoveLookController>					m_moveLookController;
+
 
 	// Drawables
 	std::vector<std::shared_ptr<Drawable>>				m_drawables;
@@ -63,18 +64,14 @@ private:
 
 
 
-	// ImGui ====================================================================
-	//
-	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
-	//
-	void DrawImGui(std::string id);
 
+#ifndef NDEBUG
 public:
 	void DrawImGui();
 
 private:
-
-	// View Mode:
-	int m_moveLookControllerIndex;
-	int m_moveLookControllerIndexPrevious;
+	void UpdateMoveLookControllerSelection();
+	std::shared_ptr<FlyMoveLookController>				m_flyMoveLookController;
+	bool												m_useFlyMoveLookController;
+#endif
 };
