@@ -19,8 +19,6 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	CreateWindowSizeDependentResources();
 	CreateAndBindModelViewProjectionBuffer();
 
-
-
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookController);
 	m_terrain->SetProjectionMatrix(m_projectionMatrix);

@@ -2,6 +2,7 @@
 
 using DirectX::XMFLOAT4;
 using DirectX::XMFLOAT3;
+using DirectX::XMMATRIX;
 
 Terrain::Terrain(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	m_deviceResources(deviceResources),

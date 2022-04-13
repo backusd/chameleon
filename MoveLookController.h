@@ -11,10 +11,6 @@
 
 #include "imgui.h"
 
-// For some reason, the XMVECTOR operator* does not work unless I include the 
-// entire namespace
-using namespace DirectX;
-
 class MoveLookController
 {
 public:

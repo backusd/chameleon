@@ -36,8 +36,8 @@ public:
 
 private:
 	void UpdateModelViewProjectionConstantBuffer(DirectX::XMMATRIX parentModelMatrix, DirectX::XMMATRIX projectionMatrix);
-	XMMATRIX GetModelMatrix();
-	XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixIdentity(); }
+	DirectX::XMMATRIX GetModelMatrix();
+	DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixIdentity(); }
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 	std::shared_ptr<MoveLookController> m_moveLookController;

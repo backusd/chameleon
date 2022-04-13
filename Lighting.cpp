@@ -1,6 +1,9 @@
 #include "Lighting.h"
 
 using DirectX::XMFLOAT3;
+using DirectX::XMFLOAT4;
+using DirectX::XMVECTORF32;
+using DirectX::XMVECTOR;
 
 Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController)

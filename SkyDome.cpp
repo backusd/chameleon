@@ -1,5 +1,7 @@
 #include "SkyDome.h"
 
+using DirectX::XMFLOAT4;
+
 SkyDome::SkyDome(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController),
 	m_apexColor(XMFLOAT4(0.0f, 0.05f, 0.6f, 1.0f)),

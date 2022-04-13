@@ -2,6 +2,7 @@
 
 using DirectX::XMFLOAT3;
 using DirectX::XMMATRIX;
+using DirectX::operator*;
 
 ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	m_mesh(nullptr),

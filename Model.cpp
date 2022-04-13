@@ -1,6 +1,8 @@
 #include "Model.h"
 
 using DirectX::XMMATRIX;
+using DirectX::XMFLOAT2;
+using DirectX::XMFLOAT3;
 
 Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh) :
 	m_deviceResources(deviceResources),

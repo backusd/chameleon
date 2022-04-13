@@ -1,5 +1,6 @@
 #include "Sphere.h"
 
+using DirectX::XMFLOAT4;
 
 Sphere::Sphere(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController),

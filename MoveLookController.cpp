@@ -3,6 +3,7 @@
 using DirectX::XMVECTOR;
 using DirectX::XMFLOAT3;
 
+using DirectX::operator*;
 
 MoveLookController::MoveLookController(HWND hWnd) :
     m_hWnd(hWnd),

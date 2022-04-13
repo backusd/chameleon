@@ -1,6 +1,6 @@
 #include "Suzanne.h"
 
-
+using DirectX::XMFLOAT4;
 
 Suzanne::Suzanne(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController)

@@ -1,6 +1,6 @@
 #include "Nanosuit.h"
 
-
+using DirectX::XMFLOAT4;
 
 Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController)
@@ -81,7 +81,7 @@ void Nanosuit::PreDrawUpdate()
 
 void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
-
+	// 
 }
 
 
