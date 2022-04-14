@@ -11,6 +11,8 @@
 
 #include "imgui.h"
 
+class Nanosuit;
+
 class MoveLookController
 {
 public:
@@ -18,8 +20,8 @@ public:
 
 	DirectX::XMMATRIX ViewMatrix();
 
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
-
+	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
+	void UpdateCameraLocation();
 	virtual bool IsMoving();
 
 	void SetPosition(DirectX::XMFLOAT3 position) { m_eyeVec = DirectX::XMLoadFloat3(&position); }
@@ -30,7 +32,11 @@ public:
 
 	DirectX::XMVECTOR Position() { return m_eyeVec; }
 
-	
+	void SetPlayer(std::shared_ptr<Nanosuit> player);
+
+	// Allow Player to be manually released so as to not leak resources on shutdown
+	// (MoveLookController has shared_ptr to player and player has shared_ptr to it)
+	void ReleasePlayer() { m_player = nullptr; }
 
 protected:
 	virtual void ResetState();
@@ -49,6 +55,15 @@ protected:
 	virtual void MouseMove();
 
 	HWND m_hWnd;
+
+	std::shared_ptr<Nanosuit> m_player;
+
+	// Use spherical coordinates to keep track of where the camera is relative to the player
+	float m_r;		// distance from the camera to the looking at point
+	float m_theta;	// rotation in the xz-axis 
+	float m_phi;	// rotation down from the vertical y-axis
+
+
 
 	// Input states for keyboard
 	bool  m_left;
@@ -81,34 +96,5 @@ protected:
 
 	// vector of characters that are read in from the keyboard
 	std::vector<char> m_charBuffer;
-	
 
-
-
-	// ImGui ====================================================================
-	//
-	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
-	//
-
-public:
-	void DrawImGui();
-	void LoadImGuiValues();
-	void UpdateImGuiValues();
-
-protected:
-	virtual void SetupImGui();
-
-	// Camera
-	DirectX::XMFLOAT3 m_cameraPosition;
-	DirectX::XMFLOAT3 m_cameraLookAt;
-	DirectX::XMFLOAT3 m_cameraUpDirection;
-
-	DirectX::XMFLOAT3 m_cameraPositionMax;
-	DirectX::XMFLOAT3 m_cameraPositionMin;
-
-	DirectX::XMFLOAT3 m_cameraLookAtMax;
-	DirectX::XMFLOAT3 m_cameraLookAtMin;
-
-	DirectX::XMFLOAT3 m_cameraUpDirectionMax;
-	DirectX::XMFLOAT3 m_cameraUpDirectionMin;
 };

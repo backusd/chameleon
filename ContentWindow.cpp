@@ -127,7 +127,8 @@ void ContentWindow::AddSceneObjects()
 
 
 	std::shared_ptr<Nanosuit> nanosuit = m_scene->AddDrawable<Nanosuit>();
-	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
+	nanosuit->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
+	m_scene->SetPlayer(nanosuit);
 	/*
 
 	// Sphere
@@ -186,6 +187,8 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 
 	std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
 	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
+
+	//std::shared_ptr<Suzanne> suzanne = m_centerOnOriginScene->AddDrawable<Suzanne>();
 }
 #endif
 

@@ -10,9 +10,14 @@ public:
 	Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
 	void PreDrawUpdate() override;
-	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f); }
+	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(m_scaleFactor, m_scaleFactor, m_scaleFactor); }
+	DirectX::XMFLOAT3 CenterOfModel();
 
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
+	void MoveForward();
+	void MoveBackward();
+
+
 
 private:
 	void CreateMaterialData();
@@ -20,6 +25,15 @@ private:
 
 	PhongMaterialProperties* m_material;
 	std::shared_ptr<ConstantBuffer> m_materialConstantBuffer;
+
+	// scale factor for scaling down the size of the model
+	float m_scaleFactor;
+
+	float m_movementSpeed;
+	bool m_movingForward;
+	bool m_movingBackward;
+	double m_currentTime;
+	double m_previousTime;
 
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG

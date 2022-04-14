@@ -28,6 +28,7 @@ public:
 
 	void AddBindable(std::string lookupName) { m_bindables.push_back(ObjectStore::GetBindable(lookupName)); }
 
+	float GetHeight(float x, float z);
 
 	// If we are in DEBUG, then the move look controller may change, so allow it to be updated
 #ifndef NDEBUG

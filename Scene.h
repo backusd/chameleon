@@ -36,6 +36,7 @@ public:
 	Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd);
 	Scene(const Scene&) = delete;
 	Scene& operator=(const Scene&) = delete;
+	~Scene();
 
 	void WindowResized();
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
@@ -43,6 +44,8 @@ public:
 
 	template <typename T>
 	std::shared_ptr<T> AddDrawable();
+
+	void SetPlayer(std::shared_ptr<Nanosuit> player) { m_moveLookController->SetPlayer(player); }
 
 private:
 	void CreateWindowSizeDependentResources();

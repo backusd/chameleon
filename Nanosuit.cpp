@@ -1,9 +1,17 @@
 #include "Nanosuit.h"
+#include "Terrain.h"
 
+using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT4;
 
 Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController)
+	Drawable(deviceResources, moveLookController),
+	m_scaleFactor(0.5f),
+	m_movementSpeed(1.0f),
+	m_movingForward(false),
+	m_movingBackward(false),
+	m_currentTime(0.0),
+	m_previousTime(0.0)
 {
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
@@ -81,8 +89,50 @@ void Nanosuit::PreDrawUpdate()
 
 void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
-	// 
+	m_currentTime = timer->GetTotalSeconds();
+	double timeDelta = m_currentTime - m_previousTime;
+	
+	if (m_movingForward)
+	{
+		float deltaX = static_cast<float>(m_movementSpeed * timeDelta);
+		m_position.x += deltaX;
+	}
+	else if (m_movingBackward)
+	{
+		float deltaX = static_cast<float>(m_movementSpeed * timeDelta);
+		m_position.x -= deltaX;
+	}
+
+
+
+	// Update the y position according to the terrain height
+	m_position.y = terrain->GetHeight(m_position.x, m_position.z);
+
+
+	m_previousTime = m_currentTime;
 }
+
+XMFLOAT3 Nanosuit::CenterOfModel()
+{
+	// Top of the nanosuit is about 15.4 units, so halfway up is about 7.7
+	// Scale this down by some scale factor
+	return XMFLOAT3(m_position.x, m_position.y + (7.7f * m_scaleFactor), m_position.z);
+}
+
+void Nanosuit::MoveForward()
+{
+	if (!m_movingBackward)
+		m_movingForward = true;
+}
+
+void Nanosuit::MoveBackward()
+{
+	if (!m_movingForward)
+		m_movingBackward = true;
+}
+
+
+
 
 
 

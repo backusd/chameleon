@@ -200,3 +200,28 @@ float TerrainCellMesh::GetZLength()
 {
 	return m_maxDepth - m_minDepth;
 }
+
+bool TerrainCellMesh::ContainsPoint(float x, float z)
+{
+	return x <= m_maxWidth && x >= m_minWidth && z <= m_maxDepth && z >= m_minDepth;
+}
+
+float TerrainCellMesh::GetHeight(float x, float z)
+{
+	// Just return the height of the vertex that is closest - THIS SHOULD DEFINITELY
+	// BE IMPROVED TO BE CONSTANT TIME LOOKUP
+	int closestVertexIndex = 0;
+	float closestVertexDistance = FLT_MAX;
+	float distance;
+	for (int iii = 0; iii < m_vertexCount; iii++)
+	{
+		distance = pow(x - m_vertexList[iii].x, 2.0f) + pow(z - m_vertexList[iii].z, 2.0f);
+		if (distance < closestVertexDistance)
+		{
+			closestVertexDistance = distance;
+			closestVertexIndex = iii;
+		}
+	}
+
+	return m_vertexList[closestVertexIndex].y;
+}

@@ -54,6 +54,116 @@ void FlyMoveLookController::ResetState()
     m_previousTime = 0.0;
 }
 
+void FlyMoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
+{
+    // At the beginning of the update, load the eye/at/up values for the selected camera mode as they may
+    // have changed because of the menu sliders
+    LoadImGuiValues();
+
+    m_currentTime = timer->GetTotalSeconds();
+
+    Mouse::Event e;
+    std::ostringstream oss;
+
+    Keyboard::Event keyEvent;
+
+    // Process mouse events
+    while (!mouse->IsEmpty())
+    {
+        e = mouse->Read();
+        switch (e.GetType())
+        {
+        case Mouse::Event::Type::WheelUp: ZoomIn(mouse->GetPosX(), mouse->GetPosY()); break;
+        case Mouse::Event::Type::WheelDown: ZoomOut(mouse->GetPosX(), mouse->GetPosY()); break;
+        case Mouse::Event::Type::LPress:
+            // Only register the LPress if the RButton and MButton are not already down
+            if (!(m_RButtonDown || m_MButtonDown))
+            {
+                m_LButtonDown = true;
+                m_mouseDownInitialPositionX = m_mouseCurrentPositionX = static_cast<float>(mouse->GetPosX());
+                m_mouseDownInitialPositionY = m_mouseCurrentPositionY = static_cast<float>(mouse->GetPosY());
+            }
+            break;
+
+        case Mouse::Event::Type::LRelease: m_LButtonDown = false; break;
+        case Mouse::Event::Type::RPress:
+            // Only register the RPress if the LButton and MButton are not already down
+            if (!(m_LButtonDown || m_MButtonDown))
+            {
+                m_RButtonDown = true;
+                m_mouseDownInitialPositionX = m_mouseCurrentPositionX = static_cast<float>(mouse->GetPosX());
+                m_mouseDownInitialPositionY = m_mouseCurrentPositionY = static_cast<float>(mouse->GetPosY());
+            }
+            break;
+
+        case Mouse::Event::Type::RRelease: m_RButtonDown = false; break;
+        case Mouse::Event::Type::MPress:
+            // Only register the MPress if the LButton and RButton are not already down
+            if (!(m_LButtonDown || m_RButtonDown))
+            {
+                m_MButtonDown = true;
+                m_mouseDownInitialPositionX = m_mouseCurrentPositionX = static_cast<float>(mouse->GetPosX());
+                m_mouseDownInitialPositionY = m_mouseCurrentPositionY = static_cast<float>(mouse->GetPosY());
+            }
+            break;
+
+        case Mouse::Event::Type::MRelease: m_MButtonDown = false; break;
+        case Mouse::Event::Type::Move:
+            m_mouseCurrentPositionX = static_cast<float>(mouse->GetPosX());
+            m_mouseCurrentPositionY = static_cast<float>(mouse->GetPosY());
+            MouseMove();
+            break;
+        default:
+            break;
+        }
+
+    }
+
+    // Process keyboard events, but only if a mouse button is not down
+    if (m_LButtonDown || m_MButtonDown || m_RButtonDown)
+    {
+        // Just drop any key events if mouse is down
+        keyboard->FlushKey();
+    }
+    else
+    {
+        while (!keyboard->KeyIsEmpty())
+        {
+            keyEvent = keyboard->ReadKey();
+            switch (keyEvent.GetCode())
+            {
+            case VK_SHIFT:      m_shift = keyEvent.IsPress(); break;
+            case VK_CONTROL:    m_ctrl = keyEvent.IsPress(); break;
+            case VK_MENU:       m_alt = keyEvent.IsPress(); break;    // ALT key
+            case VK_LEFT:       m_left = keyEvent.IsPress(); break;
+            case VK_UP:         m_up = keyEvent.IsPress(); break;
+            case VK_RIGHT:      m_right = keyEvent.IsPress(); break;
+            case VK_DOWN:       m_down = keyEvent.IsPress(); break;
+            }
+        }
+
+        // Read in each char into a vector that will then get used in the UpdatePosition function
+        while (!keyboard->CharIsEmpty())
+        {
+            m_charBuffer.push_back(keyboard->ReadChar());
+        }
+    }
+
+    // Call update position to check if any of the new variables have been set and update the position accordingly
+    UpdatePosition();
+
+    // Clear the char buffer as UpdatePosition should now be done with them
+    m_charBuffer.clear();
+
+
+    m_previousTime = m_currentTime;
+
+
+    // Update the ImGui values with the new eye/at/up vec values
+    UpdateImGuiValues();
+}
+
+
 void FlyMoveLookController::UpdatePosition()
 {
     if (m_up && !m_down)
@@ -181,4 +291,39 @@ void FlyMoveLookController::MoveBackward()
     // Add this value to the eyeVec and atVec
     m_eyeVec = DirectX::XMVectorAdd(m_eyeVec, positionChange);
     m_atVec = DirectX::XMVectorAdd(m_atVec, positionChange);
+}
+
+void FlyMoveLookController::DrawImGui()
+{
+    // Draw a camera control
+    ImGui::Begin("Fly Camera");
+
+    ImGui::Text("Position:");
+    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionX", &m_cameraPosition.x, m_cameraPositionMin.x, m_cameraPositionMax.x, "%.3f");
+    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionY", &m_cameraPosition.y, m_cameraPositionMin.y, m_cameraPositionMax.y, "%.3f");
+    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionZ", &m_cameraPosition.z, m_cameraPositionMin.z, m_cameraPositionMax.z, "%.3f");
+    ImGui::Text("Look At:");
+    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtX", &m_cameraLookAt.x, m_cameraLookAtMin.x, m_cameraLookAtMax.x, "%.3f");
+    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtY", &m_cameraLookAt.y, m_cameraLookAtMin.y, m_cameraLookAtMax.y, "%.3f");
+    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtZ", &m_cameraLookAt.z, m_cameraLookAtMin.z, m_cameraLookAtMax.z, "%.3f");
+    ImGui::Text("Up Direction:");
+    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionX", &m_cameraUpDirection.x, m_cameraUpDirectionMin.x, m_cameraUpDirectionMax.x, "%.3f");
+    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionY", &m_cameraUpDirection.y, m_cameraUpDirectionMin.y, m_cameraUpDirectionMax.y, "%.3f");
+    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionZ", &m_cameraUpDirection.z, m_cameraUpDirectionMin.z, m_cameraUpDirectionMax.z, "%.3f");
+
+    ImGui::End();
+}
+
+void FlyMoveLookController::LoadImGuiValues()
+{
+    m_eyeVec = DirectX::XMVectorSet(m_cameraPosition.x, m_cameraPosition.y, m_cameraPosition.z, 1.0f);
+    m_atVec = DirectX::XMVectorSet(m_cameraLookAt.x, m_cameraLookAt.y, m_cameraLookAt.z, 1.0f);
+    m_upVec = DirectX::XMVectorSet(m_cameraUpDirection.x, m_cameraUpDirection.y, m_cameraUpDirection.z, 1.0f);
+}
+
+void FlyMoveLookController::UpdateImGuiValues()
+{
+    DirectX::XMStoreFloat3(&m_cameraPosition, m_eyeVec);
+    DirectX::XMStoreFloat3(&m_cameraLookAt, m_atVec);
+    DirectX::XMStoreFloat3(&m_cameraUpDirection, m_upVec);
 }

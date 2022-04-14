@@ -15,6 +15,9 @@ public:
 	void PreDrawUpdate() override {}
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override {}
 
+	bool ContainsPoint(float x, float z);
+	float GetHeight(float x, float z);
+
 private:
 
 };

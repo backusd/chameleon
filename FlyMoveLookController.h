@@ -21,6 +21,7 @@ class FlyMoveLookController : public MoveLookController
 public:
 	FlyMoveLookController(HWND hWnd);
 
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse) override;
 	bool IsMoving() override;
 
 protected:
@@ -40,7 +41,25 @@ protected:
 	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
 	//
 
+public:
+	void DrawImGui();
+	void LoadImGuiValues();
+	void UpdateImGuiValues();
 
 protected:
-	void SetupImGui() override;
+	void SetupImGui();
+
+	// Camera
+	DirectX::XMFLOAT3 m_cameraPosition;
+	DirectX::XMFLOAT3 m_cameraLookAt;
+	DirectX::XMFLOAT3 m_cameraUpDirection;
+
+	DirectX::XMFLOAT3 m_cameraPositionMax;
+	DirectX::XMFLOAT3 m_cameraPositionMin;
+
+	DirectX::XMFLOAT3 m_cameraLookAtMax;
+	DirectX::XMFLOAT3 m_cameraLookAtMin;
+
+	DirectX::XMFLOAT3 m_cameraUpDirectionMax;
+	DirectX::XMFLOAT3 m_cameraUpDirectionMin;
 };

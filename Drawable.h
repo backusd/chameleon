@@ -38,6 +38,10 @@ public:
 	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) = 0;
 	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }
 
+	float Roll() { return m_roll; }
+	float Pitch() { return m_pitch; }
+	float Yaw() { return m_yaw; }
+
 protected:
 	void UpdateModelViewProjectionConstantBuffer();
 

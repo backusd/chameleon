@@ -136,6 +136,17 @@ void Terrain::UpdateBindings()
 	);
 }
 
+float Terrain::GetHeight(float x, float z)
+{
+	for (std::shared_ptr<TerrainCell> cell : m_terrainCells)
+	{
+		if (cell->ContainsPoint(x, z))
+			return cell->GetHeight(x, z);
+	}
+
+	return 0.0f;
+}
+
 #ifndef NDEBUG
 void Terrain::SetMoveLookController(std::shared_ptr<MoveLookController> mlc) 
 { 

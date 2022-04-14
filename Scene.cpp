@@ -24,6 +24,12 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_terrain->SetProjectionMatrix(m_projectionMatrix);
 }
 
+Scene::~Scene()
+{
+	// Manually release the player from the MoveLookController, otherwise, resources will be leaked
+	m_moveLookController->ReleasePlayer();
+}
+
 void Scene::CreateWindowSizeDependentResources()
 {
 	RECT rect;
@@ -125,61 +131,6 @@ void Scene::Draw()
 	m_terrain->Draw();
 }
 
-/*
-void Scene::SetupTerrainCubePipeline()
-{
-	
-	m_terrainCubePipeline = std::make_shared<DrawPipeline>(
-		m_deviceResources,
-		"box-outline-mesh",
-		"solid-vertex-shader",
-		"solid-pixel-shader",
-		"solidfill",
-		"depth-enabled-depth-stencil-state",
-		"terrain-cube-buffers-VS"
-		);
-
-	std::shared_ptr<TerrainMesh> terrain = ObjectStore::GetTerrain("terrain");
-	std::shared_ptr<TerrainCellMesh> cell;
-	for (int iii = 0; iii < terrain->TerrainCellCount(); ++iii)
-	{
-		cell = terrain->GetTerrainCell(iii);
-		m_terrainCubePipeline->AddRenderable(
-			std::make_shared<Box>(cell->GetCenter(), cell->GetXLength(), cell->GetYLength(), cell->GetZLength())
-		);
-	}
-
-	m_terrainCubePipeline->SetPerRendererableUpdate(
-		[this, weakDeviceResources = std::weak_ptr<DeviceResources>(m_deviceResources)]
-	(std::shared_ptr<Renderable> renderable,
-		std::shared_ptr<Mesh> mesh,
-		std::shared_ptr<ConstantBufferArray> vertexShaderBufferArray,
-		std::shared_ptr<ConstantBufferArray> pixelShaderBufferArray)
-	{
-		auto deviceResources = weakDeviceResources.lock();
-		ID3D11DeviceContext4* context = deviceResources->D3DDeviceContext();
-
-		D3D11_MAPPED_SUBRESOURCE ms;
-
-		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		context->Map(vertexShaderBufferArray->GetRawBufferPointer(0), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-
-		XMMATRIX _model = renderable->GetModelMatrix();
-		TerrainMatrixBufferType* mappedBuffer = (TerrainMatrixBufferType*)ms.pData;
-
-		mappedBuffer->world = renderable->GetModelMatrix();
-		mappedBuffer->view = this->ViewMatrix();
-		mappedBuffer->projection = this->ProjectionMatrix();
-
-		context->Unmap(vertexShaderBufferArray->GetRawBufferPointer(0), 0);
-	}
-	);
-}
-*/
-
-
-
-
 #ifndef NDEBUG
 void Scene::DrawImGui()
 {
@@ -204,8 +155,6 @@ void Scene::DrawImGui()
 	// Let the MoveLookController draw ImGui controls
 	if (m_useFlyMoveLookController)
 		m_flyMoveLookController->DrawImGui();
-	else
-		m_moveLookController->DrawImGui();	
 }
 
 void Scene::UpdateMoveLookControllerSelection()

@@ -20,9 +20,13 @@ public:
 	
 	void Draw(DirectX::XMMATRIX parentModelMatrix, DirectX::XMMATRIX projectionMatrix);
 
+	std::shared_ptr<Mesh> GetRootNodeMesh() { return m_rootNode->GetMesh(); }
+
 #ifndef NDEBUG
 	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_rootNode->SetMoveLookController(mlc); }
 #endif
+
+
 
 private:
 	void Load(std::string filename);

@@ -1,4 +1,5 @@
 #include "MoveLookController.h"
+#include "Nanosuit.h"
 
 using DirectX::XMVECTOR;
 using DirectX::XMFLOAT3;
@@ -8,69 +9,20 @@ using DirectX::operator*;
 MoveLookController::MoveLookController(HWND hWnd) :
     m_hWnd(hWnd),
     m_moveSpeed(10.0),
-    m_turnSpeed(0.5)
+    m_turnSpeed(0.5),
+    m_player(nullptr),
+    m_r(30.0f),
+    m_theta(0.0f),
+    m_phi(DirectX::XM_PIDIV4)
 {
     ResetState();
 
-    m_eyeVec = { 0.0f, 0.0f, -2.0f, 0.0f };     // Start at 2 in the negative Z direction
-    m_atVec = { 0.0f, 0.0f, 0.0f, 0.0f };		// look at the origin
-    m_upVec = { 0.0f, 1.0f, 0.0f, 0.0f };		// Up in the positive y-direction
-
-    //
-    // Consider making this NDEBUG only
-    //
-    SetupImGui();
-}
-
-void MoveLookController::SetupImGui()
-{
-    m_cameraPosition = XMFLOAT3(5.0f, 15.0f, 350.0f);
-    m_cameraLookAt = XMFLOAT3(45.0f, 7.0f, 380.0f);
-    m_cameraUpDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-    m_cameraPositionMax = XMFLOAT3(1000.0f, 1000.0f, 1000.0f);
-    m_cameraPositionMin = XMFLOAT3(-100.0f, -100.0f, -100.0f);
-
-    m_cameraLookAtMax = XMFLOAT3(1000.0f, 1000.0f, 1000.0f);
-    m_cameraLookAtMin = XMFLOAT3(-1000.0f, -1000.0f, -1000.0f);
-
-    m_cameraUpDirectionMax = XMFLOAT3(1.0f, 1.0f, 1.0f);
-    m_cameraUpDirectionMin = XMFLOAT3(-1.0f, -1.0f, -1.0f);
-}
-
-void MoveLookController::DrawImGui()
-{
-    // Draw a camera control
-    ImGui::Begin("Camera");
-
-    ImGui::Text("Position:");
-    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionX", &m_cameraPosition.x, m_cameraPositionMin.x, m_cameraPositionMax.x, "%.3f");
-    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionY", &m_cameraPosition.y, m_cameraPositionMin.y, m_cameraPositionMax.y, "%.3f");
-    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionZ", &m_cameraPosition.z, m_cameraPositionMin.z, m_cameraPositionMax.z, "%.3f");
-    ImGui::Text("Look At:");
-    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtX", &m_cameraLookAt.x, m_cameraLookAtMin.x, m_cameraLookAtMax.x, "%.3f");
-    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtY", &m_cameraLookAt.y, m_cameraLookAtMin.y, m_cameraLookAtMax.y, "%.3f");
-    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtZ", &m_cameraLookAt.z, m_cameraLookAtMin.z, m_cameraLookAtMax.z, "%.3f");
-    ImGui::Text("Up Direction:");
-    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionX", &m_cameraUpDirection.x, m_cameraUpDirectionMin.x, m_cameraUpDirectionMax.x, "%.3f");
-    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionY", &m_cameraUpDirection.y, m_cameraUpDirectionMin.y, m_cameraUpDirectionMax.y, "%.3f");
-    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##upDirectionZ", &m_cameraUpDirection.z, m_cameraUpDirectionMin.z, m_cameraUpDirectionMax.z, "%.3f");
-
-    ImGui::End();
-}
-
-void MoveLookController::LoadImGuiValues()
-{
-    m_eyeVec = DirectX::XMVectorSet(m_cameraPosition.x, m_cameraPosition.y, m_cameraPosition.z, 1.0f);
-    m_atVec = DirectX::XMVectorSet(m_cameraLookAt.x, m_cameraLookAt.y, m_cameraLookAt.z, 1.0f);
-    m_upVec = DirectX::XMVectorSet(m_cameraUpDirection.x, m_cameraUpDirection.y, m_cameraUpDirection.z, 1.0f);
-}
-
-void MoveLookController::UpdateImGuiValues()
-{
-    DirectX::XMStoreFloat3(&m_cameraPosition, m_eyeVec);
-    DirectX::XMStoreFloat3(&m_cameraLookAt, m_atVec);
-    DirectX::XMStoreFloat3(&m_cameraUpDirection, m_upVec);
+    // Vectors can have non-sensical values to start because they will be updated
+    // correctly once the player is bound (probably want to make sure the math doesn't throw
+    // a weird error, so don't just make everything 0)
+    m_eyeVec = { 0.0f, 0.0f, -1.0f, 0.0f };
+    m_atVec = { 0.0f, 0.0f, 0.0f, 0.0f };
+    m_upVec = { 0.0f, 1.0f, 0.0f, 0.0f };
 }
 
 void MoveLookController::ResetState()
@@ -105,12 +57,43 @@ DirectX::XMMATRIX MoveLookController::ViewMatrix()
     return DirectX::XMMatrixLookAtRH(m_eyeVec, m_atVec, m_upVec);
 }
 
+void MoveLookController::SetPlayer(std::shared_ptr<Nanosuit> player) 
+{
+    // Set the player and adjust the camera location and direction
+    m_player = player;
+
+    UpdateCameraLocation();
+}
+void MoveLookController::UpdateCameraLocation()
+{
+    // Camera should point at the center of the player
+    XMFLOAT3 center = m_player->CenterOfModel();
+    m_atVec = DirectX::XMLoadFloat3(&center);
+
+
+    // Convert the spherical coordinates for the camera into rectangular coordinates
+    // So this is a little bit tricky. We want to swap the z and y coordinates, but we
+    // also want to keep working in a right handed coordinate system. The way to set this
+    // up is to imagine the axes where x is coming at you, y is going up, and that forces
+    // z to go to the left. Then define theta as the angle in the xz-plane starting from
+    // the positive x-axis and going toward the positive z-axis. Then define phi as the angle
+    // going from the positive y-axis towards the negative y-axis. If you do this, the math
+    // works out exactly the same as it would for a normal spherical coordinate system. The
+    // BIG CAVEAT is that you have to think of positive theta as going clockwise, instead of 
+    // counter-clockwise
+    float x = m_r * sin(m_phi) * cos(m_theta);
+    float z = m_r * sin(m_phi) * sin(m_theta);
+    float y = m_r * cos(m_phi);
+
+    // Compute the location for the camera
+    center.x += x;
+    center.y += y;
+    center.z += z;
+    m_eyeVec = DirectX::XMLoadFloat3(&center);
+}
+
 void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
-    // At the beginning of the update, load the eye/at/up values for the selected camera mode as they may
-    // have changed because of the menu sliders
-    LoadImGuiValues();
-
     m_currentTime = timer->GetTotalSeconds();
 
     Mouse::Event e;
@@ -207,11 +190,9 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
     m_charBuffer.clear();
     
 
+    UpdateCameraLocation();
+
     m_previousTime = m_currentTime;
-
-
-    // Update the ImGui values with the new eye/at/up vec values
-    UpdateImGuiValues();
 }
 
 void MoveLookController::ZoomIn(int mouseX, int mouseY)
@@ -258,101 +239,43 @@ bool MoveLookController::IsMoving()
 
 void MoveLookController::LookLeft()
 {
+    // Looking left is just spinning the camera in the negative theta direction
     double timeDelta = m_currentTime - m_previousTime;
     float angle = static_cast<float>(m_turnSpeed * timeDelta);
-
-    // First compute the difference between the atVec and eyeVec. This gives us a vector
-    // that has its tail at the origin, which we can then rotate, and add back to the eyeVec
-    // to compute the final atVec
-    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
-
-    // Rotate the diff about the yAxis
-    XMVECTOR yAxis = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(yAxis, angle);
-    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
-
-    // Add the diff back to the eye vec to get a slightly different atVec
-    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+    m_theta -= angle;
 }
 void MoveLookController::LookRight()
 {
+    // Looking right is just spinning the camera in the positive theta direction
     double timeDelta = m_currentTime - m_previousTime;
-    float angle = -1.0f * static_cast<float>(m_turnSpeed * timeDelta);
-
-    // First compute the difference between the atVec and eyeVec. This gives us a vector
-    // that has its tail at the origin, which we can then rotate, and add back to the eyeVec
-    // to compute the final atVec
-    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
-
-    // Rotate the diff about the yAxis
-    XMVECTOR yAxis = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(yAxis, angle);
-    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
-
-    // Add the diff back to the eye vec to get a slightly different atVec
-    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+    m_theta += angle;
 }
 void MoveLookController::LookUp()
 {
+    // LookUp is caused by SHIFT + UP arrow
+    // This really just means move the camera closer to the y-axis, 
+    // which is achieved by decreasing m_phi
     double timeDelta = m_currentTime - m_previousTime;
     float angle = static_cast<float>(m_turnSpeed * timeDelta);
-
-    // If shift is pressed, then we want to pan up
-    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
-
-    // sideways vector should be the cross product of vector going between atVec and eyeVec (the diff vector) and the upVec
-    XMVECTOR sidewaysVector = DirectX::XMVector3Cross(diff, m_upVec);
-
-    // Rotate the diff about the sidewaysVector
-    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(sidewaysVector, angle);
-    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
-
-    // Add the diff back to the eye vec to get a slightly different atVec
-    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+    m_phi = std::max(0.05f, m_phi - angle);         // don't let it get below 0.05
 }
 void MoveLookController::LookDown()
 {
+    // LookDown is caused by SHIFT + DOWN arrow
+    // This really just means move the camera further from the positive y-axis, 
+    // which is achieved by increasing m_phi
     double timeDelta = m_currentTime - m_previousTime;
-    float angle = -1.0f * static_cast<float>(m_turnSpeed * timeDelta);
-
-    // If shift is pressed, then we want to pan up
-    XMVECTOR diff = DirectX::XMVectorSubtract(m_atVec, m_eyeVec);
-
-    // sideways vector should be the cross product of vector going between atVec and eyeVec (the diff vector) and the upVec
-    XMVECTOR sidewaysVector = DirectX::XMVector3Cross(diff, m_upVec);
-
-    // Rotate the diff about the sidewaysVector
-    XMVECTOR rotationQuaternion = DirectX::XMQuaternionRotationAxis(sidewaysVector, angle);
-    XMVECTOR rotatedDiff = DirectX::XMVector3Rotate(diff, rotationQuaternion);
-
-    // Add the diff back to the eye vec to get a slightly different atVec
-    m_atVec = DirectX::XMVectorAdd(m_eyeVec, rotatedDiff);
+    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+    m_phi = std::min(DirectX::XM_PIDIV2, m_phi + angle);    // don't let it go below horizontal
 }
 void MoveLookController::MoveForward()
 {
-    double timeDelta = m_currentTime - m_previousTime;
+    m_player->MoveForward();
 
-    // Compute the difference between the eyeVec and atVec - and normalize it
-    XMVECTOR diffNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(m_atVec, m_eyeVec));
 
-    // Scale the diffNormalVector according to the velocity and timedelta to get the change in position
-    XMVECTOR positionChange = DirectX::XMVectorScale(diffNormal, static_cast<float>(m_moveSpeed * timeDelta));
-
-    // Add this value to the eyeVec and atVec
-    m_eyeVec = DirectX::XMVectorAdd(m_eyeVec, positionChange);
-    m_atVec = DirectX::XMVectorAdd(m_atVec, positionChange);
 }
 void MoveLookController::MoveBackward()
 {
-    double timeDelta = m_currentTime - m_previousTime;
 
-    // Compute the difference between the eyeVec and atVec - and normalize it
-    XMVECTOR diffNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(m_eyeVec, m_atVec));
-
-    // Scale the diffNormalVector according to the velocity and timedelta to get the change in position
-    XMVECTOR positionChange = DirectX::XMVectorScale(diffNormal, static_cast<float>(m_moveSpeed * timeDelta));
-
-    // Add this value to the eyeVec and atVec
-    m_eyeVec = DirectX::XMVectorAdd(m_eyeVec, positionChange);
-    m_atVec = DirectX::XMVectorAdd(m_atVec, positionChange);
 }

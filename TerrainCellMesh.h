@@ -50,6 +50,9 @@ public:
 	float GetMinHeight() { return m_minHeight; }
 	float GetMinDepth() { return m_minDepth; }
 
+	bool ContainsPoint(float x, float z);
+	float GetHeight(float x, float z);
+
 
 	VectorType* m_vertexList;
 
