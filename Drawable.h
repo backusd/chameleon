@@ -70,7 +70,7 @@ public:
 	virtual void DrawImGui(std::string id);
 
 protected:
-	void DrawImGuiPosition(std::string id);
+	virtual void DrawImGuiPosition(std::string id);
 	void DrawImGuiRollPitchYaw(std::string id);
 
 

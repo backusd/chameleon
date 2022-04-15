@@ -129,13 +129,13 @@ void TerrainCellMesh::CalculateCellDimensions()
 
 
 	// Initialize the dimensions of the node.
-	m_maxWidth = -1000000.0f;
-	m_maxHeight = -1000000.0f;
-	m_maxDepth = -1000000.0f;
+	m_maxX = -FLT_MAX;
+	m_maxY = -FLT_MAX;
+	m_maxZ = -FLT_MAX;
 
-	m_minWidth = 1000000.0f;
-	m_minHeight = 1000000.0f;
-	m_minDepth = 1000000.0f;
+	m_minX = FLT_MAX;
+	m_minY = FLT_MAX;
+	m_minZ = FLT_MAX;
 
 	for (i = 0; i < m_vertexCount; i++)
 	{
@@ -144,40 +144,40 @@ void TerrainCellMesh::CalculateCellDimensions()
 		depth = m_vertexList[i].z;
 
 		// Check if the width exceeds the minimum or maximum.
-		if (width > m_maxWidth)
+		if (width > m_maxX)
 		{
-			m_maxWidth = width;
+			m_maxX = width;
 		}
-		if (width < m_minWidth)
+		if (width < m_minX)
 		{
-			m_minWidth = width;
+			m_minX = width;
 		}
 
 		// Check if the height exceeds the minimum or maximum.
-		if (height > m_maxHeight)
+		if (height > m_maxY)
 		{
-			m_maxHeight = height;
+			m_maxY = height;
 		}
-		if (height < m_minHeight)
+		if (height < m_minY)
 		{
-			m_minHeight = height;
+			m_minY = height;
 		}
 
 		// Check if the depth exceeds the minimum or maximum.
-		if (depth > m_maxDepth)
+		if (depth > m_maxZ)
 		{
-			m_maxDepth = depth;
+			m_maxZ = depth;
 		}
-		if (depth < m_minDepth)
+		if (depth < m_minZ)
 		{
-			m_minDepth = depth;
+			m_minZ = depth;
 		}
 	}
 
 	// Calculate the center position of this cell.
-	m_positionX = ((m_maxWidth - m_minWidth) / 2.0f) + m_minWidth;
-	m_positionY = ((m_maxHeight - m_minHeight) / 2.0f) + m_minHeight;
-	m_positionZ = ((m_maxDepth - m_minDepth) / 2.0f) + m_minDepth;
+	m_positionX = ((m_maxX - m_minX) / 2.0f) + m_minX;
+	m_positionY = ((m_maxY - m_minY) / 2.0f) + m_minY;
+	m_positionZ = ((m_maxZ - m_minZ) / 2.0f) + m_minZ;
 
 }
 
@@ -188,22 +188,22 @@ XMFLOAT3 TerrainCellMesh::GetCenter()
 
 float TerrainCellMesh::GetXLength()
 {
-	return m_maxWidth - m_minWidth;
+	return m_maxX - m_minX;
 }
 
 float TerrainCellMesh::GetYLength()
 {
-	return m_maxHeight - m_minHeight;
+	return m_maxY - m_minY;
 }
 
 float TerrainCellMesh::GetZLength()
 {
-	return m_maxDepth - m_minDepth;
+	return m_maxZ - m_minZ;
 }
 
 bool TerrainCellMesh::ContainsPoint(float x, float z)
 {
-	return x <= m_maxWidth && x >= m_minWidth && z <= m_maxDepth && z >= m_minDepth;
+	return x <= m_maxX && x >= m_minX && z <= m_maxZ && z >= m_minZ;
 }
 
 float TerrainCellMesh::GetHeight(float x, float z)

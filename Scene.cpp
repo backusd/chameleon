@@ -155,6 +155,15 @@ void Scene::DrawImGui()
 	// Let the MoveLookController draw ImGui controls
 	if (m_useFlyMoveLookController)
 		m_flyMoveLookController->DrawImGui();
+
+	// Display a menu of all objects in the scene
+	ImGui::Begin("Object Edit");
+
+	// Easiest way to make each drawable unique is to pass the number of the drawable to the DrawImGui function
+	for (unsigned int iii = 0; iii < m_drawables.size(); ++iii)
+		m_drawables[iii]->DrawImGui(std::to_string(iii));
+
+	ImGui::End();
 }
 
 void Scene::UpdateMoveLookControllerSelection()

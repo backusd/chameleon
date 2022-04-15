@@ -29,6 +29,12 @@ public:
 	void AddBindable(std::string lookupName) { m_bindables.push_back(ObjectStore::GetBindable(lookupName)); }
 
 	float GetHeight(float x, float z);
+	float GetMinX() { return m_minX; }
+	float GetMaxX() { return m_maxX; }
+	float GetMinY() { return m_minY; }
+	float GetMaxY() { return m_maxY; }
+	float GetMinZ() { return m_minZ; }
+	float GetMaxZ() { return m_maxZ; }
 
 	// If we are in DEBUG, then the move look controller may change, so allow it to be updated
 #ifndef NDEBUG
@@ -37,6 +43,9 @@ public:
 
 private:
 	void UpdateBindings();
+
+	// Min max values for storing the min/max coordinate values
+	float m_minX, m_maxX, m_minY, m_maxY, m_minZ, m_maxZ;
 
 	std::shared_ptr<DeviceResources>	m_deviceResources;
 	std::shared_ptr<MoveLookController> m_moveLookController;

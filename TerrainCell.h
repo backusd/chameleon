@@ -17,6 +17,12 @@ public:
 
 	bool ContainsPoint(float x, float z);
 	float GetHeight(float x, float z);
+	float GetMinX();
+	float GetMaxX();
+	float GetMinY();
+	float GetMaxY();
+	float GetMinZ();
+	float GetMaxZ();
 
 private:
 

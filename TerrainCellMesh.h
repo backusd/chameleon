@@ -43,12 +43,12 @@ public:
 	float GetYLength();
 	float GetZLength();
 
-	float GetMaxWidth() { return m_maxWidth; }
-	float GetMaxHeight() { return m_maxHeight; }
-	float GetMaxDepth() { return m_maxDepth; }
-	float GetMinWidth() { return m_minWidth; }
-	float GetMinHeight() { return m_minHeight; }
-	float GetMinDepth() { return m_minDepth; }
+	float GetMinX() { return m_minX; }
+	float GetMaxX() { return m_maxX; }
+	float GetMinY() { return m_minY; }
+	float GetMaxY() { return m_maxY; }
+	float GetMinZ() { return m_minZ; }
+	float GetMaxZ() { return m_maxZ; }
 
 	bool ContainsPoint(float x, float z);
 	float GetHeight(float x, float z);
@@ -63,6 +63,6 @@ private:
 
 	int m_vertexCount;
 
-	float m_maxWidth, m_maxHeight, m_maxDepth, m_minWidth, m_minHeight, m_minDepth;
+	float m_maxX, m_maxY, m_maxZ, m_minX, m_minY, m_minZ;
 	float m_positionX, m_positionY, m_positionZ;
 };

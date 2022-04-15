@@ -35,12 +35,15 @@ private:
 	double m_currentTime;
 	double m_previousTime;
 
+	std::shared_ptr<Terrain> m_currentTerrain;
+
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG
 public:
 	void DrawImGui(std::string id) override;
 
-private:
+protected:
+	void DrawImGuiPosition(std::string id) override;
 	void DrawImGuiMaterialSettings(std::string id);
 
 	bool m_materialNeedsUpdate = false;

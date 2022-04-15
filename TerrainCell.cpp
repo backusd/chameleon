@@ -21,3 +21,45 @@ float TerrainCell::GetHeight(float x, float z)
 	std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);
 	return cellMesh->GetHeight(x, z);
 }
+
+float TerrainCell::GetMinX()
+{
+	std::shared_ptr<Mesh> mesh = m_model->GetRootNodeMesh();
+	std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);
+	return cellMesh->GetMinX();
+}
+
+float TerrainCell::GetMaxX()
+{
+	std::shared_ptr<Mesh> mesh = m_model->GetRootNodeMesh();
+	std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);
+	return cellMesh->GetMaxX();
+}
+
+float TerrainCell::GetMinY()
+{
+	std::shared_ptr<Mesh> mesh = m_model->GetRootNodeMesh();
+	std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);
+	return cellMesh->GetMinY();
+}
+
+float TerrainCell::GetMaxY()
+{
+	std::shared_ptr<Mesh> mesh = m_model->GetRootNodeMesh();
+	std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);
+	return cellMesh->GetMaxY();
+}
+
+float TerrainCell::GetMinZ()
+{
+	std::shared_ptr<Mesh> mesh = m_model->GetRootNodeMesh();
+	std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);
+	return cellMesh->GetMinZ();
+}
+
+float TerrainCell::GetMaxZ()
+{
+	std::shared_ptr<Mesh> mesh = m_model->GetRootNodeMesh();
+	std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);
+	return cellMesh->GetMaxZ();
+}

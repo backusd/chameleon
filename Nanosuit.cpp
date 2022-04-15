@@ -10,7 +10,8 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_movementSpeed(10.0f),
 	m_movingForward(false),
 	m_currentTime(0.0),
-	m_previousTime(0.0)
+	m_previousTime(0.0),
+	m_currentTerrain(nullptr)
 {
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
@@ -88,6 +89,10 @@ void Nanosuit::PreDrawUpdate()
 
 void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
+	// If the terrain has changed, update it first
+	if (m_currentTerrain != terrain)
+		m_currentTerrain = terrain;
+
 	m_currentTime = timer->GetTotalSeconds();
 	double timeDelta = m_currentTime - m_previousTime;
 	
@@ -98,10 +103,14 @@ void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain>
 
 		float deltaZ = static_cast<float>(m_movementSpeed * cos(m_yaw) * timeDelta);
 		m_position.z += deltaZ;
-
-		// Update the y position according to the terrain height
-		m_position.y = terrain->GetHeight(m_position.x, m_position.z);
 	}
+
+	// Update the y position according to the terrain height
+	// NOTE: For game logic, it might make sense to only update the height if
+	// the player is actuall moving forward. However, getting the terrain height
+	// SHOULD be constant time lookup and it helps with debugging to just make
+	// sure it is always set.
+	m_position.y = m_currentTerrain->GetHeight(m_position.x, m_position.z);
 
 	m_previousTime = m_currentTime;
 }
@@ -137,6 +146,13 @@ void Nanosuit::DrawImGui(std::string id)
 		DrawImGuiMaterialSettings(id);
 		m_model->DrawImGui(id);
 	}
+}
+
+void Nanosuit::DrawImGuiPosition(std::string id)
+{
+	ImGui::Text("Position:");
+	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionX" + id).c_str(), &m_position.x, m_currentTerrain->GetMinX(), m_currentTerrain->GetMaxX(), "%.3f");
+	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionZ" + id).c_str(), &m_position.z, m_currentTerrain->GetMinZ(), m_currentTerrain->GetMaxZ(), "%.3f");
 }
 
 void Nanosuit::DrawImGuiMaterialSettings(std::string id)

@@ -6,7 +6,13 @@ using DirectX::XMMATRIX;
 
 Terrain::Terrain(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	m_deviceResources(deviceResources),
-	m_moveLookController(moveLookController)
+	m_moveLookController(moveLookController),
+	m_minX(FLT_MAX),
+	m_maxX(-FLT_MAX),
+	m_minY(FLT_MAX),
+	m_maxY(-FLT_MAX),
+	m_minZ(FLT_MAX),
+	m_maxZ(-FLT_MAX)
 {
 	// Create the frustum (will have bad values to start but will get updated later
 	m_frustum = std::make_shared<Frustum>(1000.0f, DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity());
@@ -21,6 +27,20 @@ Terrain::Terrain(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 		oss << "terrain_" << iii;
 
 		m_terrainCells.push_back(std::make_shared<TerrainCell>(deviceResources, moveLookController, oss.str()));
+	
+		// As each new cell is added, update min/max values
+		if (m_terrainCells.back()->GetMaxX() > m_maxX)
+			m_maxX = m_terrainCells.back()->GetMaxX();
+		if (m_terrainCells.back()->GetMinX() < m_minX)
+			m_minX = m_terrainCells.back()->GetMinX();
+		if (m_terrainCells.back()->GetMaxY() > m_maxY)
+			m_maxY = m_terrainCells.back()->GetMaxY();
+		if (m_terrainCells.back()->GetMinY() < m_minY)
+			m_minY = m_terrainCells.back()->GetMinY();
+		if (m_terrainCells.back()->GetMaxZ() > m_maxZ)
+			m_maxZ = m_terrainCells.back()->GetMaxZ();
+		if (m_terrainCells.back()->GetMinZ() < m_minZ)
+			m_minZ = m_terrainCells.back()->GetMinZ();
 	}
 
 
@@ -80,12 +100,12 @@ void Terrain::Update(std::shared_ptr<StepTimer> timer)
 	{
 		cell = m_terrainMesh->GetTerrainCell(iii);
 		m_terrainCellVisibility[iii] = m_frustum->CheckRectangle2(
-			cell->GetMaxWidth(),
-			cell->GetMaxHeight(),
-			cell->GetMaxDepth(),
-			cell->GetMinWidth(),
-			cell->GetMinHeight(),
-			cell->GetMinDepth()
+			cell->GetMaxX(),
+			cell->GetMaxY(),
+			cell->GetMaxZ(),
+			cell->GetMinX(),
+			cell->GetMinY(),
+			cell->GetMinZ()
 		);
 	}
 }
