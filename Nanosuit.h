@@ -14,9 +14,10 @@ public:
 	DirectX::XMFLOAT3 CenterOfModel();
 
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
-	void MoveForward();
-	void MoveBackward();
-
+	
+	void MoveForward(bool moveForward) { m_movingForward = moveForward; }
+	void LookLeft(float angle);
+	void LookRight(float angle);
 
 
 private:
@@ -31,7 +32,6 @@ private:
 
 	float m_movementSpeed;
 	bool m_movingForward;
-	bool m_movingBackward;
 	double m_currentTime;
 	double m_previousTime;
 

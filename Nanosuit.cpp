@@ -7,9 +7,8 @@ using DirectX::XMFLOAT4;
 Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController),
 	m_scaleFactor(0.5f),
-	m_movementSpeed(1.0f),
+	m_movementSpeed(10.0f),
 	m_movingForward(false),
-	m_movingBackward(false),
 	m_currentTime(0.0),
 	m_previousTime(0.0)
 {
@@ -94,20 +93,15 @@ void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain>
 	
 	if (m_movingForward)
 	{
-		float deltaX = static_cast<float>(m_movementSpeed * timeDelta);
+		float deltaX = static_cast<float>(m_movementSpeed * sin(m_yaw) * timeDelta);
 		m_position.x += deltaX;
+
+		float deltaZ = static_cast<float>(m_movementSpeed * cos(m_yaw) * timeDelta);
+		m_position.z += deltaZ;
+
+		// Update the y position according to the terrain height
+		m_position.y = terrain->GetHeight(m_position.x, m_position.z);
 	}
-	else if (m_movingBackward)
-	{
-		float deltaX = static_cast<float>(m_movementSpeed * timeDelta);
-		m_position.x -= deltaX;
-	}
-
-
-
-	// Update the y position according to the terrain height
-	m_position.y = terrain->GetHeight(m_position.x, m_position.z);
-
 
 	m_previousTime = m_currentTime;
 }
@@ -119,20 +113,17 @@ XMFLOAT3 Nanosuit::CenterOfModel()
 	return XMFLOAT3(m_position.x, m_position.y + (7.7f * m_scaleFactor), m_position.z);
 }
 
-void Nanosuit::MoveForward()
+void Nanosuit::LookLeft(float angle)
 {
-	if (!m_movingBackward)
-		m_movingForward = true;
+	// don't let the angle get arbitrarily high, so wrap between [-PI, PI]
+	m_yaw = fmod(m_yaw + angle, DirectX::XM_2PI);
 }
 
-void Nanosuit::MoveBackward()
+void Nanosuit::LookRight(float angle)
 {
-	if (!m_movingForward)
-		m_movingBackward = true;
+	// don't let the angle get arbitrarily high, so wrap between [-PI, PI]
+	m_yaw = fmod(m_yaw - angle, DirectX::XM_2PI);
 }
-
-
-
 
 
 

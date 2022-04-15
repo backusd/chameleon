@@ -211,19 +211,37 @@ void MoveLookController::MouseMove()
 
 void MoveLookController::UpdatePosition()
 {
-    if (m_up && !m_down)
+    if (m_up)
     {
-        if (m_shift)
+        // If DOWN arrow is also pressed, do nothing
+        if (m_down)
+            m_player->MoveForward(false);
+        else if (m_shift)
+        {
             LookUp();
+            m_player->MoveForward(false);
+        }
         else
-            MoveForward();     
+            m_player->MoveForward(true);
     }
-    else if (m_down && !m_up)
+    else
     {
-        if (m_shift)
-            LookDown();
-        else
-            MoveBackward();        
+        m_player->MoveForward(false);
+
+        if (m_down)
+        {
+            if (m_shift)
+                LookDown();
+            else
+            {
+                // Not actually sure what to do here. Do we want the player to spin around?
+                int iii = 0;
+
+
+
+
+            }
+        }
     }
 
     if (m_left && !m_right)
@@ -243,6 +261,10 @@ void MoveLookController::LookLeft()
     double timeDelta = m_currentTime - m_previousTime;
     float angle = static_cast<float>(m_turnSpeed * timeDelta);
     m_theta -= angle;
+
+    // If shift is NOT down, then also rotate the player
+    if (!m_shift)
+        m_player->LookLeft(angle);
 }
 void MoveLookController::LookRight()
 {
@@ -250,6 +272,10 @@ void MoveLookController::LookRight()
     double timeDelta = m_currentTime - m_previousTime;
     float angle = static_cast<float>(m_turnSpeed * timeDelta);
     m_theta += angle;
+
+    // If shift is NOT down, then also rotate the player
+    if (!m_shift)
+        m_player->LookRight(angle);
 }
 void MoveLookController::LookUp()
 {
@@ -268,14 +294,4 @@ void MoveLookController::LookDown()
     double timeDelta = m_currentTime - m_previousTime;
     float angle = static_cast<float>(m_turnSpeed * timeDelta);
     m_phi = std::min(DirectX::XM_PIDIV2, m_phi + angle);    // don't let it go below horizontal
-}
-void MoveLookController::MoveForward()
-{
-    m_player->MoveForward();
-
-
-}
-void MoveLookController::MoveBackward()
-{
-
 }

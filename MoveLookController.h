@@ -47,8 +47,8 @@ protected:
 	virtual void LookRight();
 	virtual void LookUp();
 	virtual void LookDown();
-	virtual void MoveForward();
-	virtual void MoveBackward();
+	virtual void MoveForward() {};
+	virtual void MoveBackward() {};
 
 	virtual void ZoomIn(int mouseX, int mouseY);
 	virtual void ZoomOut(int mouseX, int mouseY);
