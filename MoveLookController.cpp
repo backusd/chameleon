@@ -197,11 +197,15 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
 
 void MoveLookController::ZoomIn(int mouseX, int mouseY)
 {
-
+    // For the game movelookController, zooming in just requires decreasing m_r
+    // Don't allow m_r to be less than 10, cause that would just appear too close
+    m_r = std::max(m_r - 0.2f, 10.0f);
 }
 void MoveLookController::ZoomOut(int mouseX, int mouseY)
 {
-
+    // For the game movelookController, zooming out just requires increasing m_r
+    // Don't allow m_r to be greater than 65, cause that would just appear too far away
+    m_r = std::min(m_r + 0.2f, 65.0f);
 }
 
 void MoveLookController::MouseMove()
