@@ -42,6 +42,7 @@ protected:
 	virtual void ResetState();
 	
 	virtual void UpdatePosition();
+	void CenterCameraBehindPlayer();
 
 	virtual void LookLeft();
 	virtual void LookRight();
@@ -73,6 +74,10 @@ protected:
 	bool  m_shift;
 	bool  m_ctrl;
 	bool  m_alt;
+	bool  m_a;
+	bool  m_w;
+	bool  m_s;
+	bool  m_d;
 
 	// Input states for mouse
 
@@ -93,8 +98,5 @@ protected:
 	DirectX::XMVECTOR m_eyeVec;
 	DirectX::XMVECTOR m_atVec;
 	DirectX::XMVECTOR m_upVec;
-
-	// vector of characters that are read in from the keyboard
-	std::vector<char> m_charBuffer;
 
 };

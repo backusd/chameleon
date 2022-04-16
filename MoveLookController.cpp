@@ -11,9 +11,9 @@ MoveLookController::MoveLookController(HWND hWnd) :
     m_moveSpeed(10.0),
     m_turnSpeed(0.5),
     m_player(nullptr),
-    m_r(30.0f),
+    m_r(35.0f),
     m_theta(0.0f),
-    m_phi(DirectX::XM_PIDIV4)
+    m_phi(DirectX::XM_PI / 2.5f) // 2.5 is somewhat random and just gives a pleasing angle for the camera
 {
     ResetState();
 
@@ -42,6 +42,10 @@ void MoveLookController::ResetState()
     m_shift = false;
     m_ctrl = false;
     m_alt = false;
+    m_a = false;
+    m_w = false;
+    m_s = false;
+    m_d = false;
 
     m_currentTime = 0.0;
     m_previousTime = 0.0;
@@ -61,6 +65,11 @@ void MoveLookController::SetPlayer(std::shared_ptr<Nanosuit> player)
 {
     // Set the player and adjust the camera location and direction
     m_player = player;
+
+    // The nanosuit faces the positive z direction but the default camera location 
+    // is to face the negative x direction. Rotating the camera negative 90 degrees
+    // should line up the camera direction behind the player
+    m_theta = -DirectX::XM_PIDIV2;
 
     UpdateCameraLocation();
 }
@@ -176,23 +185,37 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
             }
         }
 
-        // Read in each char into a vector that will then get used in the UpdatePosition function
+        // for WASD keys, we don't just want to know when the button is pressed, we really
+        // just want to know when they are down. 
+        m_a = keyboard->KeyIsPressed('a') || keyboard->KeyIsPressed('A');
+        m_w = keyboard->KeyIsPressed('w') || keyboard->KeyIsPressed('W');
+        m_s = keyboard->KeyIsPressed('s') || keyboard->KeyIsPressed('S');
+        m_d = keyboard->KeyIsPressed('d') || keyboard->KeyIsPressed('D');
+
+
+        // for non-WASD keys, just read from the keyboard's char buffer. The char will be
+        // placed on the keyboard's char queue when the key is pressed down, so there is no way
+        // of knowing when the char is released. This should be fine for now
         while (!keyboard->CharIsEmpty())
         {
-            m_charBuffer.push_back(keyboard->ReadChar());
+            switch (keyboard->ReadChar())
+            {
+            case 'c': CenterCameraBehindPlayer(); break;
+            }
         }
     }
 
     // Call update position to check if any of the new variables have been set and update the position accordingly
-    UpdatePosition();
-
-    // Clear the char buffer as UpdatePosition should now be done with them
-    m_charBuffer.clear();
-    
+    UpdatePosition();    
 
     UpdateCameraLocation();
 
     m_previousTime = m_currentTime;
+}
+
+void MoveLookController::CenterCameraBehindPlayer()
+{
+    m_theta = -m_player->Yaw() - DirectX::XM_PIDIV2;
 }
 
 void MoveLookController::ZoomIn(int mouseX, int mouseY)
@@ -215,6 +238,10 @@ void MoveLookController::MouseMove()
 
 void MoveLookController::UpdatePosition()
 {
+    // If up arrow, down arrow, 'w' or 's' are pressed, handle their input
+    //auto w_it  = std::find()
+    //if (m_up || m_down || )
+
     if (m_up)
     {
         // If DOWN arrow is also pressed, do nothing
@@ -252,6 +279,9 @@ void MoveLookController::UpdatePosition()
         LookLeft();
     else if (m_right && !m_left)
         LookRight();
+
+    // Process char input
+
 }
 
 bool MoveLookController::IsMoving()

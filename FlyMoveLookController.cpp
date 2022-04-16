@@ -143,17 +143,17 @@ void FlyMoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared
         }
 
         // Read in each char into a vector that will then get used in the UpdatePosition function
-        while (!keyboard->CharIsEmpty())
-        {
-            m_charBuffer.push_back(keyboard->ReadChar());
-        }
+        //while (!keyboard->CharIsEmpty())
+        //{
+        //    m_charBuffer.push_back(keyboard->ReadChar());
+        //}
     }
 
     // Call update position to check if any of the new variables have been set and update the position accordingly
     UpdatePosition();
 
     // Clear the char buffer as UpdatePosition should now be done with them
-    m_charBuffer.clear();
+    //m_charBuffer.clear();
 
 
     m_previousTime = m_currentTime;

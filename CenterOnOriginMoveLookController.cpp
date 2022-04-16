@@ -161,16 +161,19 @@ void CenterOnOriginMoveLookController::Update(std::shared_ptr<StepTimer> timer, 
         // Read in each char into a vector that will then get used in the UpdatePosition function
         while (!keyboard->CharIsEmpty())
         {
-            m_charBuffer.push_back(keyboard->ReadChar());
+            switch (keyboard->ReadChar())
+            {
+            case 'c': CenterOnFace(); break;
+            case 'a': RotateLeft90(); break;
+            case 'd': RotateRight90(); break;
+            case 'w': RotateUp90(); break;
+            case 's': RotateDown90(); break;
+            }
         }
     }
 
     // Call update position to check if any of the new variables have been set and update the position accordingly
     UpdatePosition();
-
-    // Clear the char buffer as UpdatePosition should now be done with them
-    m_charBuffer.clear();
-
 
     m_previousTime = m_currentTime;
 
@@ -306,19 +309,6 @@ void CenterOnOriginMoveLookController::RotateUpDown(float theta)
 
 void CenterOnOriginMoveLookController::UpdatePosition()
 {
-    // Loop over the char buffer and process specific keys
-    for (char c : m_charBuffer)
-    {
-        switch (c)
-        {
-        case 'c': CenterOnFace(); break;
-        case 'a': RotateLeft90(); break;
-        case 'd': RotateRight90(); break;
-        case 'w': RotateUp90(); break;
-        case 's': RotateDown90(); break;
-        }
-    }
-
     // If an arrow key is being held down, rotate
     if (m_up || m_down || m_left || m_right)
     {
