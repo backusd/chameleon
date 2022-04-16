@@ -181,17 +181,13 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
             case VK_LEFT:       m_left = keyEvent.IsPress(); break;
             case VK_UP:         m_up = keyEvent.IsPress(); break;
             case VK_RIGHT:      m_right = keyEvent.IsPress(); break;
-            case VK_DOWN:       m_down = keyEvent.IsPress(); break;                
+            case VK_DOWN:       m_down = keyEvent.IsPress(); break;
+            case 'A':           m_a = keyEvent.IsPress(); break;
+            case 'W':           m_w = keyEvent.IsPress(); break;
+            case 'S':           m_s = keyEvent.IsPress(); break;
+            case 'D':           m_d = keyEvent.IsPress(); break;
             }
         }
-
-        // for WASD keys, we don't just want to know when the button is pressed, we really
-        // just want to know when they are down. 
-        m_a = keyboard->KeyIsPressed('a') || keyboard->KeyIsPressed('A');
-        m_w = keyboard->KeyIsPressed('w') || keyboard->KeyIsPressed('W');
-        m_s = keyboard->KeyIsPressed('s') || keyboard->KeyIsPressed('S');
-        m_d = keyboard->KeyIsPressed('d') || keyboard->KeyIsPressed('D');
-
 
         // for non-WASD keys, just read from the keyboard's char buffer. The char will be
         // placed on the keyboard's char queue when the key is pressed down, so there is no way
@@ -238,14 +234,12 @@ void MoveLookController::MouseMove()
 
 void MoveLookController::UpdatePosition()
 {
-    // If up arrow, down arrow, 'w' or 's' are pressed, handle their input
-    //auto w_it  = std::find()
-    //if (m_up || m_down || )
-
-    if (m_up)
+    // Treat arrow keys the same as WASD keys and don't double dip (meaning if 
+    // up arrow is pressed and 'w' is pressed, don't go up twice...whatever that would mean)
+    if (m_up || m_w)
     {
         // If DOWN arrow is also pressed, do nothing
-        if (m_down)
+        if (m_down || m_s)
             m_player->MoveForward(false);
         else if (m_shift)
         {
@@ -259,7 +253,7 @@ void MoveLookController::UpdatePosition()
     {
         m_player->MoveForward(false);
 
-        if (m_down)
+        if (m_down || m_s)
         {
             if (m_shift)
                 LookDown();
@@ -275,13 +269,10 @@ void MoveLookController::UpdatePosition()
         }
     }
 
-    if (m_left && !m_right)
+    if ((m_left || m_a) && !(m_right || m_d))
         LookLeft();
-    else if (m_right && !m_left)
+    else if ((m_right || m_d) && !(m_left || m_a))
         LookRight();
-
-    // Process char input
-
 }
 
 bool MoveLookController::IsMoving()
