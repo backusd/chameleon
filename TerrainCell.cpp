@@ -88,6 +88,8 @@ bool TerrainCell::GetClickLocation(XMFLOAT3 origin, XMFLOAT3 direction, XMFLOAT3
 	XMVECTOR xYZ = DirectX::XMVectorSet(minX, maxY, maxZ, 0.0f);
 	XMVECTOR XYZ = DirectX::XMVectorSet(minX, minY, maxZ, 0.0f);
 
+	// Must test for intersection to all faces of the terrain cell to determine if the clicking ray
+	// has the potential to interesect the terrain surface
 	if (DirectX::TriangleTests::Intersects(o, d, xyz, Xyz, xYz, distance) || // min z-plane
 		DirectX::TriangleTests::Intersects(o, d, XYz, Xyz, xYz, distance) ||
 		DirectX::TriangleTests::Intersects(o, d, XYZ, XyZ, xYZ, distance) || // max z-plane
@@ -99,8 +101,7 @@ bool TerrainCell::GetClickLocation(XMFLOAT3 origin, XMFLOAT3 direction, XMFLOAT3
 		DirectX::TriangleTests::Intersects(o, d, xyz, Xyz, xyZ, distance) || // min y-plane
 		DirectX::TriangleTests::Intersects(o, d, XyZ, Xyz, xyZ, distance) ||
 		DirectX::TriangleTests::Intersects(o, d, xYz, XYz, xYZ, distance) || // max y-plane
-		DirectX::TriangleTests::Intersects(o, d, XYZ, XYz, xYZ, distance)
-		)
+		DirectX::TriangleTests::Intersects(o, d, XYZ, XYz, xYZ, distance))
 	{
 		std::shared_ptr<Mesh> mesh = m_model->GetRootNodeMesh();
 		std::shared_ptr<TerrainCellMesh> cellMesh = std::dynamic_pointer_cast<TerrainCellMesh>(mesh);

@@ -3,6 +3,7 @@
 
 using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT4;
+using DirectX::XMVECTOR;
 
 Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController),
@@ -16,7 +17,9 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_clickLocation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
 	m_velocityVector(XMFLOAT3(0.0f, 0.0f, 0.0f)),
 	m_startTime(0.0),
-	m_endTime(0.0)
+	m_endTime(0.0),
+	m_turning(false),
+	m_yawRemainingToTurn(0.0f)
 {
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
@@ -128,6 +131,29 @@ void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain>
 		}
 	}
 
+	if (m_turning)
+	{
+		float angle = timeDelta * DirectX::XM_2PI; // Turn at PI radians per second
+		if (abs(angle) > abs(m_yawRemainingToTurn))
+		{
+			// In this case, just turn the remaining and be done
+			angle = abs(m_yawRemainingToTurn);
+			m_turning = false;
+		}
+
+		// If the yaw to turn is positive, look left, otherwise look right
+		if (m_yawRemainingToTurn > 0.0f)
+		{
+			LookLeft(angle);
+			m_yawRemainingToTurn -= angle;
+		}
+		else
+		{
+			LookRight(angle);
+			m_yawRemainingToTurn += angle;
+		}
+	}
+
 	// Update the y position according to the terrain height
 	// NOTE: For game logic, it might make sense to only update the height if
 	// the player is actuall moving forward. However, getting the terrain height
@@ -171,18 +197,50 @@ void Nanosuit::MoveTo(DirectX::XMFLOAT3 location, float speed)
 			speed
 		)
 	);
+
+	// Determine the angle to turn to face the direction
+	m_turning = true;
+	float finalYaw = DirectX::XMVectorGetX(
+		DirectX::XMVector3AngleBetweenVectors(
+			DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),
+			DirectX::XMVectorSet(direction.x, 0.0f, direction.z, 0.0f)
+		)
+	);
+	
+	if (direction.x < 0.0f)
+		finalYaw *= -1.0f;
+
+	m_yawRemainingToTurn = finalYaw - m_yaw;
+
+	// If the amount is greater than PI, then the amount needs to be reduced
+	if (abs(m_yawRemainingToTurn) > DirectX::XM_PI)
+	{
+		// If the yaw to turn is positive, it will need to become negative
+		float factor = (m_yawRemainingToTurn > 0.0f) ? -1.0f : 1.0f;
+
+		// New angle is compute be subtracting from 2PI
+		m_yawRemainingToTurn = factor * (DirectX::XM_2PI - abs(m_yawRemainingToTurn));
+	}
 }
 
 void Nanosuit::LookLeft(float angle)
 {
-	// don't let the angle get arbitrarily high, so wrap between [-PI, PI]
-	m_yaw = fmod(m_yaw + angle, DirectX::XM_2PI);
+	// Yaw must be bound [-PI, PI]
+	m_yaw += angle;
+
+	// If it is now greater than PI, just negate it
+	if (m_yaw > DirectX::XM_PI)
+		m_yaw *= -1.0f;
 }
 
 void Nanosuit::LookRight(float angle)
 {
-	// don't let the angle get arbitrarily high, so wrap between [-PI, PI]
-	m_yaw = fmod(m_yaw - angle, DirectX::XM_2PI);
+	// Yaw must be bound [-PI, PI]
+	m_yaw -= angle;
+
+	// If it is now less than -PI, negate it
+	if (m_yaw < -DirectX::XM_PI)
+		m_yaw *= -1.0f;
 }
 
 

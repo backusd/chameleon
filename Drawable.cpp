@@ -90,6 +90,6 @@ void Drawable::DrawImGuiRollPitchYaw(std::string id)
 	ImGui::Text("Orientation:");
 	ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##drawableRoll" + id).c_str(), &m_roll, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
 	ImGui::Text("   Pitch: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePitch" + id).c_str(), &m_pitch, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
-	ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##drawableYaw" + id).c_str(), &m_yaw, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+	ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##drawableYaw" + id).c_str(), &m_yaw, -DirectX::XM_PI, DirectX::XM_PI, "%.3f");
 }
 #endif

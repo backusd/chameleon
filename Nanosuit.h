@@ -41,6 +41,8 @@ private:
 	DirectX::XMFLOAT3 m_velocityVector;
 	double m_startTime, m_endTime;
 
+	bool m_turning;
+	float m_yawRemainingToTurn;
 
 
 	std::shared_ptr<Terrain> m_currentTerrain;
