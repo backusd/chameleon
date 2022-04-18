@@ -139,6 +139,8 @@ void CenterOnOriginScene::WindowResized()
 {
 	CreateWindowSizeDependentResources();
 
+	m_moveLookController->WindowResized();
+
 	// Update the bindables to know about the new projection matrix
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
 		drawable->SetProjectionMatrix(m_projectionMatrix);

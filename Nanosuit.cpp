@@ -7,7 +7,7 @@ using DirectX::XMVECTOR;
 
 Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController),
-	m_scaleFactor(0.5f),
+	m_scaleFactor(0.25f),
 	m_movementSpeed(10.0f),
 	m_movingForward(false),
 	m_currentTime(0.0),

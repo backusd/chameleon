@@ -196,7 +196,7 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 	lighting->SetPositionMin(XMFLOAT3(-20.0f, -20.0f, -20.0f));
 
 	std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
-	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
+	nanosuit->SetPosition(XMFLOAT3(0.0f, -2.0f, 0.0f));
 
 	//std::shared_ptr<Suzanne> suzanne = m_centerOnOriginScene->AddDrawable<Suzanne>();
 }
