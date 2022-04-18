@@ -4,8 +4,8 @@ using DirectX::XMVECTOR;
 using DirectX::XMFLOAT3;
 
 
-FlyMoveLookController::FlyMoveLookController(HWND hWnd) :
-    MoveLookController(hWnd)
+FlyMoveLookController::FlyMoveLookController(HWND hWnd, std::shared_ptr<DeviceResources> deviceResources) :
+    MoveLookController(hWnd, deviceResources)
 {
     ResetState();
 

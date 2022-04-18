@@ -1,21 +1,27 @@
 #include "MoveLookController.h"
 #include "Nanosuit.h"
+#include "Terrain.h"
 
 using DirectX::XMVECTOR;
 using DirectX::XMFLOAT3;
+using DirectX::XMMATRIX;
+using DirectX::XMFLOAT4X4;
 
 using DirectX::operator*;
 
-MoveLookController::MoveLookController(HWND hWnd) :
+MoveLookController::MoveLookController(HWND hWnd, std::shared_ptr<DeviceResources> deviceResources) :
     m_hWnd(hWnd),
+    m_deviceResources(deviceResources),
     m_moveSpeed(10.0),
     m_turnSpeed(0.5),
     m_player(nullptr),
+    m_terrain(nullptr),
     m_r(35.0f),
     m_theta(0.0f),
     m_phi(DirectX::XM_PI / 2.5f) // 2.5 is somewhat random and just gives a pleasing angle for the camera
 {
     ResetState();
+    UpdateProjectionMatrix();
 
     // Vectors can have non-sensical values to start because they will be updated
     // correctly once the player is bound (probably want to make sure the math doesn't throw
@@ -49,6 +55,9 @@ void MoveLookController::ResetState()
 
     m_currentTime = 0.0;
     m_previousTime = 0.0;
+
+    m_player = nullptr;
+    m_terrain = nullptr;
     
     //m_movingToNewLocation = false;
     //m_updatedViewMatrixHasBeenRead = false;
@@ -56,7 +65,43 @@ void MoveLookController::ResetState()
     //m_rotatingUpDown = false;
 }
 
-DirectX::XMMATRIX MoveLookController::ViewMatrix()
+void MoveLookController::UpdateProjectionMatrix()
+{
+    RECT rect;
+    GetClientRect(m_hWnd, &rect);
+
+    // Perspective Matrix
+    float aspectRatio = static_cast<float>(rect.right - rect.left) / static_cast<float>(rect.bottom - rect.top); // width / height
+    float fovAngleY = DirectX::XM_PI / 4;
+
+    // This is a simple example of a change that can be made when the app is in portrait or snapped view
+    if (aspectRatio < 1.0f)
+    {
+        fovAngleY *= 2.0f;
+    }
+
+    // Note that the OrientationTransform3D matrix is post-multiplied here
+    // in order to correctly orient the scene to match the display orientation.
+    // This post-multiplication step is required for any draw calls that are
+    // made to the swap chain render target. For draw calls to other targets,
+    // this transform should not be applied.
+
+    // This sample makes use of a right-handed coordinate system using row-major matrices.
+    XMMATRIX perspectiveMatrix = DirectX::XMMatrixPerspectiveFovRH(
+        fovAngleY,
+        aspectRatio,
+        0.01f,
+        1000.0f
+    );
+
+    XMFLOAT4X4 orientation = m_deviceResources->OrientationTransform3D();
+    XMMATRIX orientationMatrix = XMLoadFloat4x4(&orientation);
+
+    // Projection Matrix (No Transpose)
+    m_projectionMatrix = perspectiveMatrix * orientationMatrix;
+}
+
+XMMATRIX MoveLookController::ViewMatrix()
 {
     return DirectX::XMMatrixLookAtRH(m_eyeVec, m_atVec, m_upVec);
 }
@@ -128,7 +173,11 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
             }
             break;
 
-        case Mouse::Event::Type::LRelease: m_LButtonDown = false; break;
+        case Mouse::Event::Type::LRelease: 
+            GoToClickLocation(static_cast<float>(mouse->GetPosX()), static_cast<float>(mouse->GetPosY()));
+            m_LButtonDown = false; 
+            break;
+
         case Mouse::Event::Type::RPress:
             // Only register the RPress if the LButton and MButton are not already down
             if (!(m_LButtonDown || m_MButtonDown))
@@ -207,6 +256,50 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
     UpdateCameraLocation();
 
     m_previousTime = m_currentTime;
+}
+
+void MoveLookController::GoToClickLocation(float x, float y)
+{
+    // The passed in x/y values are the screen coordinates of the click
+    // Convert this to a location and direction vector that can be passed 
+    // to the terrain to identify the x/y/z coordinate on the map
+
+    /*
+    XMVECTOR rayOriginVector, rayDestinationVector, rayDirectionVector;
+
+    D3D11_VIEWPORT viewport = m_deviceResources->GetScreenViewport();
+
+    rayOriginVector = XMVector3Unproject(
+        DirectX::XMVectorSet(x, y, 0.0f, 0.0f), // click point near vector
+        viewport.TopLeftX,
+        viewport.TopLeftY,
+        viewport.Width,
+        viewport.Height,
+        0,
+        1,
+        projectionMatrix,
+        viewMatrix,
+        DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z));
+
+    rayDestinationVector = XMVector3Unproject(
+        DirectX::XMVectorSet(x, y, 1.0f, 0.0f), // click point far vector
+        viewport.TopLeftX,
+        viewport.TopLeftY,
+        viewport.Width,
+        viewport.Height,
+        0,
+        1,
+        projectionMatrix,
+        viewMatrix,
+        DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z));
+
+    rayDirectionVector = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(rayDestinationVector, rayOriginVector));
+
+    //
+    XMFLOAT3 origin, direction;
+    XMStoreFloat3(&origin, rayOriginVector);
+    XMStoreFloat3(&direction, rayDirectionVector);
+    */
 }
 
 void MoveLookController::CenterCameraBehindPlayer()

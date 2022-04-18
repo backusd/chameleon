@@ -8,7 +8,7 @@ CenterOnOriginScene::CenterOnOriginScene(std::shared_ptr<DeviceResources> device
 	m_deviceResources(deviceResources),
 	m_hWnd(hWnd)
 {
-	m_moveLookController = std::make_shared<CenterOnOriginMoveLookController>(m_hWnd);
+	m_moveLookController = std::make_shared<CenterOnOriginMoveLookController>(m_hWnd, deviceResources);
 
 	CreateWindowSizeDependentResources();
 	CreateAndBindModelViewProjectionBuffer();

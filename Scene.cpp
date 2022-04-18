@@ -9,29 +9,34 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_hWnd(hWnd)
 {
 	// Create the move look controllers
-	m_moveLookController = std::make_shared<MoveLookController>(m_hWnd);
+	m_moveLookController = std::make_shared<MoveLookController>(m_hWnd, deviceResources);
 
 #ifndef NDEBUG
-	m_flyMoveLookController = std::make_shared<FlyMoveLookController>(m_hWnd);
+	m_flyMoveLookController = std::make_shared<FlyMoveLookController>(m_hWnd, deviceResources);
 	m_useFlyMoveLookController = false;
 #endif
 
-	CreateWindowSizeDependentResources();
+	// CreateWindowSizeDependentResources();
 	CreateAndBindModelViewProjectionBuffer();
 
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookController);
-	m_terrain->SetProjectionMatrix(m_projectionMatrix);
+	
+	//m_terrain->SetProjectionMatrix(m_projectionMatrix);
+	m_terrain->SetProjectionMatrix(m_moveLookController->ProjectionMatrix());
+
 }
 
 Scene::~Scene()
 {
 	// Manually release the player from the MoveLookController, otherwise, resources will be leaked
-	m_moveLookController->ReleasePlayer();
+	// Same goes for the terrain
+	m_moveLookController->ReleaseResources();
 }
 
 void Scene::CreateWindowSizeDependentResources()
 {
+	/*
 	RECT rect;
 	GetClientRect(m_hWnd, &rect);
 
@@ -64,6 +69,7 @@ void Scene::CreateWindowSizeDependentResources()
 
 	// Projection Matrix (No Transpose)
 	m_projectionMatrix = perspectiveMatrix * orientationMatrix;
+	*/
 }
 
 void Scene::CreateAndBindModelViewProjectionBuffer()
@@ -97,9 +103,9 @@ void Scene::WindowResized()
 
 	// Update the bindables to know about the new projection matrix
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
-		drawable->SetProjectionMatrix(m_projectionMatrix);
+		drawable->SetProjectionMatrix(m_moveLookController->ProjectionMatrix());
 
-	m_terrain->SetProjectionMatrix(m_projectionMatrix);
+	m_terrain->SetProjectionMatrix(m_moveLookController->ProjectionMatrix());
 }
 
 void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)

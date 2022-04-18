@@ -19,7 +19,7 @@ using namespace DirectX;
 class FlyMoveLookController : public MoveLookController
 {
 public:
-	FlyMoveLookController(HWND hWnd);
+	FlyMoveLookController(HWND hWnd, std::shared_ptr<DeviceResources> deviceResources);
 
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse) override;
 	bool IsMoving() override;

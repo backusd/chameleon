@@ -4,6 +4,7 @@
 #include "StepTimer.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "DeviceResources.h"
 
 #include <cmath>
 #include <memory>
@@ -12,13 +13,15 @@
 #include "imgui.h"
 
 class Nanosuit;
+class Terrain;
 
 class MoveLookController
 {
 public:
-	MoveLookController(HWND hWnd);
+	MoveLookController(HWND hWnd, std::shared_ptr<DeviceResources> deviceResources);
 
 	DirectX::XMMATRIX ViewMatrix();
+	DirectX::XMMATRIX ProjectionMatrix() { return m_projectionMatrix; }
 
 	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
 	void UpdateCameraLocation();
@@ -36,10 +39,12 @@ public:
 
 	// Allow Player to be manually released so as to not leak resources on shutdown
 	// (MoveLookController has shared_ptr to player and player has shared_ptr to it)
-	void ReleasePlayer() { m_player = nullptr; }
+	// Same goes for the terrain
+	void ReleaseResources() { m_player = nullptr; m_terrain = nullptr; }
 
 protected:
 	virtual void ResetState();
+	void UpdateProjectionMatrix();
 	
 	virtual void UpdatePosition();
 	void CenterCameraBehindPlayer();
@@ -50,14 +55,19 @@ protected:
 	virtual void LookDown();
 	virtual void MoveForward() {};
 	virtual void MoveBackward() {};
+	virtual void GoToClickLocation(float x, float y);
 
 	virtual void ZoomIn(int mouseX, int mouseY);
 	virtual void ZoomOut(int mouseX, int mouseY);
 	virtual void MouseMove();
 
-	HWND m_hWnd;
+	HWND								m_hWnd;
+	std::shared_ptr<DeviceResources>	m_deviceResources;
 
-	std::shared_ptr<Nanosuit> m_player;
+	DirectX::XMMATRIX					m_projectionMatrix;
+
+	std::shared_ptr<Nanosuit>			m_player;
+	std::shared_ptr<Terrain>			m_terrain;
 
 	// Use spherical coordinates to keep track of where the camera is relative to the player
 	float m_r;		// distance from the camera to the looking at point

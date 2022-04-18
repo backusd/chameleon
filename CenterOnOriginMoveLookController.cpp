@@ -4,8 +4,8 @@ using DirectX::XMVECTOR;
 using DirectX::XMFLOAT3;
 
 
-CenterOnOriginMoveLookController::CenterOnOriginMoveLookController(HWND hWnd) :
-    MoveLookController(hWnd)
+CenterOnOriginMoveLookController::CenterOnOriginMoveLookController(HWND hWnd, std::shared_ptr<DeviceResources> deviceResources) :
+    MoveLookController(hWnd, deviceResources)
 {
     ResetState();
 

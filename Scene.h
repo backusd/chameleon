@@ -62,7 +62,7 @@ private:
 	HWND												m_hWnd;
 	std::shared_ptr<DeviceResources>					m_deviceResources;
 
-	DirectX::XMMATRIX									m_projectionMatrix;
+	// DirectX::XMMATRIX									m_projectionMatrix;
 
 	// Light Properties
 	std::shared_ptr<Lighting>							m_lighting;
@@ -93,7 +93,7 @@ template <typename T>
 std::shared_ptr<T> Scene::AddDrawable()
 {
 	std::shared_ptr<T> newItem = std::make_shared<T>(m_deviceResources, m_moveLookController);
-	newItem->SetProjectionMatrix(m_projectionMatrix);
+	newItem->SetProjectionMatrix(m_moveLookController->ProjectionMatrix());
 	m_drawables.push_back(newItem);
 
 	// If we are creating the lighting, keep track of it
