@@ -131,6 +131,12 @@ void Scene::Draw()
 	m_terrain->Draw();
 }
 
+void Scene::Activate()
+{
+	// When activating a new scene, you must activate the scene lighting
+	m_lighting->Activate();
+}
+
 #ifndef NDEBUG
 void Scene::DrawImGui()
 {

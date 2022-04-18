@@ -104,7 +104,8 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	AddCenterOnOriginSceneObjects();
 #endif
 
-
+	// Activate the main scene
+	m_scene->Activate();
 
 
 	//
@@ -125,6 +126,14 @@ void ContentWindow::AddSceneObjects()
 	//     MUST be added first because it needs to be rendered first because depth test is turned off
 	std::shared_ptr<SkyDome> skyDome = m_scene->AddDrawable<SkyDome>();
 
+	// Lighting
+	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
+	std::shared_ptr<Lighting> lighting = m_scene->AddDrawable<Lighting>();
+	lighting->SetPosition(XMFLOAT3(45.0f, 20.0f, 390.0f));
+#ifndef NDEBUG
+	lighting->SetPositionMax(XMFLOAT3(1024.0f, 150.0f, 1024.0f));
+	lighting->SetPositionMin(XMFLOAT3(0.0f, 0.0f, 0.0f));
+#endif
 
 	std::shared_ptr<Nanosuit> nanosuit = m_scene->AddDrawable<Nanosuit>();
 	nanosuit->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
@@ -183,7 +192,8 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 	// Lighting
 	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
 	std::shared_ptr<Lighting> lighting = m_centerOnOriginScene->AddDrawable<Lighting>();
-
+	lighting->SetPositionMax(XMFLOAT3(20.0f, 20.0f, 20.0f));
+	lighting->SetPositionMin(XMFLOAT3(-20.0f, -20.0f, -20.0f));
 
 	std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
 	nanosuit->SetPosition(XMFLOAT3(0.0f, -5.0f, 0.0f));
@@ -510,9 +520,17 @@ bool ContentWindow::Render()
 	ImGui::Begin("Render Stats");
 	ImGui::Checkbox("Enable all other ImGui windows", &m_enableImGuiWindows);
 
-	if (ImGui::RadioButton("Normal Scene", !m_useCenterOnOriginScene)) m_useCenterOnOriginScene = false;
+	if (ImGui::RadioButton("Normal Scene", !m_useCenterOnOriginScene))
+	{
+		m_useCenterOnOriginScene = false;
+		m_scene->Activate();
+	}
 	ImGui::SameLine();
-	if (ImGui::RadioButton("Center On Origin Scene", m_useCenterOnOriginScene)) m_useCenterOnOriginScene = true;
+	if (ImGui::RadioButton("Center On Origin Scene", m_useCenterOnOriginScene))
+	{
+		m_useCenterOnOriginScene = true;
+		m_centerOnOriginScene->Activate();
+	}
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / m_io.Framerate, m_io.Framerate);
 	ImGui::End();

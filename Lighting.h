@@ -10,6 +10,11 @@ public:
 	void PreDrawUpdate() override;
 
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
+	
+	// This function is necessary when in debug mode (and possibly in the future when a new scene
+	// is created in memory but not rendered yet. Currently it is used to set the lighting buffer
+	// when switching between the normal scene and the center on origin scene
+	void Activate();
 
 private:
 	void CreateLightProperties();
@@ -28,6 +33,8 @@ private:
 #ifndef NDEBUG
 public:
 	void DrawImGui(std::string id) override;
+	void SetPositionMax(DirectX::XMFLOAT3 max) { m_positionMax = max; }
+	void SetPositionMin(DirectX::XMFLOAT3 min) { m_positionMin = min; }
 
 private:
 	DirectX::XMFLOAT3 m_positionMax;

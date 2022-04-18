@@ -131,7 +131,19 @@ void Lighting::CreateAndBindLightPropertiesBuffer()
 		static_cast<void*>(&m_lightProperties)	// Initial Data: Fill the buffer with light data
 		);
 	
+	Activate();
+	//ID3D11Buffer* buffer[1] = { m_lightConstantBuffer->GetRawBufferPointer() };
+	//GFX_THROW_INFO_ONLY(
+	//	m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 1u, buffer)
+	//);
+}
 
+void Lighting::Activate()
+{
+	INFOMAN(m_deviceResources);
+
+	// When activating a new scene, the lighting must be activated
+	// This just means the light constant buffer must be bound
 	ID3D11Buffer* buffer[1] = { m_lightConstantBuffer->GetRawBufferPointer() };
 	GFX_THROW_INFO_ONLY(
 		m_deviceResources->D3DDeviceContext()->PSSetConstantBuffers(0u, 1u, buffer)

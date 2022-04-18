@@ -188,3 +188,9 @@ void CenterOnOriginScene::DrawImGui()
 	// Let the MoveLookController draw ImGui controls
 	m_moveLookController->DrawImGui();
 }
+
+void CenterOnOriginScene::Activate()
+{
+	// When activating a new scene, you must activate the scene lighting
+	m_lighting->Activate();
+}
