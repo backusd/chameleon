@@ -35,6 +35,7 @@ public:
 	float GetMaxY() { return m_maxY; }
 	float GetMinZ() { return m_minZ; }
 	float GetMaxZ() { return m_maxZ; }
+	bool GetClickLocation(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMFLOAT3& clickLocation);
 
 	// If we are in DEBUG, then the move look controller may change, so allow it to be updated
 #ifndef NDEBUG

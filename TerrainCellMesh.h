@@ -8,6 +8,8 @@
 #include <memory>
 #include <vector>
 
+#include <DirectXCollision.h>
+
 struct TerrainModelType
 {
 	float x, y, z;
@@ -34,6 +36,7 @@ private:
 
 public:
 	TerrainCellMesh(std::shared_ptr<DeviceResources> deviceResources);
+	~TerrainCellMesh();
 
 	void Initialize(TerrainModelType* terrainModel, int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth);
 	
@@ -52,9 +55,12 @@ public:
 
 	bool ContainsPoint(float x, float z);
 	float GetHeight(float x, float z);
+	bool GetClickLocation(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMFLOAT3& clickLocation, float& distance);
+
 
 
 	VectorType* m_vertexList;
+	unsigned long* m_indices;
 
 private:
 	void InitializeBuffers(int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth, TerrainModelType* terrainModel);

@@ -16,15 +16,15 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_useFlyMoveLookController = false;
 #endif
 
-	// CreateWindowSizeDependentResources();
 	CreateAndBindModelViewProjectionBuffer();
 
 	// Terrain
 	m_terrain = std::make_shared<Terrain>(m_deviceResources, m_moveLookController);
 	
-	//m_terrain->SetProjectionMatrix(m_projectionMatrix);
 	m_terrain->SetProjectionMatrix(m_moveLookController->ProjectionMatrix());
 
+	// Must set the terrain to be used by the move look controller
+	m_moveLookController->SetTerrain(m_terrain);
 }
 
 Scene::~Scene()
@@ -32,44 +32,6 @@ Scene::~Scene()
 	// Manually release the player from the MoveLookController, otherwise, resources will be leaked
 	// Same goes for the terrain
 	m_moveLookController->ReleaseResources();
-}
-
-void Scene::CreateWindowSizeDependentResources()
-{
-	/*
-	RECT rect;
-	GetClientRect(m_hWnd, &rect);
-
-	// Perspective Matrix
-	float aspectRatio = static_cast<float>(rect.right - rect.left) / static_cast<float>(rect.bottom - rect.top); // width / height
-	float fovAngleY = DirectX::XM_PI / 4;
-
-	// This is a simple example of a change that can be made when the app is in portrait or snapped view
-	if (aspectRatio < 1.0f)
-	{
-		fovAngleY *= 2.0f;
-	}
-
-	// Note that the OrientationTransform3D matrix is post-multiplied here
-	// in order to correctly orient the scene to match the display orientation.
-	// This post-multiplication step is required for any draw calls that are
-	// made to the swap chain render target. For draw calls to other targets,
-	// this transform should not be applied.
-
-	// This sample makes use of a right-handed coordinate system using row-major matrices.
-	XMMATRIX perspectiveMatrix = DirectX::XMMatrixPerspectiveFovRH(
-		fovAngleY,
-		aspectRatio,
-		0.01f,
-		1000.0f
-	);
-
-	XMFLOAT4X4 orientation = m_deviceResources->OrientationTransform3D();
-	XMMATRIX orientationMatrix = XMLoadFloat4x4(&orientation);
-
-	// Projection Matrix (No Transpose)
-	m_projectionMatrix = perspectiveMatrix * orientationMatrix;
-	*/
 }
 
 void Scene::CreateAndBindModelViewProjectionBuffer()
@@ -99,7 +61,8 @@ void Scene::CreateAndBindModelViewProjectionBuffer()
 
 void Scene::WindowResized()
 {
-	CreateWindowSizeDependentResources();
+	// Must call this first because it will update the projection matrix
+	m_moveLookController->WindowResized();
 
 	// Update the bindables to know about the new projection matrix
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
@@ -126,6 +89,10 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	// Update all drawables
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
 		drawable->Update(timer, m_terrain);
+
+	// Update the location of the camera because it is possible the player has moved and therefore the
+	// camera needs to follow
+	m_moveLookController->UpdateCameraLocation();
 }
 
 void Scene::Draw()

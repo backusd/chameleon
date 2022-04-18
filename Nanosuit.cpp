@@ -11,7 +11,12 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_movingForward(false),
 	m_currentTime(0.0),
 	m_previousTime(0.0),
-	m_currentTerrain(nullptr)
+	m_currentTerrain(nullptr),
+	m_movingToClickLocation(false),
+	m_clickLocation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_velocityVector(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_startTime(0.0),
+	m_endTime(0.0)
 {
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
@@ -103,6 +108,24 @@ void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain>
 
 		float deltaZ = static_cast<float>(m_movementSpeed * cos(m_yaw) * timeDelta);
 		m_position.z += deltaZ;
+
+
+		// stop automated move
+
+	}
+	else if (m_movingToClickLocation)
+	{
+		if (m_currentTime > m_endTime)
+		{
+			m_position = m_clickLocation;
+			m_movingToClickLocation = false;
+		}
+		else
+		{
+			m_position.x += m_velocityVector.x * timeDelta;
+			m_position.y += m_velocityVector.y * timeDelta;
+			m_position.z += m_velocityVector.z * timeDelta;
+		}
 	}
 
 	// Update the y position according to the terrain height
@@ -120,6 +143,34 @@ XMFLOAT3 Nanosuit::CenterOfModel()
 	// Top of the nanosuit is about 15.4 units, so halfway up is about 7.7
 	// Scale this down by some scale factor
 	return XMFLOAT3(m_position.x, m_position.y + (7.7f * m_scaleFactor), m_position.z);
+}
+
+void Nanosuit::MoveTo(DirectX::XMFLOAT3 location, float speed)
+{
+	// The actual movement will take place in the Update function, so we must
+	// set certain parameters here for the movement to be triggered
+	m_movingToClickLocation = true;	// Let the Update function know we are actively moving
+	m_clickLocation = location;		// Set the destination location
+	m_startTime = m_currentTime;	// Set the time to the time that was computed in the last Update
+
+	// Compute the direction between start and finish
+	XMFLOAT3 direction;
+	direction.x = m_clickLocation.x - m_position.x;
+	direction.y = m_clickLocation.y - m_position.y;
+	direction.z = m_clickLocation.z - m_position.z;
+
+	// Compute the expected end time for the movement
+	XMFLOAT3 length;
+	DirectX::XMStoreFloat3(&length, DirectX::XMVector3Length(DirectX::XMLoadFloat3(&direction)));
+	m_endTime = m_startTime + (length.x / speed);
+
+	// Normalize the direction and scale by the speed to compute the velocity vector
+	DirectX::XMStoreFloat3(&m_velocityVector, 
+		DirectX::XMVectorScale(
+			DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&direction)), 
+			speed
+		)
+	);
 }
 
 void Nanosuit::LookLeft(float angle)

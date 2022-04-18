@@ -3,6 +3,7 @@
 using DirectX::XMFLOAT2;
 using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT4;
+using DirectX::XMVECTOR;
 
 TerrainCellMesh::TerrainCellMesh(std::shared_ptr<DeviceResources> deviceResources) :
 	Mesh(deviceResources)
@@ -12,6 +13,14 @@ TerrainCellMesh::TerrainCellMesh(std::shared_ptr<DeviceResources> deviceResource
 	m_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 
+}
+TerrainCellMesh::~TerrainCellMesh()
+{
+	delete[] m_indices;
+	m_indices = nullptr;
+
+	delete[] m_vertexList;
+	m_vertexList = nullptr;
 }
 
 void TerrainCellMesh::Initialize(TerrainModelType* terrainModel, int nodeIndexX, int nodeIndexY, int cellHeight, int cellWidth, int terrainWidth)
@@ -29,7 +38,6 @@ void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cell
 
 
 	TerrainVertexType* vertices;
-	unsigned long* indices;
 	int i, j, modelIndex, index;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
@@ -46,7 +54,7 @@ void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cell
 	vertices = new TerrainVertexType[m_vertexCount];
 
 	// Create the index array.
-	indices = new unsigned long[m_indexCount];
+	m_indices = new unsigned long[m_indexCount];
 
 	// Setup the indexes into the terrain model data and the local vertex/index array.
 	modelIndex = ((nodeIndexX * (cellWidth - 1)) + (nodeIndexY * (cellHeight - 1) * (terrainWidth - 1))) * 6;
@@ -63,7 +71,7 @@ void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cell
 			vertices[index].tangent = XMFLOAT3(terrainModel[modelIndex].tx, terrainModel[modelIndex].ty, terrainModel[modelIndex].tz);
 			vertices[index].binormal = XMFLOAT3(terrainModel[modelIndex].bx, terrainModel[modelIndex].by, terrainModel[modelIndex].bz);
 			vertices[index].color = XMFLOAT3(terrainModel[modelIndex].r, terrainModel[modelIndex].g, terrainModel[modelIndex].b);
-			indices[index] = index;
+			m_indices[index] = index;
 			modelIndex++;
 			index++;
 		}
@@ -95,7 +103,7 @@ void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cell
 	indexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = indices;
+	indexData.pSysMem = m_indices;
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
@@ -117,9 +125,6 @@ void TerrainCellMesh::InitializeBuffers(int nodeIndexX, int nodeIndexY, int cell
 	// Release the arrays now that the buffers have been created and loaded.
 	delete[] vertices;
 	vertices = 0;
-
-	delete[] indices;
-	indices = 0;
 }
 
 void TerrainCellMesh::CalculateCellDimensions()
@@ -224,4 +229,43 @@ float TerrainCellMesh::GetHeight(float x, float z)
 	}
 
 	return m_vertexList[closestVertexIndex].y;
+}
+
+bool TerrainCellMesh::GetClickLocation(XMFLOAT3 origin, XMFLOAT3 direction, XMFLOAT3& clickLocation, float& distance)
+{
+	XMVECTOR o = DirectX::XMLoadFloat3(&origin);
+	XMVECTOR d = DirectX::XMLoadFloat3(&direction);
+	XMVECTOR v1, v2, v3;
+	float dist;
+	float shortestDistance = FLT_MAX;
+	bool found = false;
+
+	for (int iii = 0; iii < m_vertexCount; iii+=3)
+	{
+		v1 = DirectX::XMVectorSet(m_vertexList[iii].x, m_vertexList[iii].y, m_vertexList[iii].z, 0.0f);
+		v2 = DirectX::XMVectorSet(m_vertexList[iii + 1].x, m_vertexList[iii + 1].y, m_vertexList[iii + 1].z, 0.0f);
+		v3 = DirectX::XMVectorSet(m_vertexList[iii + 2].x, m_vertexList[iii + 2].y, m_vertexList[iii + 2].z, 0.0f);
+
+		// If there is an intersection, update the shortest distance
+		if (DirectX::TriangleTests::Intersects(o, d, v1, v2, v3, dist))
+		{
+			shortestDistance = std::min(shortestDistance, dist);
+			found = true;
+		}
+	}
+
+	if (found)
+	{
+		// Click location is computed by just extending the direction vector the correct distance
+		// from the origin vector. Therefore, the direction MUST be normalized prior to this calculation
+		clickLocation.x = origin.x + (shortestDistance * direction.x);
+		clickLocation.y = origin.y + (shortestDistance * direction.y);
+		clickLocation.z = origin.z + (shortestDistance * direction.z);
+
+		distance = shortestDistance;
+
+		return true;
+	}
+
+	return false;
 }

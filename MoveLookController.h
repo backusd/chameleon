@@ -26,6 +26,7 @@ public:
 	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse);
 	void UpdateCameraLocation();
 	virtual bool IsMoving();
+	void WindowResized() { UpdateProjectionMatrix(); }
 
 	void SetPosition(DirectX::XMFLOAT3 position) { m_eyeVec = DirectX::XMLoadFloat3(&position); }
 
@@ -36,6 +37,7 @@ public:
 	DirectX::XMVECTOR Position() { return m_eyeVec; }
 
 	void SetPlayer(std::shared_ptr<Nanosuit> player);
+	void SetTerrain(std::shared_ptr<Terrain> terrain) { m_terrain = terrain; }
 
 	// Allow Player to be manually released so as to not leak resources on shutdown
 	// (MoveLookController has shared_ptr to player and player has shared_ptr to it)

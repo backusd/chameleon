@@ -264,11 +264,15 @@ void MoveLookController::GoToClickLocation(float x, float y)
     // Convert this to a location and direction vector that can be passed 
     // to the terrain to identify the x/y/z coordinate on the map
 
-    /*
     XMVECTOR rayOriginVector, rayDestinationVector, rayDirectionVector;
 
     D3D11_VIEWPORT viewport = m_deviceResources->GetScreenViewport();
+    XMMATRIX viewMatrix = ViewMatrix();
+    XMFLOAT3 eye;
+    DirectX::XMStoreFloat3(&eye, m_eyeVec);
 
+    // Here, we use the identity matrix for the World matrix because we don't want to translate
+    // the vectors as if they were at the origin. If we did want to do that, we would use XMMatrixTranslation(eye.x, eye.y, eye.z)
     rayOriginVector = XMVector3Unproject(
         DirectX::XMVectorSet(x, y, 0.0f, 0.0f), // click point near vector
         viewport.TopLeftX,
@@ -277,9 +281,9 @@ void MoveLookController::GoToClickLocation(float x, float y)
         viewport.Height,
         0,
         1,
-        projectionMatrix,
+        m_projectionMatrix,
         viewMatrix,
-        DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z));
+        DirectX::XMMatrixIdentity());
 
     rayDestinationVector = XMVector3Unproject(
         DirectX::XMVectorSet(x, y, 1.0f, 0.0f), // click point far vector
@@ -289,17 +293,24 @@ void MoveLookController::GoToClickLocation(float x, float y)
         viewport.Height,
         0,
         1,
-        projectionMatrix,
+        m_projectionMatrix,
         viewMatrix,
-        DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z));
+        DirectX::XMMatrixIdentity());
 
     rayDirectionVector = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(rayDestinationVector, rayOriginVector));
 
-    //
     XMFLOAT3 origin, direction;
     XMStoreFloat3(&origin, rayOriginVector);
     XMStoreFloat3(&direction, rayDirectionVector);
-    */
+
+    // Get the terrain location of the click (clickLocation is an out param)
+    XMFLOAT3 clickLocation;
+    if (m_terrain->GetClickLocation(origin, direction, clickLocation))
+    {
+        // If the click is actually on the map, update the player to move to that location
+        float speed = m_ctrl ? 20.0f : 10.0f;
+        m_player->MoveTo(clickLocation, speed);
+    }
 }
 
 void MoveLookController::CenterCameraBehindPlayer()

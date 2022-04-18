@@ -55,14 +55,11 @@ public:
 	void Activate();
 
 private:
-	void CreateWindowSizeDependentResources();
 	void CreateAndBindModelViewProjectionBuffer();
 
 
 	HWND												m_hWnd;
 	std::shared_ptr<DeviceResources>					m_deviceResources;
-
-	// DirectX::XMMATRIX									m_projectionMatrix;
 
 	// Light Properties
 	std::shared_ptr<Lighting>							m_lighting;

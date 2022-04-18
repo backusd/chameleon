@@ -15,7 +15,8 @@ public:
 
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
 	
-	void MoveForward(bool moveForward) { m_movingForward = moveForward; }
+	void MoveForward(bool moveForward, float speed = 10.0f) { m_movingForward = moveForward; m_movementSpeed = speed; }
+	void MoveTo(DirectX::XMFLOAT3 location, float speed);
 	void LookLeft(float angle);
 	void LookRight(float angle);
 
@@ -34,6 +35,13 @@ private:
 	bool m_movingForward;
 	double m_currentTime;
 	double m_previousTime;
+
+	bool m_movingToClickLocation;
+	DirectX::XMFLOAT3 m_clickLocation;
+	DirectX::XMFLOAT3 m_velocityVector;
+	double m_startTime, m_endTime;
+
+
 
 	std::shared_ptr<Terrain> m_currentTerrain;
 

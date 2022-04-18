@@ -167,6 +167,40 @@ float Terrain::GetHeight(float x, float z)
 	return 0.0f;
 }
 
+bool Terrain::GetClickLocation(XMFLOAT3 origin, XMFLOAT3 direction, XMFLOAT3& clickLocation)
+{
+	// POSSIBLE IMPROVEMENT: Quickly determine which cell the origin parameter is in as this is
+	//						 the most likely cell for the click to be in. A really advanced continuation
+	//						 would be to then check the adjacent cells
+	//		NOTE: this probably won't actually work because the mouse can be over multiple cells, so
+	//			  even if the mouse if over the closest cell, it could also be over a further cell
+
+	float distance;
+	float shortestDistance = FLT_MAX;
+	XMFLOAT3 closestLocation = XMFLOAT3(0.0, 0.0f, 0.0f);
+	bool found = false;
+
+	for (unsigned int iii = 0; iii < m_terrainCells.size(); ++iii)
+	{
+		// Make sure the terrain cell is even visible before checking
+		if (m_terrainCellVisibility[iii])
+		{
+			if (m_terrainCells[iii]->GetClickLocation(origin, direction, clickLocation, distance))
+			{
+				if (distance < shortestDistance)
+				{
+					shortestDistance = distance;
+					closestLocation = clickLocation;
+					found = true;
+				}
+			}
+		}
+	}
+
+	clickLocation = closestLocation;
+	return found;
+}
+
 #ifndef NDEBUG
 void Terrain::SetMoveLookController(std::shared_ptr<MoveLookController> mlc) 
 { 

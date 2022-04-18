@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include <DirectXCollision.h>
 
 class TerrainCell : public Drawable
 {
@@ -23,6 +24,8 @@ public:
 	float GetMaxY();
 	float GetMinZ();
 	float GetMaxZ();
+	bool GetClickLocation(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMFLOAT3& clickLocation, float& distance);
+
 
 private:
 
