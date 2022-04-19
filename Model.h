@@ -6,6 +6,7 @@
 #include "MoveLookController.h"
 #include "ObjectStore.h"
 #include "Json.h"
+#include "Base64.h"
 
 #include <string>
 #include <memory>

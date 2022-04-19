@@ -446,7 +446,29 @@ void Model::GLTFLoadFile(std::string filename)
 {
 	Json json = JsonReader::ReadFile(filename);
 
+	std::vector<std::any> buffers = json.Get<std::vector<std::any>>("buffers");
+	Json buffer = std::any_cast<Json>(buffers[0]);
+	std::string uri = buffer.Get<std::string>("uri");
 
+	std::ostringstream oss;
+
+	if (uri.substr(0, 5) != "data:")
+	{
+		oss << "Invalid URI: " << uri.substr(0, 5) << "\nURI must begin with 'data:'";
+		throw ModelException(__LINE__, __FILE__, oss.str());
+	}
+
+	std::string s = uri.substr(5, 32);
+
+	if (uri.substr(5, 32) != "application/octet-stream;base64,")
+	{
+		oss << "URI data type NOT supported: " << uri.substr(5, 32) << "\nIf you need this data type, you will need to add support for it.";
+		throw ModelException(__LINE__, __FILE__, oss.str());
+	}
+
+	uri = uri.substr(37, uri.size());
+
+	std::vector<uint8_t> data = Base64::Decode(uri);
 }
 
 void Model::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)

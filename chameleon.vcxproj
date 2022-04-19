@@ -162,6 +162,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Base64.cpp" />
+    <ClCompile Include="Base64Exception.cpp" />
     <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="BlackForestClass.cpp" />
@@ -250,6 +252,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Base64.h" />
+    <ClInclude Include="Base64Exception.h" />
     <ClInclude Include="Bindable.h" />
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="BlackForestClass.h" />
