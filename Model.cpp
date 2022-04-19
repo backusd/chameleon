@@ -29,6 +29,10 @@ void Model::Load(std::string filename)
 	{
 		OBJLoadFile(filename);
 	}
+	else if (extension == ".gltf")
+	{
+		GLTFLoadFile(filename);
+	}
 	else
 	{
 		std::ostringstream oss;
@@ -438,6 +442,12 @@ void Model::OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT
 	file.close();
 }
 
+void Model::GLTFLoadFile(std::string filename)
+{
+	Json json = JsonReader::ReadFile(filename);
+
+
+}
 
 void Model::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
 {

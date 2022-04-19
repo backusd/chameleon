@@ -6,7 +6,6 @@ ModelException::ModelException(int line, const char* file, std::string descripti
 	m_info = description;
 }
 
-
 const char* ModelException::what() const noexcept
 {
 	std::ostringstream oss;

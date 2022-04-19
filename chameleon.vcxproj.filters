@@ -103,6 +103,12 @@
     <Filter Include="Shaders\Includes">
       <UniqueIdentifier>{5f7d3ce4-f0bf-4f9e-957b-48f58670147e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utilities">
+      <UniqueIdentifier>{4595cfa5-e8ac-4d1e-9136-4d182d1629ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utilities">
+      <UniqueIdentifier>{1179e565-11d8-4210-bdcf-cfb31fd2dc91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -356,6 +362,12 @@
     </ClCompile>
     <ClCompile Include="CenterOnOriginScene.cpp">
       <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Json.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonException.cpp">
+      <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -626,6 +638,12 @@
     <ClInclude Include="CenterOnOriginScene.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Json.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonException.h">
+      <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -642,6 +660,9 @@
       <Filter>Data</Filter>
     </None>
     <None Include="models\nanosuit.obj">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="nanosuit.gltf">
       <Filter>Data</Filter>
     </None>
   </ItemGroup>

@@ -7,14 +7,14 @@
 #define MSG_NEWID				1001
 #define MSG_PING				1002
 #define MSG_DISCONNECT			1003
-#define MSG_CHAT				1004
-#define MSG_ENTITY_REQUEST		1005
-#define MSG_ENTITY_INFO			1006
-#define MSG_NEW_USER_LOGIN		1007
-#define MSG_USER_DISCONNECT		1008
-#define MSG_STATE_CHANGE		1009
-#define MSG_POSITION			1010
-#define MSG_AI_ROTATE			1011
+//#define MSG_CHAT				1004
+//#define MSG_ENTITY_REQUEST		1005
+//#define MSG_ENTITY_INFO			1006
+//#define MSG_NEW_USER_LOGIN		1007
+//#define MSG_USER_DISCONNECT		1008
+//#define MSG_STATE_CHANGE		1009
+//#define MSG_POSITION			1010
+//#define MSG_AI_ROTATE			1011
 
 
 ////////////////////////////////
@@ -53,6 +53,7 @@ typedef struct
 	unsigned short sessionId;
 }MSG_DISCONNECT_DATA;
 
+/*
 typedef struct
 {
 	unsigned short type;
@@ -99,3 +100,4 @@ typedef struct
 	unsigned short idNumber;
 	bool rotate;
 }MSG_AI_ROTATE_DATA;
+*/

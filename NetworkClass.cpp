@@ -51,7 +51,7 @@ bool NetworkClass::Initialize(char* ipAddress, unsigned short serverPort, std::s
 	}
 
 	// Send a request to the zone server for the list of user and non-user entities currently online as well as their status.
-	result = RequestEntityList();
+	//result = RequestEntityList();
 	if (!result)
 	{
 		return false;
@@ -108,11 +108,11 @@ void NetworkClass::Frame()
 	ProcessMessageQueue();
 
 	// Check if there is a chat message that this user wants to send to the server.
-	m_userInterface->CheckForChatMessage(m_uiMessage, newMessage);
-	if (newMessage)
-	{
-		SendChatMessage(m_uiMessage);
-	}
+	//m_userInterface->CheckForChatMessage(m_uiMessage, newMessage);
+	//if (newMessage)
+	//{
+	//	SendChatMessage(m_uiMessage);
+	//}
 
 	return;
 }
@@ -538,6 +538,7 @@ void NetworkClass::ProcessMessageQueue()
 		// Coerce the message into a generic format to read the type of message.
 		message = (MSG_GENERIC_DATA*)m_networkMessageQueue[m_nextMessageForProcessing].message;
 
+		/*
 		switch (message->type)
 		{
 		case MSG_CHAT:
@@ -580,6 +581,7 @@ void NetworkClass::ProcessMessageQueue()
 			break;
 		}
 		}
+		*/
 
 		// Set the message as processed.
 		m_networkMessageQueue[m_nextMessageForProcessing].active = false;
@@ -595,6 +597,7 @@ void NetworkClass::ProcessMessageQueue()
 	return;
 }
 
+/*
 
 void NetworkClass::HandleChatMessage(int queuePosition)
 {
@@ -886,3 +889,5 @@ bool NetworkClass::SendPositionUpdate(float positionX, float positionY, float po
 
 	return true;
 }
+
+*/

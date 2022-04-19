@@ -46,8 +46,8 @@ public:
 
 	void ReadNetworkMessage(char*, int, struct sockaddr_in);
 
-	bool SendStateChange(char);
-	bool SendPositionUpdate(float, float, float, float, float, float);
+	//bool SendStateChange(char);
+	//bool SendPositionUpdate(float, float, float, float, float, float);
 
 private:
 	bool InitializeWinSock();
@@ -61,16 +61,16 @@ private:
 
 	void AddMessageToQueue(char*, int, struct sockaddr_in);
 	void ProcessMessageQueue();
-	void HandleChatMessage(int);
-	void HandleEntityInfoMessage(int);
-	void HandleNewUserLoginMessage(int);
-	void HandleUserDisconnectMessage(int);
-	void HandleStateChangeMessage(int);
-	void HandlePositionMessage(int);
-	void HandleAIRotateMessage(int);
+	//void HandleChatMessage(int);
+	//void HandleEntityInfoMessage(int);
+	//void HandleNewUserLoginMessage(int);
+	//void HandleUserDisconnectMessage(int);
+	//void HandleStateChangeMessage(int);
+	//void HandlePositionMessage(int);
+	//void HandleAIRotateMessage(int);
 
-	bool SendChatMessage(char*);
-	bool RequestEntityList();
+	//bool SendChatMessage(char*);
+	//bool RequestEntityList();
 
 	std::shared_ptr<StepTimer> m_timer;
 

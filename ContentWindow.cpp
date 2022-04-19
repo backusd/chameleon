@@ -107,6 +107,8 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	// Activate the main scene
 	m_scene->Activate();
 
+	// Activate the network connectivity
+	//m_network = std::make_shared<Network>("155.248.215.180", 7000, m_timer);
 
 	//
 	// Consider making this NDEBUG only
@@ -427,8 +429,6 @@ void ContentWindow::Update()
 	m_timer->Tick([&]()
 		{
 			m_cpu->Update();
-
-			// m_network->Update();
 
 			// Don't update keyboard or mouse because they get updated via windows messages
 

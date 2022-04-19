@@ -24,7 +24,9 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
 
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.obj");
+	//m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.obj");
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.gltf");
+
 
 	AddBindable("phong-texture-vertex-shader");			// Vertex Shader
 	AddBindable("phong-texture-vertex-shader-IA");		// Input Layout

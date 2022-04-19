@@ -21,7 +21,7 @@ Network::Network(const char* ipAddress, unsigned short serverPort, std::shared_p
 	ConnectToServer(ipAddress, serverPort);
 		
 	// Send a request to the zone server for the list of user and non-user entities currently online as well as their status. Will throw on error
-	RequestEntityList();
+	//RequestEntityList();
 }
 
 Network::~Network()
@@ -340,8 +340,6 @@ void Network::ReadNetworkMessage(char* recvBuffer, int bytesRead, struct sockadd
 	{
 		AddMessageToQueue(recvBuffer, bytesRead, serverAddress);
 	}
-
-	return;
 }
 
 
@@ -441,6 +439,7 @@ void Network::ProcessMessageQueue()
 		// Coerce the message into a generic format to read the type of message.
 		message = (MSG_GENERIC_DATA*)m_networkMessageQueue[m_nextMessageForProcessing].message;
 
+		/*
 		switch (message->type)
 		{
 		case MSG_CHAT:
@@ -483,7 +482,7 @@ void Network::ProcessMessageQueue()
 			break;
 		}
 		}
-
+		*/
 		// Set the message as processed.
 		m_networkMessageQueue[m_nextMessageForProcessing].active = false;
 
@@ -494,10 +493,9 @@ void Network::ProcessMessageQueue()
 			m_nextMessageForProcessing = 0;
 		}
 	}
-
-	return;
 }
 
+/*
 
 void Network::HandleChatMessage(int queuePosition)
 {
@@ -768,3 +766,5 @@ void Network::SendPositionUpdate(float positionX, float positionY, float positio
 		throw new ChameleonException(__LINE__, __FILE__);
 	}
 }
+
+*/
