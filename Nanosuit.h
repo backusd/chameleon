@@ -3,6 +3,11 @@
 #include "Drawable.h"
 #include "HLSLStructures.h"
 
+// Assimp
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 
 class Nanosuit : public Drawable
 {

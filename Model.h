@@ -5,8 +5,9 @@
 #include "DeviceResources.h"
 #include "MoveLookController.h"
 #include "ObjectStore.h"
-#include "Json.h"
-#include "Base64.h"
+#include "GLTF.h"
+
+
 
 #include <string>
 #include <memory>

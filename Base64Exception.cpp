@@ -18,7 +18,7 @@ const char* Base64Exception::what() const noexcept
 
 const char* Base64Exception::GetType() const noexcept
 {
-	return "Model Mesh Exception";
+	return "Base64 Exception";
 }
 
 std::string Base64Exception::GetErrorInfo() const noexcept

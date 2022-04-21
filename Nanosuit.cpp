@@ -24,8 +24,8 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
 
-	//m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.obj");
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.gltf");
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.obj");
+	//m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.gltf");
 
 
 	AddBindable("phong-texture-vertex-shader");			// Vertex Shader
@@ -36,6 +36,13 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 
 	// Function to create the PS constant buffer array - it will create an immutable constant buffer to hold material data
 	CreateAndAddPSBufferArray();
+
+
+
+	Assimp::Importer imp;
+	auto model = imp.ReadFile("models\\suzanne.obj",
+		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+
 }
 
 void Nanosuit::CreateMaterialData()

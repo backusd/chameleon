@@ -93,12 +93,14 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -113,12 +115,14 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -132,12 +136,14 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,12 +158,14 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -189,6 +197,8 @@
     <ClCompile Include="FontFamily.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
     <ClCompile Include="Frustum.cpp" />
+    <ClCompile Include="GLTF.cpp" />
+    <ClCompile Include="GLTFException.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
@@ -252,6 +262,86 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="assimp\aabb.h" />
+    <ClInclude Include="assimp\ai_assert.h" />
+    <ClInclude Include="assimp\anim.h" />
+    <ClInclude Include="assimp\Base64.hpp" />
+    <ClInclude Include="assimp\BaseImporter.h" />
+    <ClInclude Include="assimp\Bitmap.h" />
+    <ClInclude Include="assimp\BlobIOSystem.h" />
+    <ClInclude Include="assimp\ByteSwapper.h" />
+    <ClInclude Include="assimp\camera.h" />
+    <ClInclude Include="assimp\cexport.h" />
+    <ClInclude Include="assimp\cfileio.h" />
+    <ClInclude Include="assimp\cimport.h" />
+    <ClInclude Include="assimp\ColladaMetaData.h" />
+    <ClInclude Include="assimp\color4.h" />
+    <ClInclude Include="assimp\commonMetaData.h" />
+    <ClInclude Include="assimp\Compiler\poppack1.h" />
+    <ClInclude Include="assimp\Compiler\pstdint.h" />
+    <ClInclude Include="assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="assimp\config.h" />
+    <ClInclude Include="assimp\CreateAnimMesh.h" />
+    <ClInclude Include="assimp\DefaultIOStream.h" />
+    <ClInclude Include="assimp\DefaultIOSystem.h" />
+    <ClInclude Include="assimp\DefaultLogger.hpp" />
+    <ClInclude Include="assimp\defs.h" />
+    <ClInclude Include="assimp\Exceptional.h" />
+    <ClInclude Include="assimp\Exporter.hpp" />
+    <ClInclude Include="assimp\fast_atof.h" />
+    <ClInclude Include="assimp\GenericProperty.h" />
+    <ClInclude Include="assimp\GltfMaterial.h" />
+    <ClInclude Include="assimp\Hash.h" />
+    <ClInclude Include="assimp\Importer.hpp" />
+    <ClInclude Include="assimp\importerdesc.h" />
+    <ClInclude Include="assimp\IOStream.hpp" />
+    <ClInclude Include="assimp\IOStreamBuffer.h" />
+    <ClInclude Include="assimp\IOSystem.hpp" />
+    <ClInclude Include="assimp\light.h" />
+    <ClInclude Include="assimp\LineSplitter.h" />
+    <ClInclude Include="assimp\LogAux.h" />
+    <ClInclude Include="assimp\Logger.hpp" />
+    <ClInclude Include="assimp\LogStream.hpp" />
+    <ClInclude Include="assimp\material.h" />
+    <ClInclude Include="assimp\MathFunctions.h" />
+    <ClInclude Include="assimp\matrix3x3.h" />
+    <ClInclude Include="assimp\matrix4x4.h" />
+    <ClInclude Include="assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="assimp\mesh.h" />
+    <ClInclude Include="assimp\metadata.h" />
+    <ClInclude Include="assimp\NullLogger.hpp" />
+    <ClInclude Include="assimp\ObjMaterial.h" />
+    <ClInclude Include="assimp\ParsingUtils.h" />
+    <ClInclude Include="assimp\pbrmaterial.h" />
+    <ClInclude Include="assimp\postprocess.h" />
+    <ClInclude Include="assimp\Profiler.h" />
+    <ClInclude Include="assimp\ProgressHandler.hpp" />
+    <ClInclude Include="assimp\qnan.h" />
+    <ClInclude Include="assimp\quaternion.h" />
+    <ClInclude Include="assimp\RemoveComments.h" />
+    <ClInclude Include="assimp\scene.h" />
+    <ClInclude Include="assimp\SceneCombiner.h" />
+    <ClInclude Include="assimp\SGSpatialSort.h" />
+    <ClInclude Include="assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="assimp\SmallVector.h" />
+    <ClInclude Include="assimp\SmoothingGroups.h" />
+    <ClInclude Include="assimp\SpatialSort.h" />
+    <ClInclude Include="assimp\StandardShapes.h" />
+    <ClInclude Include="assimp\StreamReader.h" />
+    <ClInclude Include="assimp\StreamWriter.h" />
+    <ClInclude Include="assimp\StringComparison.h" />
+    <ClInclude Include="assimp\StringUtils.h" />
+    <ClInclude Include="assimp\Subdivision.h" />
+    <ClInclude Include="assimp\texture.h" />
+    <ClInclude Include="assimp\TinyFormatter.h" />
+    <ClInclude Include="assimp\types.h" />
+    <ClInclude Include="assimp\vector2.h" />
+    <ClInclude Include="assimp\vector3.h" />
+    <ClInclude Include="assimp\version.h" />
+    <ClInclude Include="assimp\Vertex.h" />
+    <ClInclude Include="assimp\XmlParser.h" />
+    <ClInclude Include="assimp\XMLTools.h" />
+    <ClInclude Include="assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="Base64.h" />
     <ClInclude Include="Base64Exception.h" />
     <ClInclude Include="Bindable.h" />
@@ -280,6 +370,8 @@
     <ClInclude Include="FontFamily.h" />
     <ClInclude Include="FontShaderClass.h" />
     <ClInclude Include="Frustum.h" />
+    <ClInclude Include="GLTF.h" />
+    <ClInclude Include="GLTFException.h" />
     <ClInclude Include="HLSLStructures.h" />
     <ClInclude Include="HUD.h" />
     <ClInclude Include="imconfig.h" />
@@ -346,7 +438,17 @@
     <ClInclude Include="WindowsMessageMap.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="nanosuit.gltf" />
+    <None Include="assimp-vc143-mtd.dll" />
+    <None Include="assimp\color4.inl" />
+    <None Include="assimp\config.h.in" />
+    <None Include="assimp\material.inl" />
+    <None Include="assimp\matrix3x3.inl" />
+    <None Include="assimp\matrix4x4.inl" />
+    <None Include="assimp\quaternion.inl" />
+    <None Include="assimp\SmoothingGroups.inl" />
+    <None Include="assimp\vector2.inl" />
+    <None Include="assimp\vector3.inl" />
+    <None Include="models\nanosuit.gltf" />
     <None Include="PSInclude.hlsli" />
     <None Include="heightmap.r16" />
     <None Include="packages.config" />
@@ -567,6 +669,9 @@
     <None Include="models\nanosuit.obj">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="assimp-vc143-mtd.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

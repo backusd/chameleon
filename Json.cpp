@@ -14,6 +14,16 @@ std::any& Json::operator[](std::string key)
 	return m_map[key];
 }
 
+std::vector<std::string> Json::GetKeys()
+{
+	std::vector<std::string> keys;
+	for (std::map<std::string, std::any>::iterator it = m_map.begin(); it != m_map.end(); ++it) {
+		keys.push_back(it->first);
+		// value.push_back(it->second);
+	}
+	return keys;
+}
+
 // ======================================================================================================
 
 Json JsonReader::ReadFile(std::string filename)
@@ -99,6 +109,9 @@ Json JsonReader::GetNextJson(std::string& fileText, unsigned int& index)
 			{
 				key = JsonReader::GetNextString(fileText, index);
 				gettingKey = false;
+
+				if (key == "buffers")
+					int iii = 0;
 			}
 			else
 			{
@@ -149,9 +162,20 @@ Json JsonReader::GetNextJson(std::string& fileText, unsigned int& index)
 				throw JsonException(__LINE__, __FILE__, oss.str());
 			}
 
-			// Get the number as a string. If it contains a decimal, then cast to a double, otherwise int
+			// Get the number as a string. If it contains a decimal, then cast to a float, otherwise int
 			number = JsonReader::GetNextNumber(fileText, index);
-			json[key] = number.contains(".") ? std::stod(number) : std::stoi(number);
+
+			// For some BAT SHIT stupid reason, json[key] can NOT be assigned to using a ternary operator
+			// If you try to use the following commented line, you will get a "bad any_cast" when trying to
+			// correctly cast the value to an int (not sure about float)
+			//
+			// json[key] = number.contains('.') ? std::stof(number) : std::stoi(number);		<-- do NOT use
+			// 
+			if (number.contains('.'))
+				json[key] = std::stof(number);
+			else
+				json[key] = std::stoi(number);
+
 			gettingKey = true;
 			continue;
 
@@ -308,10 +332,10 @@ std::vector<std::any> JsonReader::GetNextVector(std::string& fileText, unsigned 
 		case '7':
 		case '8':
 		case '9':
-			// Get the number as a string. If it contains a decimal, then cast to a double, otherwise int
+			// Get the number as a string. If it contains a decimal, then cast to a float, otherwise int
 			number = JsonReader::GetNextNumber(fileText, index);
 			if (number.contains("."))
-				v.push_back(std::stod(number));
+				v.push_back(std::stof(number));
 			else
 				v.push_back(std::stoi(number));
 			continue;

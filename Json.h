@@ -8,6 +8,7 @@
 #include <memory>
 #include <fstream>
 #include <vector>
+#include <type_traits>
 
 class Json
 {
@@ -17,6 +18,8 @@ public:
 
 	template <typename T>
 	T Get(std::string key);
+	std::vector<std::string> GetKeys();
+	bool HasKey(std::string key) { return m_map.find(key) != m_map.end(); }
 
 private:
 	std::map<std::string, std::any> m_map;
@@ -32,9 +35,23 @@ T Json::Get(std::string key)
 		throw JsonException(__LINE__, __FILE__, oss.str());
 	}
 
+	// In the case of a float, it is possible that when parsing the file,
+	// the value was actually stored as in int. Therefore, we want to try to get
+	// it as a float first and if that doesn't work, try to get it as an int
+	if constexpr (std::is_same_v<float, T>)
+	{
+		try
+		{
+			return std::any_cast<float>(m_map[key]);
+		}
+		catch (const std::bad_any_cast& e)
+		{
+			return static_cast<float>(std::any_cast<int>(m_map[key]));
+		}
+	}
+
 	return std::any_cast<T>(m_map[key]);
 }
-
 
 // =======================================================================
 
