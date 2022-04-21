@@ -5,7 +5,6 @@ using DirectX::XMMATRIX;
 using DirectX::operator*;
 
 ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	m_mesh(nullptr),
 	m_deviceResources(deviceResources),
 	m_moveLookController(moveLookController),
 	m_roll(0.0f),
@@ -18,28 +17,57 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	// will check to see if m_mesh is nullptr to know if it has loaded the mesh yet
 }
 
-void ModelNode::Draw(XMMATRIX modelMatrix, XMMATRIX projectionMatrix)
+ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, const aiNode& node, std::vector<std::shared_ptr<Mesh>> meshes) :
+	m_deviceResources(deviceResources),
+	m_moveLookController(moveLookController),
+	m_roll(0.0f),
+	m_pitch(0.0f),
+	m_yaw(0.0f),
+	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
+{
+	m_nodeName = std::string(node.mName.C_Str());
+
+	// NOTE: the node is NOT required to have a mesh. In the case of OBJ files, 
+	// the root node is basically an empty node that houses all the children nodes
+	m_meshes.reserve(node.mNumMeshes);
+	for (unsigned int iii = 0; iii < node.mNumMeshes; ++iii)
+		m_meshes.push_back(meshes[node.mMeshes[iii]]);		// Reminder: node.mMeshes is just an int array where each int is an index into the all meshes array
+
+	for (unsigned int iii = 0; iii < node.mNumChildren; ++iii)
+		m_childNodes.push_back(std::make_unique<ModelNode>(deviceResources, moveLookController, *node.mChildren[iii], meshes));
+}
+
+void ModelNode::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
 {
 	INFOMAN(m_deviceResources);
 
+	// First thing to do is to update the accumulated model matrix
+	// This is important even for when there are no meshes, because the
+	// parent model matrix must still make its way down to the children
+	m_accumulatedModelMatrix = parentModelMatrix * this->GetModelMatrix();
+
 	// Bind the mesh (vertex and index buffers)
-	m_mesh->Bind();
-
-	// Update the Model-view-projection constant buffer with the aggregated model matrix
-	UpdateModelViewProjectionConstantBuffer(modelMatrix, projectionMatrix);
-
-	// Determine the type of draw call from the mesh
-	if (m_mesh->DrawIndexed())
+	for (std::shared_ptr<Mesh> mesh : m_meshes)
 	{
-		GFX_THROW_INFO_ONLY(
-			m_deviceResources->D3DDeviceContext()->DrawIndexed(m_mesh->IndexCount(), 0u, 0u)
-		);
-	}
-	else
-	{
-		GFX_THROW_INFO_ONLY(
-			m_deviceResources->D3DDeviceContext()->Draw(m_mesh->VertexCount(), 0u)
-		);
+		mesh->Bind();
+
+		// Update the Model-view-projection constant buffer with the aggregated model matrix
+		UpdateModelViewProjectionConstantBuffer(parentModelMatrix, projectionMatrix);
+
+		// Determine the type of draw call from the mesh
+		if (mesh->DrawIndexed())
+		{
+			GFX_THROW_INFO_ONLY(
+				m_deviceResources->D3DDeviceContext()->DrawIndexed(mesh->IndexCount(), 0u, 0u)
+			);
+		}
+		else
+		{
+			GFX_THROW_INFO_ONLY(
+				m_deviceResources->D3DDeviceContext()->Draw(mesh->VertexCount(), 0u)
+			);
+		}
 	}
 
 
@@ -67,7 +95,7 @@ void ModelNode::UpdateModelViewProjectionConstantBuffer(XMMATRIX parentModelMatr
 	);
 
 	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-	m_accumulatedModelMatrix = parentModelMatrix * this->GetModelMatrix();
+
 	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * projectionMatrix;
 	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), m_accumulatedModelMatrix);
 	DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), m_accumulatedModelMatrix * viewProjection);
@@ -89,7 +117,7 @@ std::shared_ptr<Mesh> ModelNode::CreateChildNode(std::string nodeName, std::shar
 {
 	m_childNodes.push_back(std::make_unique<ModelNode>(m_deviceResources, m_moveLookController));
 	m_childNodes.back()->SetName(nodeName);
-	m_childNodes.back()->SetMesh(mesh);
+	m_childNodes.back()->AddMesh(mesh);
 
 	// Return the mesh so that the loading code can optionally add this mesh to ObjectStore
 	return mesh;

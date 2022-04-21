@@ -38,11 +38,6 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	CreateAndAddPSBufferArray();
 
 
-
-	Assimp::Importer imp;
-	auto model = imp.ReadFile("models\\suzanne.obj",
-		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
-
 }
 
 void Nanosuit::CreateMaterialData()

@@ -8,18 +8,22 @@
 #include <memory>
 #include <vector>
 
-
+// Assimp
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 class ModelNode
 {
 public:
 	ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
+	ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, const aiNode& node, std::vector<std::shared_ptr<Mesh>> meshes);
 
-	void Draw(DirectX::XMMATRIX modelMatrix, DirectX::XMMATRIX projectionMatrix);
+	void Draw(DirectX::XMMATRIX parentModelMatrix, DirectX::XMMATRIX projectionMatrix);
 
 	void SetName(std::string name) { m_nodeName = name; }
-	void SetMesh(std::shared_ptr<Mesh> mesh) { m_mesh = mesh; }
+	void AddMesh(std::shared_ptr<Mesh> mesh) { m_meshes.push_back(mesh); }
 
 	template <typename T, typename A>
 	std::shared_ptr<Mesh> CreateMesh(std::vector<T, A>& vertices, std::vector<unsigned short>& indices);
@@ -28,7 +32,7 @@ public:
 	std::shared_ptr<Mesh> CreateChildNode(std::string nodeName, std::vector<T, A>& vertices, std::vector<unsigned short>& indices);
 	std::shared_ptr<Mesh> CreateChildNode(std::string nodeName, std::shared_ptr<Mesh> mesh);
 
-	std::shared_ptr<Mesh> GetMesh() { return m_mesh; }
+	std::shared_ptr<Mesh> GetMesh(int index) { return m_meshes[index]; }
 
 #ifndef NDEBUG
 	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc);
@@ -43,7 +47,7 @@ private:
 	std::shared_ptr<MoveLookController> m_moveLookController;
 
 	std::string m_nodeName;
-	std::shared_ptr<Mesh> m_mesh;
+	std::vector<std::shared_ptr<Mesh>> m_meshes;
 	std::vector<std::unique_ptr<ModelNode>> m_childNodes;
 
 	// Rotation about the internal center point
@@ -67,11 +71,11 @@ public:
 template <typename T, typename A>
 std::shared_ptr<Mesh> ModelNode::CreateMesh(std::vector<T, A>& vertices, std::vector<unsigned short>& indices)
 {
-	m_mesh = std::make_shared<Mesh>(m_deviceResources);
-	m_mesh->LoadBuffers<T, A>(vertices, indices);
+	m_meshes.push_back(std::make_shared<Mesh>(m_deviceResources));
+	m_meshes.back()->LoadBuffers<T, A>(vertices, indices);
 
 	// Return the newly created mesh so that the loading code can optionally add this mesh to ObjectStore
-	return m_mesh;
+	return m_meshes.back();
 }
 
 template <typename T, typename A>
@@ -82,5 +86,5 @@ std::shared_ptr<Mesh> ModelNode::CreateChildNode(std::string nodeName, std::vect
 	m_childNodes.back()->CreateMesh<T, A>(vertices, indices);
 
 	// Return the newly created mesh so that the loading code can optionally add this mesh to ObjectStore
-	return m_childNodes.back()->GetMesh();
+	return m_childNodes.back()->GetMesh(0);
 }

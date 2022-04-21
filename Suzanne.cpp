@@ -15,8 +15,6 @@ Suzanne::Suzanne(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	AddBindable("phong-pixel-shader");					// Pixel Shader
 	AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
 	AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
-	// AddBindable("cube-buffers-VS");						// VS Constant buffers
-	// AddBindable("cube-buffers-PS");						// PS Constant buffers
 
 	// Function to create the PS constant buffer array - it will create an immutable constant buffer to hold material data
 	CreateAndAddPSBufferArray();

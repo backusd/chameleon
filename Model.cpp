@@ -10,8 +10,7 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 {
 	// Create the root node - will initially have no data and no name
 	m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
-	m_rootNode->SetMesh(mesh);
-
+	m_rootNode->AddMesh(mesh);
 }
 
 Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string fileName) :
@@ -19,7 +18,112 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 	m_moveLookController(moveLookController),
 	m_rootNode(nullptr)
 {
-	Load(fileName);
+	//Load(fileName);
+
+	Assimp::Importer imp;
+	const aiScene* scene = imp.ReadFile(fileName.c_str(),	aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+
+	/*
+	std::vector<OBJVertex> vertices;		// vertices for the vertex buffer
+	std::vector<unsigned short> indices;	// indices for the index buffer
+
+	const aiMesh* mesh = scene->mMeshes[0];
+
+	vertices.reserve(mesh->mNumVertices);
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		vertices.push_back(
+			{
+				{ mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z },
+				{ 0.0f, 0.0f },	// Not sure yet how to get the texture coordinates
+				*reinterpret_cast<XMFLOAT3*>(&mesh->mNormals[i])
+			}
+		);
+	}
+
+	indices.reserve(mesh->mNumFaces * 3);
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	{
+		const aiFace& face = mesh->mFaces[i];
+		assert(face.mNumIndices == 3);
+		indices.push_back(face.mIndices[0]);
+		indices.push_back(face.mIndices[1]);
+		indices.push_back(face.mIndices[2]);
+	}
+	*/
+
+	// Build up the vector of all meshes for this model
+	std::string meshLookupName;
+	for (unsigned int iii = 0; iii < scene->mNumMeshes; ++iii)
+	{
+		// Create a unique lookup name for the mesh
+		meshLookupName = fileName + "-" + std::string(scene->mMeshes[iii]->mName.C_Str());
+
+		// If the mesh already exists in ObjectStore, just get it from there
+		if (ObjectStore::MeshExists(meshLookupName))
+			m_meshes.push_back(ObjectStore::GetMesh(meshLookupName));
+		else
+		{
+			// Mesh does not exist in object store, so load it from assimp and add it to ObjectStore
+			LoadMesh(*scene->mMeshes[iii]);
+			ObjectStore::AddMesh(meshLookupName, m_meshes.back());
+		}
+	}
+
+	// Build up the node hierarchy (just requires constructing the root node, which will 
+	// recursively build up the children nodes)
+	m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController, *scene->mRootNode, m_meshes);
+
+
+
+
+	/*
+	// if the mesh for the root node is still nullptr, then the data that has been gathered belongs to the root node
+	// Add this mesh to ObjectStore
+	std::string childNodeName = std::string(mesh->mName.C_Str());
+	m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
+	if (m_rootNode->GetMesh() == nullptr)
+		ObjectStore::AddMesh(fileName, m_rootNode->CreateMesh<OBJVertex>(vertices, indices));
+	// The root node has already been created, so add the data as a child node and add it to ObjectStore
+	else
+		ObjectStore::AddMesh(fileName + "-" + childNodeName, m_rootNode->CreateChildNode<OBJVertex>(childNodeName, vertices, indices));
+
+	// clean up the data for the vertices and indices
+	vertices.clear();
+	indices.clear();
+	*/
+
+}
+
+void Model::LoadMesh(const aiMesh& mesh)
+{
+	std::vector<OBJVertex> vertices;		// vertices for the vertex buffer
+	std::vector<unsigned short> indices;	// indices for the index buffer
+
+	vertices.reserve(mesh.mNumVertices);
+	for (unsigned int i = 0; i < mesh.mNumVertices; i++)
+	{
+		vertices.push_back(
+			{
+				{ mesh.mVertices[i].x, mesh.mVertices[i].y, mesh.mVertices[i].z },
+				{ 0.0f, 0.0f },	// Not sure yet how to get the texture coordinates
+				*reinterpret_cast<XMFLOAT3*>(&mesh.mNormals[i])
+			}
+		);
+	}
+
+	indices.reserve(mesh.mNumFaces * 3);
+	for (unsigned int i = 0; i < mesh.mNumFaces; i++)
+	{
+		const aiFace& face = mesh.mFaces[i];
+		assert(face.mNumIndices == 3);
+		indices.push_back(face.mIndices[0]);
+		indices.push_back(face.mIndices[1]);
+		indices.push_back(face.mIndices[2]);
+	}
+
+	m_meshes.push_back(std::make_shared<Mesh>(m_deviceResources));
+	m_meshes.back()->LoadBuffers<OBJVertex>(vertices, indices);
 }
 
 void Model::Load(std::string filename)
@@ -185,7 +289,7 @@ void Model::OBJLoadMeshesFromObjectStore(std::string filename)
 			{
 				m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
 				m_rootNode->SetName(modelNodeName);
-				m_rootNode->SetMesh(ObjectStore::GetMesh(filename + "-" + modelNodeName));
+				m_rootNode->AddMesh(ObjectStore::GetMesh(filename + "-" + modelNodeName));
 			}
 			// Else, add a child node and get the mesh from ObjectStore
 			else
@@ -198,7 +302,7 @@ void Model::OBJLoadMeshesFromObjectStore(std::string filename)
 	{
 		m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
 		m_rootNode->SetName(modelNodeName);
-		m_rootNode->SetMesh(ObjectStore::GetMesh(filename));	// For this case, there must not have been any 'o' in the file, so the lookup name is just the filename
+		m_rootNode->AddMesh(ObjectStore::GetMesh(filename));	// For this case, there must not have been any 'o' in the file, so the lookup name is just the filename
 	}
 }
 
@@ -360,7 +464,7 @@ void Model::OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT
 			else
 			{
 				// if the mesh for the root node is still nullptr, then the data that has been gathered belongs to the root node
-				if (m_rootNode->GetMesh() == nullptr)
+				if (m_rootNode->GetMesh(0) == nullptr)
 					ObjectStore::AddMesh(filename + "-" + childNodeName, m_rootNode->CreateMesh<OBJVertex>(vertices, indices));
 				// The root node has already been created, so add the data as a child node and add it to ObjectStore
 				else
@@ -430,7 +534,7 @@ void Model::OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT
 
 	// if the mesh for the root node is still nullptr, then the data that has been gathered belongs to the root node
 	// Add this mesh to ObjectStore
-	if (m_rootNode->GetMesh() == nullptr)
+	if (m_rootNode->GetMesh(0) == nullptr)
 		ObjectStore::AddMesh(filename, m_rootNode->CreateMesh<OBJVertex>(vertices, indices));
 	// The root node has already been created, so add the data as a child node and add it to ObjectStore
 	else
