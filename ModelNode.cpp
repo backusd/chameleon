@@ -3,6 +3,7 @@
 using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT4X4;
 using DirectX::XMMATRIX;
+using DirectX::XMVECTOR;
 using DirectX::operator*;
 
 ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
@@ -12,6 +13,7 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	m_pitch(0.0f),
 	m_yaw(0.0f),
 	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
 	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
 {
 	// Leave m_mesh as nullptr until CreateMesh is called because vertex loading code 
@@ -25,20 +27,31 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	m_pitch(0.0f),
 	m_yaw(0.0f),
 	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
 	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
 {
 	m_nodeName = std::string(node.mName.C_Str());
 
-	// Not sure how to actually use the transform here, so test to see if it is not Identity and
-	// throw error if it is
+	// Decompose the transformation to get the individual components
 	XMMATRIX transform = DirectX::XMMatrixTranspose(
 		DirectX::XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&node.mTransformation))
 	);
-	if (!DirectX::XMMatrixIsIdentity(transform))
-	{
-		throw ModelNodeException(__LINE__, __FILE__, "Model Node transformation is not identity for node: " + m_nodeName);
-	}
+	XMVECTOR scale, rotation, translation;
+	DirectX::XMMatrixDecompose(&scale, &rotation, &translation, transform);
 
+	XMFLOAT3 _rotation;
+	DirectX::XMStoreFloat3(&m_scaling, scale);
+	DirectX::XMStoreFloat3(&_rotation, rotation);
+	DirectX::XMStoreFloat3(&m_translation, translation);
+
+	if (_rotation.x != 0.0f || _rotation.y != 0.0f || _rotation.z != 0.0f)
+	{
+		std::ostringstream oss;
+		oss << "Model node '" << m_nodeName << "' has non-unity rotation transform:" << std::endl;
+		oss << "   " << _rotation.x << ", " << _rotation.y << ", " << _rotation.z << std::endl;
+		oss << "This is not yet supported";
+		throw ModelNodeException(__LINE__, __FILE__, oss.str());
+	}
 
 	// NOTE: the node is NOT required to have a mesh. In the case of OBJ files, 
 	// the root node is basically an empty node that houses all the children nodes
@@ -57,7 +70,8 @@ void ModelNode::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
 	// First thing to do is to update the accumulated model matrix
 	// This is important even for when there are no meshes, because the
 	// parent model matrix must still make its way down to the children
-	m_accumulatedModelMatrix = parentModelMatrix * this->GetModelMatrix();
+	// NOTE: Must post-multiply the parent transform
+	m_accumulatedModelMatrix = this->GetModelMatrix() * parentModelMatrix;
 
 	// Bind the mesh (vertex and index buffers)
 	for (std::shared_ptr<Mesh> mesh : m_meshes)
@@ -81,7 +95,6 @@ void ModelNode::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
 			);
 		}
 	}
-
 
 	// NOTE: Must reference the unique_ptr (cannot be copied)
 	for (std::unique_ptr<ModelNode>& node : m_childNodes)
@@ -124,17 +137,6 @@ XMMATRIX ModelNode::GetModelMatrix()
 		GetScaleMatrix() *
 		DirectX::XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
 }
-
-std::shared_ptr<Mesh> ModelNode::CreateChildNode(std::string nodeName, std::shared_ptr<Mesh> mesh)
-{
-	m_childNodes.push_back(std::make_unique<ModelNode>(m_deviceResources, m_moveLookController));
-	m_childNodes.back()->SetName(nodeName);
-	m_childNodes.back()->AddMesh(mesh);
-
-	// Return the mesh so that the loading code can optionally add this mesh to ObjectStore
-	return mesh;
-}
-
 
 
 

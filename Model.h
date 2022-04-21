@@ -6,7 +6,6 @@
 #include "MoveLookController.h"
 #include "ObjectStore.h"
 #include "Mesh.h"
-#include "GLTF.h"
 
 // Assimp
 #include <assimp/Importer.hpp>
@@ -37,19 +36,7 @@ public:
 
 
 private:
-	void Load(std::string filename);
-
 	void LoadMesh(const aiMesh& mesh);
-
-	// OBJ specific loading methods
-	void OBJLoadFile(std::string filename);
-	bool OBJMeshesAlreadyLoaded(std::string filename);
-	void OBJLoadMeshesFromObjectStore(std::string filename);
-	void OBJGetPositionsTexturesNormals(std::string filename, std::vector<DirectX::XMFLOAT3>& positions, std::vector<DirectX::XMFLOAT2>& textures, std::vector<DirectX::XMFLOAT3>& normals);
-	void OBJCreateVertices(std::string filename, std::vector<DirectX::XMFLOAT3>& positions, std::vector<DirectX::XMFLOAT2>& textures, std::vector<DirectX::XMFLOAT3>& normals);
-
-	// GLTF specific loading methods
-	void GLTFLoadFile(std::string filename);
 
 	std::shared_ptr<DeviceResources>	m_deviceResources;
 	std::shared_ptr<MoveLookController> m_moveLookController;

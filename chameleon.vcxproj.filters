@@ -109,12 +109,6 @@
     <Filter Include="Source Files\Utilities">
       <UniqueIdentifier>{1179e565-11d8-4210-bdcf-cfb31fd2dc91}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Drawable\Utilities">
-      <UniqueIdentifier>{87073fae-440d-4ac6-b962-076d651246bb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Drawable\Utilities">
-      <UniqueIdentifier>{4c0be3a0-ffc8-43e0-9e77-9f2df86ebb9f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="assimp">
       <UniqueIdentifier>{0f98237d-b4cf-4b29-9697-a7d732a17954}</UniqueIdentifier>
     </Filter>
@@ -385,12 +379,6 @@
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Base64Exception.cpp">
-      <Filter>Source Files\Exceptions</Filter>
-    </ClCompile>
-    <ClCompile Include="GLTF.cpp">
-      <Filter>Source Files\Drawable\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="GLTFException.cpp">
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
     <ClCompile Include="ModelNodeException.cpp">
@@ -675,12 +663,6 @@
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
     <ClInclude Include="Base64Exception.h">
-      <Filter>Header Files\Exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="GLTF.h">
-      <Filter>Header Files\Drawable\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="GLTFException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
     <ClInclude Include="assimp\aabb.h">

@@ -7,7 +7,7 @@ using DirectX::XMVECTOR;
 
 Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController),
-	m_scaleFactor(0.25f),
+	m_scaleFactor(1.0f),
 	m_movementSpeed(10.0f),
 	m_movingForward(false),
 	m_currentTime(0.0),
@@ -24,8 +24,8 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
 
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.obj");
-	//m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.gltf");
+	//m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.obj");
+	m_model = std::make_unique<Model>(deviceResources, moveLookController, "models/nanosuit.gltf");
 
 
 	AddBindable("phong-texture-vertex-shader");			// Vertex Shader
@@ -37,7 +37,8 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	// Function to create the PS constant buffer array - it will create an immutable constant buffer to hold material data
 	CreateAndAddPSBufferArray();
 
-
+	// The way that assimp loads the model has the nanosuit laying flat, so setting the pitch just stands him up
+	m_pitch = DirectX::XM_PIDIV2;
 }
 
 void Nanosuit::CreateMaterialData()
@@ -73,8 +74,6 @@ void Nanosuit::CreateAndAddPSBufferArray()
 void Nanosuit::PreDrawUpdate()
 {
 	INFOMAN(m_deviceResources);
-
-
 
 	// If in debug mode, update the material properties if a change has been made
 #ifndef NDEBUG
@@ -129,15 +128,15 @@ void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain>
 		}
 		else
 		{
-			m_position.x += m_velocityVector.x * timeDelta;
-			m_position.y += m_velocityVector.y * timeDelta;
-			m_position.z += m_velocityVector.z * timeDelta;
+			m_position.x += static_cast<float>(m_velocityVector.x * timeDelta);
+			m_position.y += static_cast<float>(m_velocityVector.y * timeDelta);
+			m_position.z += static_cast<float>(m_velocityVector.z * timeDelta);
 		}
 	}
 
 	if (m_turning)
 	{
-		float angle = timeDelta * DirectX::XM_2PI; // Turn at PI radians per second
+		float angle = static_cast<float>(timeDelta * DirectX::XM_2PI); // Turn at PI radians per second
 		if (abs(angle) > abs(m_yawRemainingToTurn))
 		{
 			// In this case, just turn the remaining and be done

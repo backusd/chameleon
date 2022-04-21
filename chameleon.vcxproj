@@ -197,8 +197,6 @@
     <ClCompile Include="FontFamily.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
     <ClCompile Include="Frustum.cpp" />
-    <ClCompile Include="GLTF.cpp" />
-    <ClCompile Include="GLTFException.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
@@ -371,8 +369,6 @@
     <ClInclude Include="FontFamily.h" />
     <ClInclude Include="FontShaderClass.h" />
     <ClInclude Include="Frustum.h" />
-    <ClInclude Include="GLTF.h" />
-    <ClInclude Include="GLTFException.h" />
     <ClInclude Include="HLSLStructures.h" />
     <ClInclude Include="HUD.h" />
     <ClInclude Include="imconfig.h" />
