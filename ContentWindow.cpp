@@ -141,10 +141,6 @@ void ContentWindow::AddSceneObjects()
 	nanosuit->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
 	m_scene->SetPlayer(nanosuit);
 
-	//std::shared_ptr<Suzanne> suzanne = m_scene->AddDrawable<Suzanne>();
-	//suzanne->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
-	//m_scene->SetPlayer(nanosuit);
-
 	/*
 
 	// Sphere
@@ -672,67 +668,88 @@ LRESULT ContentWindow::OnDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 LRESULT ContentWindow::OnLButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	m_mouse->OnLeftPressed(pt.x, pt.y);
+	if (!m_io.WantCaptureMouse)
+	{
+		const POINTS pt = MAKEPOINTS(lParam);
+		m_mouse->OnLeftPressed(pt.x, pt.y);
+	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnLButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	m_mouse->OnLeftReleased(pt.x, pt.y);
-	// release mouse if outside of window
-	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+	if (!m_io.WantCaptureMouse)
 	{
-		ReleaseCapture();
-		m_mouse->OnMouseLeave();
+		const POINTS pt = MAKEPOINTS(lParam);
+		m_mouse->OnLeftReleased(pt.x, pt.y);
+		// release mouse if outside of window
+		if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+		{
+			ReleaseCapture();
+			m_mouse->OnMouseLeave();
+		}
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnLButtonDoubleClick(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	m_mouse->OnLeftDoubleClick(pt.x, pt.y);
+	if (!m_io.WantCaptureMouse)
+	{
+		const POINTS pt = MAKEPOINTS(lParam);
+		m_mouse->OnLeftDoubleClick(pt.x, pt.y);
+	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	m_mouse->OnMiddlePressed(pt.x, pt.y);
+	if (!m_io.WantCaptureMouse)
+	{
+		const POINTS pt = MAKEPOINTS(lParam);
+		m_mouse->OnMiddlePressed(pt.x, pt.y);
+	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	m_mouse->OnMiddleReleased(pt.x, pt.y);
-	// release mouse if outside of window
-	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+	if (!m_io.WantCaptureMouse)
 	{
-		ReleaseCapture();
-		m_mouse->OnMouseLeave();
+		const POINTS pt = MAKEPOINTS(lParam);
+		m_mouse->OnMiddleReleased(pt.x, pt.y);
+		// release mouse if outside of window
+		if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+		{
+			ReleaseCapture();
+			m_mouse->OnMouseLeave();
+		}
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnRButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	m_mouse->OnRightPressed(pt.x, pt.y);
+	if (!m_io.WantCaptureMouse)
+	{
+		const POINTS pt = MAKEPOINTS(lParam);
+		m_mouse->OnRightPressed(pt.x, pt.y);
+	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnRButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
-	const POINTS pt = MAKEPOINTS(lParam);
-	m_mouse->OnRightReleased(pt.x, pt.y);
-	// release mouse if outside of window
-	if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+	if (!m_io.WantCaptureMouse)
 	{
-		ReleaseCapture();
-		m_mouse->OnMouseLeave();
+		const POINTS pt = MAKEPOINTS(lParam);
+		m_mouse->OnRightReleased(pt.x, pt.y);
+		// release mouse if outside of window
+		if (pt.x < 0 || pt.x >= m_width || pt.y < 0 || pt.y >= m_height)
+		{
+			ReleaseCapture();
+			m_mouse->OnMouseLeave();
+		}
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
