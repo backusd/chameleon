@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "ModelNodeException.h"
 #include "Mesh.h"
 #include "MoveLookController.h"
 #include "HLSLStructures.h"

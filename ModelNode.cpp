@@ -1,6 +1,7 @@
 #include "ModelNode.h"
 
 using DirectX::XMFLOAT3;
+using DirectX::XMFLOAT4X4;
 using DirectX::XMMATRIX;
 using DirectX::operator*;
 
@@ -27,6 +28,17 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
 {
 	m_nodeName = std::string(node.mName.C_Str());
+
+	// Not sure how to actually use the transform here, so test to see if it is not Identity and
+	// throw error if it is
+	XMMATRIX transform = DirectX::XMMatrixTranspose(
+		DirectX::XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&node.mTransformation))
+	);
+	if (!DirectX::XMMatrixIsIdentity(transform))
+	{
+		throw ModelNodeException(__LINE__, __FILE__, "Model Node transformation is not identity for node: " + m_nodeName);
+	}
+
 
 	// NOTE: the node is NOT required to have a mesh. In the case of OBJ files, 
 	// the root node is basically an empty node that houses all the children nodes

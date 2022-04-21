@@ -393,6 +393,9 @@
     <ClCompile Include="GLTFException.cpp">
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
+    <ClCompile Include="ModelNodeException.cpp">
+      <Filter>Source Files\Exceptions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -919,6 +922,9 @@
     </ClInclude>
     <ClInclude Include="assimp\Compiler\pushpack1.h">
       <Filter>assimp\Compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelNodeException.h">
+      <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -219,6 +219,7 @@
     <ClCompile Include="ModelException.cpp" />
     <ClCompile Include="ModelMeshException.cpp" />
     <ClCompile Include="ModelNode.cpp" />
+    <ClCompile Include="ModelNodeException.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="MoveLookController.cpp" />
     <ClCompile Include="Nanosuit.cpp" />
@@ -394,6 +395,7 @@
     <ClInclude Include="ModelException.h" />
     <ClInclude Include="ModelMeshException.h" />
     <ClInclude Include="ModelNode.h" />
+    <ClInclude Include="ModelNodeException.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="MoveLookController.h" />
     <ClInclude Include="Nanosuit.h" />
