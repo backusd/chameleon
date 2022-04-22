@@ -31,7 +31,7 @@ public:
 	void Draw();
 
 	// Every object should provide how to scale itself
-	virtual DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z); }
+	virtual DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixScaling(m_scaleX, m_scaleY, m_scaleZ); }
 	DirectX::XMMATRIX GetModelMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() { return m_projectionMatrix; }
 
@@ -43,7 +43,12 @@ public:
 	float Yaw() { return m_yaw; }
 
 	void SetModel(std::string fileName) { m_model = std::make_unique<Model>(m_deviceResources, m_moveLookController, fileName); }
-	void SetScale(DirectX::XMFLOAT3 scale) { m_scale = scale; }
+	void SetRoll(float roll) { m_roll = roll; }
+	void SetPitch(float pitch) { m_pitch = pitch; }
+	void SetYaw(float yaw) { m_yaw = yaw; }
+	void SetScale(DirectX::XMFLOAT3 scale) { m_scaleX = scale.x; m_scaleY = scale.y; m_scaleZ = scale.z; }
+	void SetScale(float x, float y, float z) { m_scaleX = x; m_scaleY = y; m_scaleZ = z; }
+	void SetScale(float xyz) { m_scaleX = xyz; m_scaleY = xyz; m_scaleZ = xyz; }
 	void SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> material);
 	void CreateAndAddPSBufferArray();
 
@@ -75,7 +80,9 @@ protected:
 	float m_yaw;
 
 	// Scale Values
-	DirectX::XMFLOAT3 m_scale;
+	float m_scaleX;
+	float m_scaleY;
+	float m_scaleZ;
 
 
 	// DEBUG SPECIFIC --------------------------------------------------------
@@ -88,6 +95,7 @@ public:
 protected:
 	virtual void DrawImGuiPosition(std::string id);
 	void DrawImGuiRollPitchYaw(std::string id);
+	void DrawImGuiScale(std::string id);
 	virtual void DrawImGuiMaterialSettings(std::string id);
 
 	// Phong material
@@ -97,5 +105,8 @@ protected:
 	float m_diffuse[4];
 	float m_specular[4];
 	float m_specularPower;
+
+	// Bool on whether or not to sync the scale values together
+	bool m_syncScaleValues = true;
 #endif
 };

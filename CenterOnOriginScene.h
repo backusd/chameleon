@@ -21,7 +21,6 @@
 #include "Terrain.h"
 #include "Lighting.h"
 #include "Sphere.h"
-#include "Nanosuit.h"
 
 #include <memory>
 #include <vector>

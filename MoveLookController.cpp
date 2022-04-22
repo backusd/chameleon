@@ -1,5 +1,5 @@
 #include "MoveLookController.h"
-#include "Nanosuit.h"
+#include "Player.h"
 #include "Terrain.h"
 
 using DirectX::XMVECTOR;
@@ -106,7 +106,7 @@ XMMATRIX MoveLookController::ViewMatrix()
     return DirectX::XMMatrixLookAtRH(m_eyeVec, m_atVec, m_upVec);
 }
 
-void MoveLookController::SetPlayer(std::shared_ptr<Nanosuit> player) 
+void MoveLookController::SetPlayer(std::shared_ptr<Player> player) 
 {
     // Set the player and adjust the camera location and direction
     m_player = player;

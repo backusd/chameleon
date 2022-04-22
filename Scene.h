@@ -22,7 +22,7 @@
 #include "Terrain.h"
 #include "Lighting.h"
 #include "Sphere.h"
-#include "Nanosuit.h"
+#include "Player.h"
 
 #include <memory>
 #include <vector>
@@ -44,8 +44,8 @@ public:
 
 	template <typename T>
 	std::shared_ptr<T> AddDrawable();
-
-	void SetPlayer(std::shared_ptr<Nanosuit> player) { m_moveLookController->SetPlayer(player); }
+	std::shared_ptr<Drawable> CreateDrawable();
+	std::shared_ptr<Player> CreatePlayer();
 
 	// In the future, we will need to be able to create a scene in memory before rendering it,
 	// which will require that certain events happen to finally render the scene. Right now, it is

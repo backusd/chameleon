@@ -220,13 +220,13 @@
     <ClCompile Include="ModelNodeException.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="MoveLookController.cpp" />
-    <ClCompile Include="Nanosuit.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="NetworkClass.cpp" />
     <ClCompile Include="ObjectStore.cpp" />
     <ClCompile Include="ObjectStoreException.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="PositionClass.cpp" />
     <ClCompile Include="RasterizerState.cpp" />
     <ClCompile Include="SamplerState.cpp" />
@@ -393,7 +393,6 @@
     <ClInclude Include="ModelNodeException.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="MoveLookController.h" />
-    <ClInclude Include="Nanosuit.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="NetworkClass.h" />
     <ClInclude Include="NetworkMessages.h" />
@@ -401,6 +400,7 @@
     <ClInclude Include="ObjectStoreException.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="PositionClass.h" />
     <ClInclude Include="RasterizerState.h" />
     <ClInclude Include="SamplerState.h" />

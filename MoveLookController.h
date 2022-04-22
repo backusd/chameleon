@@ -12,7 +12,7 @@
 
 #include "imgui.h"
 
-class Nanosuit;
+class Player;
 class Terrain;
 
 class MoveLookController
@@ -36,7 +36,7 @@ public:
 
 	DirectX::XMVECTOR Position() { return m_eyeVec; }
 
-	void SetPlayer(std::shared_ptr<Nanosuit> player);
+	void SetPlayer(std::shared_ptr<Player> player);
 	void SetTerrain(std::shared_ptr<Terrain> terrain) { m_terrain = terrain; }
 
 	// Allow Player to be manually released so as to not leak resources on shutdown
@@ -68,7 +68,7 @@ protected:
 
 	DirectX::XMMATRIX					m_projectionMatrix;
 
-	std::shared_ptr<Nanosuit>			m_player;
+	std::shared_ptr<Player>				m_player;
 	std::shared_ptr<Terrain>			m_terrain;
 
 	// Use spherical coordinates to keep track of where the camera is relative to the player

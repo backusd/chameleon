@@ -360,9 +360,6 @@
     <ClCompile Include="ModelException.cpp">
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
-    <ClCompile Include="Nanosuit.cpp">
-      <Filter>Source Files\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="CenterOnOriginScene.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
@@ -380,6 +377,9 @@
     </ClCompile>
     <ClCompile Include="ModelNodeException.cpp">
       <Filter>Source Files\Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -641,9 +641,6 @@
     <ClInclude Include="ModelException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
-    <ClInclude Include="Nanosuit.h">
-      <Filter>Header Files\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="CenterOnOriginScene.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
@@ -901,6 +898,9 @@
     </ClInclude>
     <ClInclude Include="ModelNodeException.h">
       <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\Drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

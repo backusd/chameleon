@@ -34,6 +34,23 @@ Scene::~Scene()
 	m_moveLookController->ReleaseResources();
 }
 
+std::shared_ptr<Drawable> Scene::CreateDrawable()
+{
+	std::shared_ptr<Drawable> newItem = std::make_shared<Drawable>(m_deviceResources, m_moveLookController);
+	newItem->SetProjectionMatrix(m_moveLookController->ProjectionMatrix());
+	m_drawables.push_back(newItem);
+	return newItem;
+}
+
+std::shared_ptr<Player> Scene::CreatePlayer()
+{
+	std::shared_ptr<Player> player = std::make_shared<Player>(m_deviceResources, m_moveLookController);
+	player->SetProjectionMatrix(m_moveLookController->ProjectionMatrix());
+	m_drawables.push_back(player);
+	m_moveLookController->SetPlayer(player);
+	return player;
+}
+
 void Scene::CreateAndBindModelViewProjectionBuffer()
 {
 	// Basically all objects that get rendered need to bind model/view/projection matrices

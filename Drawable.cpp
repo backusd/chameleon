@@ -12,7 +12,9 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_roll(0.0f),
 	m_pitch(0.0f),
 	m_yaw(0.0f),
-	m_scale(XMFLOAT3(1.0f, 1.0f, 1.0f)),
+	m_scaleX(1.0f),
+	m_scaleY(1.0f),
+	m_scaleZ(1.0f),
 	PreDrawUpdate([]() {}),
 	m_material(nullptr)
 {
@@ -130,6 +132,7 @@ void Drawable::DrawImGui(std::string id)
 	{
 		DrawImGuiPosition(id);
 		DrawImGuiRollPitchYaw(id);
+		DrawImGuiScale(id);
 		DrawImGuiMaterialSettings(id);
 		m_model->DrawImGui(id);
 	}
@@ -149,6 +152,25 @@ void Drawable::DrawImGuiRollPitchYaw(std::string id)
 	ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##drawableRoll" + id).c_str(), &m_roll, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
 	ImGui::Text("   Pitch: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePitch" + id).c_str(), &m_pitch, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
 	ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##drawableYaw" + id).c_str(), &m_yaw, -DirectX::XM_PI, DirectX::XM_PI, "%.3f");
+}
+
+void Drawable::DrawImGuiScale(std::string id)
+{
+	ImGui::Text("Scale:");
+	ImGui::Checkbox("Sync values", &m_syncScaleValues);
+
+	if (m_syncScaleValues)
+	{
+		ImGui::Text("    XYZ: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleXYZ" + id).c_str(), &m_scaleX, 0.055f, 0.0f, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		m_scaleY = m_scaleX;
+		m_scaleZ = m_scaleX;
+	}
+	else
+	{
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleX" + id).c_str(), &m_scaleX, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleY" + id).c_str(), &m_scaleY, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleZ" + id).c_str(), &m_scaleZ, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
+	}
 }
 
 void Drawable::DrawImGuiMaterialSettings(std::string id)

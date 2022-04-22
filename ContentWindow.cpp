@@ -128,9 +128,36 @@ void ContentWindow::AddSceneObjects()
 	lighting->SetPosition(XMFLOAT3(45.0f, 20.0f, 390.0f));
 
 
-	std::shared_ptr<Nanosuit> nanosuit = m_scene->AddDrawable<Nanosuit>();
+	//std::shared_ptr<Nanosuit> nanosuit = m_scene->AddDrawable<Nanosuit>();
+	//nanosuit->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
+	//m_scene->SetPlayer(nanosuit);
+
+	std::shared_ptr<Player> nanosuit = m_scene->CreatePlayer();
+	std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
+	material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
+	material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	material->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
+	material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material->Material.SpecularPower = 7.0f;
+	nanosuit->SetPhongMaterial(std::move(material));
+	nanosuit->SetModel("models/nanosuit.gltf");
+	nanosuit->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
+	nanosuit->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
+	nanosuit->AddBindable("phong-pixel-shader");					// Pixel Shader
+	nanosuit->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
+	nanosuit->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
 	nanosuit->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
-	m_scene->SetPlayer(nanosuit);
+	nanosuit->SetPitch(DirectX::XM_PIDIV2);
+	nanosuit->CreateAndAddPSBufferArray();
+	nanosuit->PreDrawUpdate = [weakNanosuit = std::weak_ptr(nanosuit)]() {
+#ifndef NDEBUG
+		std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
+		if (nanosuit != nullptr)
+		{
+			nanosuit->UpdatePhongMaterial();
+		}
+#endif
+	};
 
 	/*
 

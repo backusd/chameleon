@@ -177,12 +177,6 @@ void Lighting::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
-/*
-void Lighting::PreDrawUpdate()
-{
-	// Updating of any additional constant buffers or other pipeline resources should go here
-	UpdatePSConstantBuffer();
-}*/
 
 void Lighting::UpdatePSConstantBuffer()
 {
