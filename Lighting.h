@@ -7,8 +7,6 @@ class Lighting : public Drawable
 public: 
 	Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
-	void PreDrawUpdate() override;
-
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
 	
 	// This function is necessary when in debug mode (and possibly in the future when a new scene

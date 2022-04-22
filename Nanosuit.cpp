@@ -39,6 +39,33 @@ Nanosuit::Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared
 
 	// The way that assimp loads the model has the nanosuit laying flat, so setting the pitch just stands him up
 	m_pitch = DirectX::XM_PIDIV2;
+
+
+	PreDrawUpdate = [this]() {
+		INFOMAN(m_deviceResources);
+
+		// If in debug mode, update the material properties if a change has been made
+#ifndef NDEBUG
+		if (m_materialNeedsUpdate)
+		{
+			m_material->Material.Emissive = XMFLOAT4(m_emmissive);
+			m_material->Material.Ambient = XMFLOAT4(m_ambient);
+			m_material->Material.Diffuse = XMFLOAT4(m_diffuse);
+			m_material->Material.Specular = XMFLOAT4(m_specular);
+			m_material->Material.SpecularPower = m_specularPower;
+
+			GFX_THROW_INFO_ONLY(
+				m_deviceResources->D3DDeviceContext()->UpdateSubresource(
+					m_materialConstantBuffer->GetRawBufferPointer(),
+					0, nullptr,
+					static_cast<void*>(m_material),
+					0, 0)
+			);
+
+			m_materialNeedsUpdate = false;
+		}
+#endif
+	};
 }
 
 void Nanosuit::CreateMaterialData()
@@ -71,6 +98,7 @@ void Nanosuit::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
+/*
 void Nanosuit::PreDrawUpdate()
 {
 	INFOMAN(m_deviceResources);
@@ -97,6 +125,7 @@ void Nanosuit::PreDrawUpdate()
 	}
 #endif
 }
+*/
 
 void Nanosuit::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {

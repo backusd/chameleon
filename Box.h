@@ -11,7 +11,6 @@ public:
 
 	void SetSideLengths(DirectX::XMFLOAT3 length) { m_xSideLength = length.x; m_ySideLength = length.y; m_zSideLength = length.z; }
 
-	void PreDrawUpdate() override;
 	DirectX::XMMATRIX GetScaleMatrix() override;
 
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);

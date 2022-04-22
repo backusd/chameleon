@@ -9,7 +9,7 @@ class Nanosuit : public Drawable
 public:
 	Nanosuit(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
-	void PreDrawUpdate() override;
+	//void PreDrawUpdate() override;
 	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(m_scaleFactor, m_scaleFactor, m_scaleFactor); }
 	DirectX::XMFLOAT3 CenterOfModel();
 

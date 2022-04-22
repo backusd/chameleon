@@ -19,6 +19,21 @@ SkyDome::SkyDome(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	//AddBindable("sky-dome-buffers-PS");					// PS Constant buffers
 
 	CreateAndAddPSBufferArray();
+
+
+	PreDrawUpdate = [this]() {
+		// Pretty much every object will need to submit model/view/projection data to the vertex shader
+		// The Scene binds a ModelViewProjectionConstantBuffer object to slot 0 of the vertex shader that
+		// can be mapped and written to by any object. The reason we don't automatically perform this update
+		// for every drawable is that not every drawable actually requires this update. For example, the Terrain
+		// is not a drawable, but instead houses many TerrainCells that are drawable. However, each of these 
+		// TerrainCells do not require this update because Terrain is able to set up the model view projection 
+		// buffer once before trying to draw each TerrainCell
+		UpdateModelViewProjectionConstantBuffer();
+
+
+		// Updating of any additional constant buffers or other pipeline resources should go here
+	};
 }
 
 void SkyDome::CreateAndAddPSBufferArray()
@@ -46,6 +61,7 @@ void SkyDome::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
+/*
 void SkyDome::PreDrawUpdate()
 {
 	// Pretty much every object will need to submit model/view/projection data to the vertex shader
@@ -60,6 +76,7 @@ void SkyDome::PreDrawUpdate()
 
 	// Updating of any additional constant buffers or other pipeline resources should go here
 }
+*/
 
 void SkyDome::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {

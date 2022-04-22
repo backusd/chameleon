@@ -345,9 +345,6 @@
     <ClCompile Include="ModelMeshException.cpp">
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
-    <ClCompile Include="Suzanne.cpp">
-      <Filter>Source Files\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="Lighting.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
@@ -628,9 +625,6 @@
     </ClInclude>
     <ClInclude Include="ModelMeshException.h">
       <Filter>Header Files\Exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="Suzanne.h">
-      <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="Lighting.h">
       <Filter>Header Files\Drawable</Filter>

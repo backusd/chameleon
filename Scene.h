@@ -20,7 +20,6 @@
 #include "Box.h"
 #include "SkyDome.h"
 #include "Terrain.h"
-#include "Suzanne.h"
 #include "Lighting.h"
 #include "Sphere.h"
 #include "Nanosuit.h"

@@ -19,7 +19,6 @@
 #include "Box.h"
 #include "SkyDome.h"
 #include "Terrain.h"
-#include "Suzanne.h"
 #include "Lighting.h"
 #include "Sphere.h"
 #include "Nanosuit.h"
@@ -42,6 +41,7 @@ public:
 	void Draw();
 	template <typename T>
 	std::shared_ptr<T> AddDrawable();
+	std::shared_ptr<Drawable> CreateDrawable();
 
 	// In the future, we will need to be able to create a scene in memory before rendering it,
 	// which will require that certain events happen to finally render the scene. Right now, it is
@@ -69,12 +69,6 @@ private:
 	std::vector<std::shared_ptr<Drawable>>				m_drawables;
 
 
-
-
-	// ImGui ====================================================================
-	//
-	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
-	//
 
 public:
 	void DrawImGui();

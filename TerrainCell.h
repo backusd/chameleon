@@ -13,7 +13,6 @@ public:
 				std::shared_ptr<MoveLookController> moveLookController,
 				std::string meshLookupName);
 
-	void PreDrawUpdate() override {}
 	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override {}
 
 	bool ContainsPoint(float x, float z);

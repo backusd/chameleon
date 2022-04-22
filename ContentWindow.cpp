@@ -187,8 +187,37 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
 	std::shared_ptr<Lighting> lighting = m_centerOnOriginScene->AddDrawable<Lighting>();
 
-	std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
-	nanosuit->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	//std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
+	//nanosuit->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	std::shared_ptr<Drawable> suzanne = m_centerOnOriginScene->CreateDrawable();
+	std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
+	material->Material.Emissive = XMFLOAT4(0.4f, 0.14f, 0.14f, 1.0f);
+	material->Material.Ambient	= XMFLOAT4(1.0f, 0.75f, 0.75f, 1.0f);
+	material->Material.Diffuse	= XMFLOAT4(1.0f, 0.6f, 0.6f, 1.0f);
+	material->Material.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material->Material.SpecularPower = 6.0f;
+	suzanne->SetPhongMaterial(std::move(material));
+	suzanne->SetModel("models/suzanne.obj");
+	suzanne->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
+	suzanne->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
+	suzanne->AddBindable("phong-pixel-shader");					// Pixel Shader
+	suzanne->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
+	suzanne->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
+	suzanne->CreateAndAddPSBufferArray();
+	suzanne->PreDrawUpdate = [weakSuzanne = std::weak_ptr(suzanne)]() {
+#ifndef NDEBUG
+		std::shared_ptr<Drawable> suzanne = weakSuzanne.lock();
+		if (suzanne != nullptr)
+		{
+			suzanne->UpdatePhongMaterial();
+		}
+#endif
+	};
+	suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+
+
 
 	//std::shared_ptr<Suzanne> suzanne = m_centerOnOriginScene->AddDrawable<Suzanne>();
 	//suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));

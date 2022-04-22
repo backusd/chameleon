@@ -239,7 +239,6 @@
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SphereMesh.cpp" />
     <ClCompile Include="StateClass.cpp" />
-    <ClCompile Include="Suzanne.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TerrainCell.cpp" />
     <ClCompile Include="TerrainCellMesh.cpp" />
@@ -415,7 +414,6 @@
     <ClInclude Include="SphereMesh.h" />
     <ClInclude Include="StateClass.h" />
     <ClInclude Include="StepTimer.h" />
-    <ClInclude Include="Suzanne.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TerrainCell.h" />
     <ClInclude Include="TerrainCellMesh.h" />

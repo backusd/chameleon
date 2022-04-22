@@ -35,6 +35,11 @@ Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared
 
 	// ONLY needed if doing Phong shading
 	CreateAndAddPSBufferArray();
+
+	PreDrawUpdate = [this]() {
+		// Updating of any additional constant buffers or other pipeline resources should go here
+		UpdatePSConstantBuffer();
+	};
 }
 
 void Lighting::CreateLightProperties()
@@ -172,11 +177,12 @@ void Lighting::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
+/*
 void Lighting::PreDrawUpdate()
 {
 	// Updating of any additional constant buffers or other pipeline resources should go here
 	UpdatePSConstantBuffer();
-}
+}*/
 
 void Lighting::UpdatePSConstantBuffer()
 {
