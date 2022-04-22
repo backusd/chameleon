@@ -157,9 +157,9 @@ void ModelNode::DrawImGui(std::string id)
 	if (ImGui::TreeNode(treeNodeName.c_str()))
 	{
 		ImGui::Text("Position:");
-		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePositionX" + m_nodeName + id).c_str(), &m_translation.x, -100.0f, 100.0f, "%.3f");
-		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePositionY" + m_nodeName + id).c_str(), &m_translation.y, -100.0f, 100.0f, "%.3f");
-		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePositionZ" + m_nodeName + id).c_str(), &m_translation.z, -100.0f, 100.0f, "%.3f");
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionX" + id).c_str(), &m_translation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionY" + id).c_str(), &m_translation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionZ" + id).c_str(), &m_translation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
 
 		ImGui::Text("Orientation:");
 		ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeRoll"  + m_nodeName + id).c_str(), &m_roll,  -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");

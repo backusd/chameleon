@@ -89,9 +89,6 @@ protected:
 	DirectX::XMFLOAT3 m_cameraLookAt;
 	DirectX::XMFLOAT3 m_cameraUpDirection;
 
-	DirectX::XMFLOAT3 m_cameraPositionMax;
-	DirectX::XMFLOAT3 m_cameraPositionMin;
-
 	DirectX::XMFLOAT3 m_cameraLookAtMax;
 	DirectX::XMFLOAT3 m_cameraLookAtMin;
 

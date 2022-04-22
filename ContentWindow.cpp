@@ -7,23 +7,24 @@ using DirectX::XMFLOAT3;
 ContentWindow::ContentWindow(int width, int height, const char* name) :
 	WindowBase(width, height, name),
 	// m_stateBlock(nullptr),
-	m_io(ImGui::GetIO()),
 	m_timer(nullptr),
 	m_cpu(nullptr),
 	m_keyboard(nullptr),
 	m_mouse(nullptr),
 	m_network(nullptr),
 	m_hud(nullptr),
-	m_scene(nullptr),
+	m_scene(nullptr)
+#ifndef NDEBUG
+	,m_io(ImGui::GetIO()),
 	m_centerOnOriginScene(nullptr),
 	m_useCenterOnOriginScene(false)
+#endif
 {
 	// Create the device resources
 	m_deviceResources = std::make_shared<DeviceResources>(m_hWnd);
 	m_deviceResources->OnResize(); // Calling OnResize will create the render target, etc.
-
 	
-
+#ifndef NDEBUG
 	(void)m_io;
 	m_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -53,6 +54,8 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	ImGui_ImplWin32_Init(m_hWnd);
 	ImGui_ImplDX11_Init(m_deviceResources->D3DDevice(), m_deviceResources->D3DDeviceContext());
 
+	m_enableImGuiWindows = true;
+
 	// Load Fonts
 	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
 	// - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -67,12 +70,7 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
-
-
-	// Our state
-	m_show_demo_window = true;
-	m_show_another_window = false;
-	m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+#endif
 
 	// We now have access to the device, so we now need to initialize the object store before creating the scene
 	ObjectStore::Initialize(m_deviceResources);
@@ -110,10 +108,6 @@ ContentWindow::ContentWindow(int width, int height, const char* name) :
 	// Activate the network connectivity
 	//m_network = std::make_shared<Network>("155.248.215.180", 7000, m_timer);
 
-	//
-	// Consider making this NDEBUG only
-	//
-	m_enableImGuiWindows = true;
 }
 
 ContentWindow::~ContentWindow()
@@ -132,10 +126,7 @@ void ContentWindow::AddSceneObjects()
 	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
 	std::shared_ptr<Lighting> lighting = m_scene->AddDrawable<Lighting>();
 	lighting->SetPosition(XMFLOAT3(45.0f, 20.0f, 390.0f));
-#ifndef NDEBUG
-	lighting->SetPositionMax(XMFLOAT3(1024.0f, 150.0f, 1024.0f));
-	lighting->SetPositionMin(XMFLOAT3(0.0f, 0.0f, 0.0f));
-#endif
+
 
 	std::shared_ptr<Nanosuit> nanosuit = m_scene->AddDrawable<Nanosuit>();
 	nanosuit->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
@@ -195,8 +186,6 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 	// Lighting
 	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
 	std::shared_ptr<Lighting> lighting = m_centerOnOriginScene->AddDrawable<Lighting>();
-	lighting->SetPositionMax(XMFLOAT3(20.0f, 20.0f, 20.0f));
-	lighting->SetPositionMin(XMFLOAT3(-20.0f, -20.0f, -20.0f));
 
 	std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
 	nanosuit->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -515,6 +504,7 @@ bool ContentWindow::Render()
 #endif
 
 
+#ifndef NDEBUG
 	// Start the Dear ImGui frame =========================================================================================
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -541,8 +531,6 @@ bool ContentWindow::Render()
 
 	// Have the scene draw the necessary ImGui controls ==============================================================
 
-
-#ifndef NDEBUG
 	if (m_useCenterOnOriginScene)
 	{
 		if (m_enableImGuiWindows)
@@ -553,7 +541,6 @@ bool ContentWindow::Render()
 		if (m_enableImGuiWindows)
 			m_scene->DrawImGui();
 	}
-#endif
 
 	// Render ImGui
 	ImGui::Render();
@@ -565,6 +552,8 @@ bool ContentWindow::Render()
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}
+
+#endif
 
 	return true;
 }
@@ -668,18 +657,27 @@ LRESULT ContentWindow::OnDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 LRESULT ContentWindow::OnLButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		m_mouse->OnLeftPressed(pt.x, pt.y);
+#endif
+
+	const POINTS pt = MAKEPOINTS(lParam);
+	m_mouse->OnLeftPressed(pt.x, pt.y);
+
+#ifndef NDEBUG
 	}
+#endif
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnLButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
+
 		const POINTS pt = MAKEPOINTS(lParam);
 		m_mouse->OnLeftReleased(pt.x, pt.y);
 		// release mouse if outside of window
@@ -688,34 +686,50 @@ LRESULT ContentWindow::OnLButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			ReleaseCapture();
 			m_mouse->OnMouseLeave();
 		}
+
+#ifndef NDEBUG
 	}
+#endif
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnLButtonDoubleClick(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
+
 		const POINTS pt = MAKEPOINTS(lParam);
 		m_mouse->OnLeftDoubleClick(pt.x, pt.y);
+
+#ifndef NDEBUG
 	}
+#endif
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
 		const POINTS pt = MAKEPOINTS(lParam);
 		m_mouse->OnMiddlePressed(pt.x, pt.y);
+
+#ifndef NDEBUG
 	}
+#endif
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
 		const POINTS pt = MAKEPOINTS(lParam);
 		m_mouse->OnMiddleReleased(pt.x, pt.y);
 		// release mouse if outside of window
@@ -724,24 +738,34 @@ LRESULT ContentWindow::OnMButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			ReleaseCapture();
 			m_mouse->OnMouseLeave();
 		}
+
+#ifndef NDEBUG
 	}
+#endif
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnRButtonDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
 		const POINTS pt = MAKEPOINTS(lParam);
 		m_mouse->OnRightPressed(pt.x, pt.y);
+
+#ifndef NDEBUG
 	}
+#endif
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnRButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
 		const POINTS pt = MAKEPOINTS(lParam);
 		m_mouse->OnRightReleased(pt.x, pt.y);
 		// release mouse if outside of window
@@ -750,7 +774,10 @@ LRESULT ContentWindow::OnRButtonUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			ReleaseCapture();
 			m_mouse->OnMouseLeave();
 		}
+
+#ifndef NDEBUG
 	}
+#endif
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -765,8 +792,10 @@ LRESULT ContentWindow::OnResize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 LRESULT ContentWindow::OnMouseMove(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
 		const POINTS pt = MAKEPOINTS(lParam);
 		// in client region -> log move, and log enter + capture mouse (if not previously in window)
 		if (pt.x >= 0 && pt.x < m_width && pt.y >= 0 && pt.y < m_height)
@@ -792,7 +821,11 @@ LRESULT ContentWindow::OnMouseMove(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 				m_mouse->OnMouseLeave();
 			}
 		}
+
+#ifndef NDEBUG
 	}
+#endif
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnMouseLeave(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -801,12 +834,19 @@ LRESULT ContentWindow::OnMouseLeave(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 }
 LRESULT ContentWindow::OnMouseWheel(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureMouse)
 	{
+#endif
+
 		const POINTS pt = MAKEPOINTS(lParam);
 		const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 		m_mouse->OnWheelDelta(pt.x, pt.y, delta);
+
+#ifndef NDEBUG
 	}
+#endif
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
@@ -835,29 +875,47 @@ LRESULT ContentWindow::OnGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 LRESULT ContentWindow::OnChar(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureKeyboard)
 	{
+#endif
 		m_keyboard->OnChar(static_cast<unsigned char>(wParam));
+
+#ifndef NDEBUG
 	}
+#endif
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureKeyboard)
 	{
+#endif
+
 		m_keyboard->OnKeyReleased(static_cast<unsigned char>(wParam));
+
+#ifndef NDEBUG
 	}
+#endif
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnKeyDown(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+#ifndef NDEBUG
 	if (!m_io.WantCaptureKeyboard)
 	{
+#endif
 		if (!(lParam & 0x40000000) || m_keyboard->AutorepeatIsEnabled()) // filter autorepeat
 		{
 			m_keyboard->OnKeyPressed(static_cast<unsigned char>(wParam));
 		}
+
+#ifndef NDEBUG
 	}
+#endif
+
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 LRESULT ContentWindow::OnSysKeyUp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

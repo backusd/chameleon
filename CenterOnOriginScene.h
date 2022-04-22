@@ -29,7 +29,7 @@
 #include <type_traits>
 
 
-
+#ifndef NDEBUG
 class CenterOnOriginScene
 {
 public:
@@ -96,3 +96,5 @@ std::shared_ptr<T> CenterOnOriginScene::AddDrawable()
 
 	return newItem;
 }
+
+#endif

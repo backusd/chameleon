@@ -10,11 +10,6 @@ Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared
 {
 	m_position = XMFLOAT3(0.0f, 5.0f, 10.0f);
 
-#ifndef NDEBUG
-	m_positionMax = XMFLOAT3(20.0f, 20.0f, 20.0f);
-	m_positionMin = XMFLOAT3(-20.0f, -20.0f, -20.0f);
-#endif
-
 	// This must be run first because some of the following methods may use the lighting data
 	CreateLightProperties();
 
@@ -242,10 +237,11 @@ void Lighting::DrawImGui(std::string id)
 	if (ImGui::CollapsingHeader(("Lighting##" + id).c_str(), ImGuiTreeNodeFlags_None))
 	{
 		ImGui::Text("Position:");
-		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##lightPositionX" + id).c_str(), &m_position.x, m_positionMin.x, m_positionMax.x, "%.3f");
-		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat(("##lightPositionY" + id).c_str(), &m_position.y, m_positionMin.y, m_positionMax.y, "%.3f");
-		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##lightPositionZ" + id).c_str(), &m_position.z, m_positionMin.z, m_positionMax.z, "%.3f");
-	
+
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionX" + id).c_str(), &m_position.x, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionY" + id).c_str(), &m_position.y, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionZ" + id).c_str(), &m_position.z, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+
 		ImGui::Text("");
 		ImGui::Text("Could make this an array of lights and be able to change");
 		ImGui::Text("color and light type");

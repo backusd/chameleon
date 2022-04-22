@@ -31,7 +31,6 @@
 
 // 3D Scene
 #include "Scene.h"
-#include "CenterOnOriginScene.h"
 
 
 #include "PixelShader.h"
@@ -50,19 +49,15 @@
 #include "DepthStencilState.h"
 #include "SphereMesh.h"
 
+
+#ifndef NDEBUG
+#include "CenterOnOriginScene.h"
+
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
-#include <tchar.h>
+#endif
 
-/*
-#include "CPUStatistics.h"
-#include "InputClass.h"
-#include "StateClass.h"
-#include "BlackForestClass.h"
-#include "UserInterfaceClass.h"
-#include "NetworkClass.h"
-*/
 
 
 class ContentWindow : public WindowBase
@@ -125,20 +120,10 @@ private:
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 
-	bool m_show_demo_window;
-	bool m_show_another_window;
-	ImVec4 m_clear_color;
-	ImGuiIO& m_io;
-
-
-
-
-	
 	std::shared_ptr<StepTimer> m_timer;
 
 	//Microsoft::WRL::ComPtr<ID2D1DrawingStateBlock1> m_stateBlock;
-	
-	
+		
 	std::shared_ptr<CPU> m_cpu;
 
 	std::shared_ptr<Keyboard> m_keyboard;
@@ -150,15 +135,14 @@ private:
 	std::shared_ptr<Scene> m_scene;
 
 #ifndef NDEBUG
+	ImGuiIO& m_io;
+
 	void AddCenterOnOriginSceneObjects();
 	std::shared_ptr<CenterOnOriginScene> m_centerOnOriginScene;
 	bool m_useCenterOnOriginScene;
+	bool m_enableImGuiWindows;
 #endif
 
-	// ImGui ====================================================================
-	//
-	// NOTE: This should only be used if in Debug, so consider using #if defined NDEBUG
-	//
-	bool m_enableImGuiWindows;
+	
 
 };

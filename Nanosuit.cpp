@@ -265,14 +265,15 @@ void Nanosuit::DrawImGuiPosition(std::string id)
 	ImGui::Text("Position:");
 	if (m_currentTerrain != nullptr)
 	{
-		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionX" + id).c_str(), &m_position.x, m_currentTerrain->GetMinX(), m_currentTerrain->GetMaxX(), "%.3f");
-		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionZ" + id).c_str(), &m_position.z, m_currentTerrain->GetMinZ(), m_currentTerrain->GetMaxZ(), "%.3f");
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionX" + id).c_str(), &m_position.x, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionY" + id).c_str(), &m_position.y, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionZ" + id).c_str(), &m_position.z, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
 	}
 	else
 	{
-		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionX" + id).c_str(), &m_position.x, -50.0f, 50.0f, "%.3f");
-		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionY" + id).c_str(), &m_position.y, -50.0f, 50.0f, "%.3f");
-		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat(("##drawablePositionZ" + id).c_str(), &m_position.z, -50.0f, 50.0f, "%.3f");
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionX" + id).c_str(), &m_position.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionY" + id).c_str(), &m_position.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionZ" + id).c_str(), &m_position.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
 	}
 }
 

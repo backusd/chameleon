@@ -33,11 +33,7 @@ private:
 #ifndef NDEBUG
 public:
 	void DrawImGui(std::string id) override;
-	void SetPositionMax(DirectX::XMFLOAT3 max) { m_positionMax = max; }
-	void SetPositionMin(DirectX::XMFLOAT3 min) { m_positionMin = min; }
 
-private:
-	DirectX::XMFLOAT3 m_positionMax;
-	DirectX::XMFLOAT3 m_positionMin;
+
 #endif
 };

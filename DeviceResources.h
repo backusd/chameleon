@@ -54,11 +54,14 @@ public:
 
 	RECT WindowRect();
 
-	DxgiInfoManager& GetInfoManager() { return infoManager; }
+
 
 	void SetSolidRasterState() { m_d3dDeviceContext->RSSetState(solidRasterState.Get()); }
 	void SetWireframeRasterState() { m_d3dDeviceContext->RSSetState(wireframeRasterState.Get()); }
 
+#ifndef NDEBUG
+	DxgiInfoManager& GetInfoManager() { return infoManager; }
+#endif
 
 private:
 

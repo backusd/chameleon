@@ -22,9 +22,6 @@ void CenterOnOriginMoveLookController::SetupImGui()
     m_cameraLookAt = XMFLOAT3(0.0f, 0.0f, 0.0f);
     m_cameraUpDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-    m_cameraPositionMax = XMFLOAT3(100.0f, 100.0f, 100.0f);
-    m_cameraPositionMin = XMFLOAT3(-100.0f, -100.0f, -100.0f);
-
     m_cameraLookAtMax = XMFLOAT3(100.0f, 100.0f, 100.0f);
     m_cameraLookAtMin = XMFLOAT3(-100.0f, -100.0f, -100.0f);
 
@@ -546,9 +543,9 @@ void CenterOnOriginMoveLookController::DrawImGui()
     ImGui::Begin("Center On Origin Camera");
 
     ImGui::Text("Position:");
-    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionX", &m_cameraPosition.x, m_cameraPositionMin.x, m_cameraPositionMax.x, "%.3f");
-    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionY", &m_cameraPosition.y, m_cameraPositionMin.y, m_cameraPositionMax.y, "%.3f");
-    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::SliderFloat("##cameraPositionZ", &m_cameraPosition.z, m_cameraPositionMin.z, m_cameraPositionMax.z, "%.3f");
+    ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat("##cameraPositionX", &m_cameraPosition.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+    ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat("##cameraPositionY", &m_cameraPosition.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+    ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat("##cameraPositionZ", &m_cameraPosition.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
     ImGui::Text("Look At:");
     ImGui::Text("    X: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtX", &m_cameraLookAt.x, m_cameraLookAtMin.x, m_cameraLookAtMax.x, "%.3f");
     ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::SliderFloat("##lookAtY", &m_cameraLookAt.y, m_cameraLookAtMin.y, m_cameraLookAtMax.y, "%.3f");

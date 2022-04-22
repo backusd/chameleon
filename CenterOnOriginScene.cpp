@@ -1,4 +1,6 @@
 #include "CenterOnOriginScene.h"
+#ifndef NDEBUG
+
 
 using DirectX::XMMATRIX;
 using DirectX::XMFLOAT4X4;
@@ -196,3 +198,6 @@ void CenterOnOriginScene::Activate()
 	// When activating a new scene, you must activate the scene lighting
 	m_lighting->Activate();
 }
+
+
+#endif
