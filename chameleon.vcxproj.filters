@@ -953,6 +953,9 @@
     <None Include="assimp\vector3.inl">
       <Filter>assimp</Filter>
     </None>
+    <None Include="models\nanosuit2.gltf">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="blackforest_cm.bmp">

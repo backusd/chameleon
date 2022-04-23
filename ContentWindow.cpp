@@ -216,7 +216,7 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 
 	//std::shared_ptr<Nanosuit> nanosuit = m_centerOnOriginScene->AddDrawable<Nanosuit>();
 	//nanosuit->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-
+	/*
 	std::shared_ptr<Drawable> suzanne = m_centerOnOriginScene->CreateDrawable();
 	std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
 	material->Material.Emissive = XMFLOAT4(0.4f, 0.14f, 0.14f, 1.0f);
@@ -242,7 +242,61 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 #endif
 	};
 	suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	*/
 
+	std::shared_ptr<Drawable> nanosuit = m_centerOnOriginScene->CreateDrawable();
+	std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
+	material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
+	material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	material->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
+	material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material->Material.SpecularPower = 7.0f;
+	nanosuit->SetPhongMaterial(std::move(material));
+	nanosuit->SetModel("models/nanosuit.gltf");
+	nanosuit->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
+	nanosuit->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
+	nanosuit->AddBindable("phong-pixel-shader");					// Pixel Shader
+	nanosuit->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
+	nanosuit->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
+	nanosuit->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	nanosuit->SetPitch(DirectX::XM_PIDIV2);
+	nanosuit->CreateAndAddPSBufferArray();
+	nanosuit->PreDrawUpdate = [weakNanosuit = std::weak_ptr(nanosuit)]() {
+#ifndef NDEBUG
+		std::shared_ptr<Drawable> nanosuit = weakNanosuit.lock();
+		if (nanosuit != nullptr)
+		{
+			nanosuit->UpdatePhongMaterial();
+		}
+#endif
+	};
+
+	std::shared_ptr<Drawable> nanosuit2 = m_centerOnOriginScene->CreateDrawable();
+	std::unique_ptr<PhongMaterialProperties> material2 = std::make_unique<PhongMaterialProperties>();
+	material2->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
+	material2->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	material2->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
+	material2->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material2->Material.SpecularPower = 7.0f;
+	nanosuit2->SetPhongMaterial(std::move(material2));
+	nanosuit2->SetModel("models/nanosuit2.gltf");
+	nanosuit2->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
+	nanosuit2->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
+	nanosuit2->AddBindable("phong-pixel-shader");					// Pixel Shader
+	nanosuit2->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
+	nanosuit2->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
+	nanosuit2->SetPosition(XMFLOAT3(5.0f, 0.0f, 0.0f));
+	nanosuit2->SetPitch(DirectX::XM_PI);
+	nanosuit2->CreateAndAddPSBufferArray();
+	nanosuit2->PreDrawUpdate = [weakNanosuit2 = std::weak_ptr(nanosuit2)]() {
+#ifndef NDEBUG
+		std::shared_ptr<Drawable> nanosuit2 = weakNanosuit2.lock();
+		if (nanosuit2 != nullptr)
+		{
+			nanosuit2->UpdatePhongMaterial();
+		}
+#endif
+	};
 
 
 

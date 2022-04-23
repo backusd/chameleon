@@ -445,6 +445,7 @@
     <None Include="assimp\vector2.inl" />
     <None Include="assimp\vector3.inl" />
     <None Include="models\nanosuit.gltf" />
+    <None Include="models\nanosuit2.gltf" />
     <None Include="PSInclude.hlsli" />
     <None Include="heightmap.r16" />
     <None Include="packages.config" />
