@@ -22,21 +22,28 @@ public:
 	ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 	ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, const aiNode& node, std::vector<std::shared_ptr<Mesh>> meshes);
 
-	void Draw(DirectX::XMMATRIX parentModelMatrix, DirectX::XMMATRIX projectionMatrix);
+	void Draw(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
 
 	void SetName(std::string name) { m_nodeName = name; }
 	void AddMesh(std::shared_ptr<Mesh> mesh) { m_meshes.push_back(mesh); }
 
 	std::shared_ptr<Mesh> GetMesh(int index) { return m_meshes[index]; }
 
+	bool IsMouseHovered(const DirectX::XMVECTOR& clickPointNear, 
+						const DirectX::XMVECTOR& clickPointFar, 
+						const DirectX::XMMATRIX& projectionMatrix, 
+						float& distance);
+
+	void GetBoundingBoxPositionsWithTransformation(std::vector<DirectX::XMVECTOR>& positions);
+
+
 #ifndef NDEBUG
 	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc);
 #endif
 
 private:
-	void UpdateModelViewProjectionConstantBuffer(DirectX::XMMATRIX parentModelMatrix, DirectX::XMMATRIX projectionMatrix);
+	void UpdateModelViewProjectionConstantBuffer(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
 	DirectX::XMMATRIX GetModelMatrix();
-	DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixScaling(m_scaling.x, m_scaling.y, m_scaling.z); }
 
 	std::shared_ptr<DeviceResources> m_deviceResources;
 	std::shared_ptr<MoveLookController> m_moveLookController;
@@ -60,6 +67,11 @@ private:
 public:
 	void DrawImGui(std::string id);
 
+	void DrawBoundingBox(const DirectX::XMMATRIX& projectionMatrix);
+	bool NeedDrawBoundingBox();
+
+private:
+	bool m_drawBoundingBox;
 #endif
 
 };

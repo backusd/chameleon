@@ -6,6 +6,7 @@
 #include "MoveLookController.h"
 #include "ObjectStore.h"
 #include "Mesh.h"
+#include "BoundingBox.h"
 
 // Assimp
 #include <assimp/Importer.hpp>
@@ -14,7 +15,6 @@
 
 #include <string>
 #include <memory>
-#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -25,7 +25,7 @@ public:
 	Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string fileName);
 	Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
 	
-	void Draw(DirectX::XMMATRIX parentModelMatrix, DirectX::XMMATRIX projectionMatrix);
+	void Draw(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
 
 	std::shared_ptr<Mesh> GetRootNodeMesh() { return m_rootNode->GetMesh(0); }
 
@@ -33,7 +33,7 @@ public:
 	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_rootNode->SetMoveLookController(mlc); }
 #endif
 
-
+	bool IsMouseHovered(float mouseX, float mouseY, const DirectX::XMMATRIX& modelMatrix, const DirectX::XMMATRIX& projectionMatrix, float& distance);
 
 private:
 	void LoadMesh(const aiMesh& mesh);
@@ -51,11 +51,17 @@ private:
 	// we assign out the meshes to the corresponding nodes
 	std::vector<std::shared_ptr<Mesh>> m_meshes;
 
+	// BoundingBox to excapsulate the entire Model
+	std::unique_ptr<BoundingBox>	m_boundingBox;
 
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG
 public:
 	void DrawImGui(std::string id);
+
+	void DrawBoundingBox(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
+	bool NeedDrawBoundingBox();
+	bool m_drawBoundingBox;
 
 #endif
 };

@@ -55,7 +55,8 @@ public:
 
 private:
 	void CreateAndBindModelViewProjectionBuffer();
-
+	void ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr<Mouse> mouse);
+	void ProcessKeyboardEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard);
 
 	HWND												m_hWnd;
 	std::shared_ptr<DeviceResources>					m_deviceResources;
@@ -70,6 +71,16 @@ private:
 	// Drawables
 	std::vector<std::shared_ptr<Drawable>>				m_drawables;
 	std::shared_ptr<Terrain>							m_terrain;
+
+	// Mouse Input state variables
+	bool m_LButtonDown, m_RButtonDown, m_MButtonDown;
+	std::shared_ptr<Drawable> m_mouseHoveredDrawable;
+	std::shared_ptr<Drawable> m_LPressDrawable;
+	std::shared_ptr<Drawable> m_MPressDrawable;
+	std::shared_ptr<Drawable> m_RPressDrawable;
+	float m_distanceToHoveredDrawable;
+
+	// Keyboard Input state variables
 
 
 

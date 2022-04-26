@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Bindable.h"
+#include "BoundingBox.h"
 
 #include <vector>
 
@@ -26,7 +27,11 @@ public:
 
 	bool DrawIndexed() { return m_drawIndexed; }
 
+	bool RayIntersectionTest(const DirectX::XMVECTOR& rayOrigin, const DirectX::XMVECTOR& rayDirection, float& distance);
+	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& tranformation, std::vector<DirectX::XMVECTOR>& positions);
+
 protected:
+
 	D3D11_PRIMITIVE_TOPOLOGY m_topology;
 	DXGI_FORMAT m_indexFormat;
 
@@ -38,6 +43,20 @@ protected:
 	unsigned int m_sizeOfVertex;
 
 	bool m_drawIndexed;
+
+	// Data used for collision detection
+	std::unique_ptr<BoundingBox>	m_boundingBox;
+	std::vector<DirectX::XMVECTOR>	m_positions;
+	std::vector<unsigned short>		m_indices;
+
+
+
+	// DEBUG SPECIFIC --------------------------------------------------------
+#ifndef NDEBUG
+public:
+	void DrawBoundingBox(const DirectX::XMMATRIX& modelMatrix, const DirectX::XMMATRIX& viewMatrix, const DirectX::XMMATRIX& projectionMatrix);
+
+#endif
 };
 
 template <typename T, typename A>
@@ -73,4 +92,14 @@ void Mesh::LoadBuffers(std::vector<T, A>& vertices, std::vector<unsigned short>&
 	GFX_THROW_INFO(m_deviceResources->D3DDevice()->CreateBuffer(&ibd, &isd, &m_indexBuffer));
 
 	m_indexCount = static_cast<unsigned int>(indices.size());
+
+	// If this worked, copy over the position data and create the BoundingBox
+	// NOTE: HUGE ASSUMPTION that the vertex has a XMFLOAT3 position member variable
+	for (T vertex : vertices)
+		m_positions.push_back(DirectX::XMLoadFloat3(&vertex.position));
+
+	for (unsigned short index : indices)
+		m_indices.push_back(index);
+
+	m_boundingBox = std::make_unique<BoundingBox>(m_deviceResources, m_positions);
 }

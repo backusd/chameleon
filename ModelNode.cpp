@@ -15,6 +15,9 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
 	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
 	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
+#ifndef NDEBUG
+	, m_drawBoundingBox(true)
+#endif
 {
 	// Leave m_mesh as nullptr until CreateMesh is called because vertex loading code 
 	// will check to see if m_mesh is nullptr to know if it has loaded the mesh yet
@@ -29,6 +32,9 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
 	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
 	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
+#ifndef NDEBUG
+	, m_drawBoundingBox(true)
+#endif
 {
 	m_nodeName = std::string(node.mName.C_Str());
 
@@ -63,7 +69,7 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 		m_childNodes.push_back(std::make_unique<ModelNode>(deviceResources, moveLookController, *node.mChildren[iii], meshes));
 }
 
-void ModelNode::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
+void ModelNode::Draw(const XMMATRIX& parentModelMatrix, const XMMATRIX& projectionMatrix)
 {
 	INFOMAN(m_deviceResources);
 
@@ -101,7 +107,7 @@ void ModelNode::Draw(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
 		node->Draw(m_accumulatedModelMatrix, projectionMatrix);
 }
 
-void ModelNode::UpdateModelViewProjectionConstantBuffer(XMMATRIX parentModelMatrix, XMMATRIX projectionMatrix)
+void ModelNode::UpdateModelViewProjectionConstantBuffer(const XMMATRIX& parentModelMatrix, const XMMATRIX& projectionMatrix)
 {
 	INFOMAN(m_deviceResources);
 
@@ -134,11 +140,83 @@ void ModelNode::UpdateModelViewProjectionConstantBuffer(XMMATRIX parentModelMatr
 XMMATRIX ModelNode::GetModelMatrix()
 {
 	return DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *
-		GetScaleMatrix() *
+		DirectX::XMMatrixScaling(m_scaling.x, m_scaling.y, m_scaling.z) *
 		DirectX::XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
 }
 
+bool ModelNode::IsMouseHovered(const XMVECTOR& clickPointNear, const XMVECTOR& clickPointFar, const XMMATRIX& projectionMatrix, float& distance)
+{
+	// NOTE: We do NOT need to pass the parent's model matrix into this function because this class keeps
+	//		 track of the accumulated model matrix. Assuming the Update is done correctly, this class will
+	//		 already have an up-to-date model matrix
 
+	// Compute the ray origin and ray direction vector
+	XMVECTOR rayOrigin, rayDestination, rayDirection;
+
+	D3D11_VIEWPORT viewport = m_deviceResources->GetScreenViewport();
+	XMMATRIX viewMatrix = m_moveLookController->ViewMatrix();
+
+	// Here, we use the identity matrix for the World matrix because we don't want to translate
+	// the vectors as if they were at the origin. If we did want to do that, we would use XMMatrixTranslation(eye.x, eye.y, eye.z)
+	rayOrigin = XMVector3Unproject(
+		clickPointNear,
+		viewport.TopLeftX, viewport.TopLeftY,
+		viewport.Width, viewport.Height,
+		0, 1,
+		projectionMatrix,
+		viewMatrix,
+		m_accumulatedModelMatrix);
+
+	rayDestination = XMVector3Unproject(
+		clickPointFar,
+		viewport.TopLeftX, viewport.TopLeftY,
+		viewport.Width, viewport.Height,
+		0, 1,
+		projectionMatrix,
+		viewMatrix,
+		m_accumulatedModelMatrix);
+
+	rayDirection = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(rayDestination, rayOrigin));
+
+
+	// First, run the test for the meshes of this node
+	float dist;
+	bool found = false;
+	distance = FLT_MAX;
+
+	//     ModelNode can have multiple meshes, so loop over each one
+	for (std::shared_ptr<Mesh> mesh : m_meshes)
+	{
+		if (mesh->RayIntersectionTest(rayOrigin, rayDirection, dist))
+		{
+			distance = std::min(distance, dist);
+			found = true;
+		}
+	}
+
+	// Second, run the test for all child nodes
+	for (std::unique_ptr<ModelNode>& node : m_childNodes)
+	{
+		if (node->IsMouseHovered(clickPointNear, clickPointFar, projectionMatrix, distance))
+		{
+			distance = std::min(distance, dist);
+			found = true;
+		}
+	}
+
+	return found;	
+}
+
+void ModelNode::GetBoundingBoxPositionsWithTransformation(std::vector<XMVECTOR>& positions)
+{
+	// Get all positions for the meshes this node owns
+	for (std::shared_ptr<Mesh> mesh : m_meshes)
+		mesh->GetBoundingBoxPositionsWithTransformation(GetModelMatrix(), positions);
+
+	// Get all positions for all children nodes
+	for (std::unique_ptr<ModelNode>& node : m_childNodes)
+		node->GetBoundingBoxPositionsWithTransformation(positions);
+}
 
 
 #ifndef NDEBUG
@@ -172,5 +250,31 @@ void ModelNode::DrawImGui(std::string id)
 
 		ImGui::TreePop();
 	}
+}
+
+bool ModelNode::NeedDrawBoundingBox()
+{
+	// Return true if any node needs its boundingbox to be drawn
+	if (m_drawBoundingBox)
+		return true;
+
+	for (std::unique_ptr<ModelNode>& node : m_childNodes)
+		if (node->NeedDrawBoundingBox())
+			return true;
+
+	return false;
+}
+
+void ModelNode::DrawBoundingBox(const XMMATRIX& projectionMatrix)
+{
+	// Draw the bounding box for the model if necessary then pass the call to the root node
+	if (m_drawBoundingBox)
+	{
+		for (std::shared_ptr<Mesh> mesh : m_meshes)
+			mesh->DrawBoundingBox(m_accumulatedModelMatrix, m_moveLookController->ViewMatrix(), projectionMatrix);
+	}
+
+	for (std::unique_ptr<ModelNode>& node : m_childNodes)
+		node->DrawBoundingBox(projectionMatrix);
 }
 #endif

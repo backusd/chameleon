@@ -175,6 +175,7 @@
     <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="BlackForestClass.cpp" />
+    <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="BoxMesh.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="CenterOnOriginMoveLookController.cpp" />
@@ -345,6 +346,7 @@
     <ClInclude Include="Bindable.h" />
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="BlackForestClass.h" />
+    <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BoxMesh.h" />
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="CenterOnOriginMoveLookController.h" />

@@ -44,6 +44,10 @@ public:
 	// Same goes for the terrain
 	void ReleaseResources() { m_player = nullptr; m_terrain = nullptr; }
 
+
+	virtual void ZoomIn(int mouseX, int mouseY);
+	virtual void ZoomOut(int mouseX, int mouseY);
+
 protected:
 	virtual void ResetState();
 	void UpdateProjectionMatrix();
@@ -59,8 +63,6 @@ protected:
 	virtual void MoveBackward() {};
 	virtual void GoToClickLocation(float x, float y);
 
-	virtual void ZoomIn(int mouseX, int mouseY);
-	virtual void ZoomOut(int mouseX, int mouseY);
 	virtual void MouseMove();
 
 	HWND								m_hWnd;

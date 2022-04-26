@@ -16,9 +16,19 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_scaleY(1.0f),
 	m_scaleZ(1.0f),
 	PreDrawUpdate([]() {}),
-	m_material(nullptr)
+	OnMouseHover([]() {}),
+	OnMouseClick([]() {}),
+	m_material(nullptr),
+	m_name("Unnamed Drawable")
 {
 }
+
+void Drawable::SetModel(std::string fileName) {
+	m_model = std::make_unique<Model>(m_deviceResources, m_moveLookController, fileName);
+
+	// Getting the stem gets just the filename without the extension
+	m_name = std::filesystem::path(fileName).stem().string();
+}	
 
 void Drawable::SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> material)
 { 
@@ -86,7 +96,28 @@ void Drawable::Draw()
 	PreDrawUpdate();
 
 	m_model->Draw(GetModelMatrix(), m_projectionMatrix);
+
+#ifndef NDEBUG
+	// Draw bounding boxes one or more meshes within the model need to have their bounding box drawn
+	if (m_model->NeedDrawBoundingBox())
+	{
+		// Bind necessary bindables for drawing box lines
+
+		ObjectStore::GetBindable("solid-vertex-shader")->Bind();				// Vertex Shader
+		ObjectStore::GetBindable("solid-vertex-shader-IA")->Bind();				// Input Layout
+		ObjectStore::GetBindable("solid-pixel-shader")->Bind();					// Pixel Shader
+
+		ObjectStore::GetBindable("solidfill")->Bind();							// Rasterizer State
+		ObjectStore::GetBindable("depth-enabled-depth-stencil-state")->Bind();	// Depth Stencil State
+
+
+		// Issue draw call to the model
+		m_model->DrawBoundingBox(GetModelMatrix(), m_projectionMatrix);
+	}
+#endif
 }
+
+
 
 void Drawable::UpdateModelViewProjectionConstantBuffer()
 {
@@ -125,10 +156,17 @@ XMMATRIX Drawable::GetModelMatrix()
 		DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 }
 
+bool Drawable::IsMouseHovered(float mouseX, float mouseY, float& distance)
+{
+	// Must pass the model matrix because it will be used when unprojecting
+	// the mouse ray
+	return m_model->IsMouseHovered(mouseX, mouseY, GetModelMatrix(), m_projectionMatrix, distance);
+}
+
 #ifndef NDEBUG
 void Drawable::DrawImGui(std::string id)
 {
-	if (ImGui::CollapsingHeader(("Unnamed Drawable##" + id).c_str(), ImGuiTreeNodeFlags_None))
+	if (ImGui::CollapsingHeader((m_name + "##" + id).c_str(), ImGuiTreeNodeFlags_None))
 	{
 		DrawImGuiPosition(id);
 		DrawImGuiRollPitchYaw(id);
@@ -225,5 +263,10 @@ void Drawable::UpdatePhongMaterial()
 
 		m_materialNeedsUpdate = false;
 	}
+}
+
+bool Drawable::NeedDrawBoundingBox()
+{
+	return m_model->NeedDrawBoundingBox();
 }
 #endif

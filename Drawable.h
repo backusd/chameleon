@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <filesystem>
 
 // Forward declare the Terrain class because we will be passing a pointer to Terrain
 // to the pure virtual Update function
@@ -42,7 +43,8 @@ public:
 	float Pitch() { return m_pitch; }
 	float Yaw() { return m_yaw; }
 
-	void SetModel(std::string fileName) { m_model = std::make_unique<Model>(m_deviceResources, m_moveLookController, fileName); }
+	void SetName(std::string name) { m_name = name; }
+	void SetModel(std::string fileName);
 	void SetRoll(float roll) { m_roll = roll; }
 	void SetPitch(float pitch) { m_pitch = pitch; }
 	void SetYaw(float yaw) { m_yaw = yaw; }
@@ -52,11 +54,20 @@ public:
 	void SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> material);
 	void CreateAndAddPSBufferArray();
 
+	bool IsMouseHovered(float mouseX, float mouseY, float& distance);
+
 	// Functional used for updating buffers, etc., after all bindings and before issuing the draw call
 	std::function<void()> PreDrawUpdate;
 
+	// Functional for user interaction events
+	std::function<void()> OnMouseHover;
+	std::function<void()> OnMouseClick;
+
+
 protected:
 	void UpdateModelViewProjectionConstantBuffer();
+	
+	std::string m_name;
 
 	std::unique_ptr<PhongMaterialProperties> m_material;
 	std::shared_ptr<ConstantBuffer> m_materialConstantBuffer;
@@ -98,6 +109,9 @@ protected:
 	void DrawImGuiScale(std::string id);
 	virtual void DrawImGuiMaterialSettings(std::string id);
 
+	// Bool on whether or not one or more of the meshes need to have a bounding box drawn
+	bool NeedDrawBoundingBox();
+
 	// Phong material
 	bool m_materialNeedsUpdate = false;
 	float m_emmissive[4];
@@ -108,5 +122,7 @@ protected:
 
 	// Bool on whether or not to sync the scale values together
 	bool m_syncScaleValues = true;
+
+	// Bool on whether or not one or more of the meshes need to have a bounding box drawn
 #endif
 };
