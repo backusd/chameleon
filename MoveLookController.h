@@ -51,12 +51,16 @@ public:
 	virtual void LookLeftRight(float angle);
 	virtual void LookUpDown(float angle);
 
+	virtual void ProcessKeyboardEvents(std::shared_ptr<Keyboard> keyboard);
+	virtual void SetTimeDelta(double delta) { m_timeDelta = delta; }
+
+	void CenterCameraBehindPlayer();
+
 protected:
 	virtual void ResetState();
 	void UpdateProjectionMatrix();
 	
 	virtual void UpdatePosition();
-	void CenterCameraBehindPlayer();
 
 	virtual void LookLeft();
 	virtual void LookRight();
@@ -101,6 +105,7 @@ protected:
 
 	double m_currentTime;
 	double m_previousTime;
+	double m_timeDelta;
 
 	// Movement speeds
 	double m_turnSpeed; // radians per second

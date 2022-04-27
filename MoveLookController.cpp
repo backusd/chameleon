@@ -149,6 +149,7 @@ void MoveLookController::UpdateCameraLocation()
 void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
     m_currentTime = timer->GetTotalSeconds();
+    m_timeDelta = m_currentTime - m_previousTime;
 
     Mouse::Event e;
     std::ostringstream oss;
@@ -256,6 +257,31 @@ void MoveLookController::Update(std::shared_ptr<StepTimer> timer, std::shared_pt
     UpdateCameraLocation();
 
     m_previousTime = m_currentTime;
+}
+
+void MoveLookController::ProcessKeyboardEvents(std::shared_ptr<Keyboard> keyboard)
+{
+    Keyboard::Event keyEvent;
+    while (!keyboard->KeyIsEmpty())
+    {
+        keyEvent = keyboard->ReadKey();
+        switch (keyEvent.GetCode())
+        {
+        case VK_SHIFT:      m_shift = keyEvent.IsPress(); break;
+        case VK_CONTROL:    m_ctrl = keyEvent.IsPress(); break;
+        case VK_MENU:       m_alt = keyEvent.IsPress(); break;    // ALT key
+        case VK_LEFT:       m_left = keyEvent.IsPress(); break;
+        case VK_UP:         m_up = keyEvent.IsPress(); break;
+        case VK_RIGHT:      m_right = keyEvent.IsPress(); break;
+        case VK_DOWN:       m_down = keyEvent.IsPress(); break;
+        case 'A':           m_a = keyEvent.IsPress(); break;
+        case 'W':           m_w = keyEvent.IsPress(); break;
+        case 'S':           m_s = keyEvent.IsPress(); break;
+        case 'D':           m_d = keyEvent.IsPress(); break;
+        }
+    }
+
+    UpdatePosition();
 }
 
 void MoveLookController::GoToClickLocation(float x, float y)
@@ -387,8 +413,7 @@ bool MoveLookController::IsMoving()
 void MoveLookController::LookLeft()
 {
     // Looking left is just spinning the camera in the negative theta direction
-    double timeDelta = m_currentTime - m_previousTime;
-    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+    float angle = static_cast<float>(m_turnSpeed * m_timeDelta);
     m_theta -= angle;
 
     // If shift is NOT down, then also rotate the player
@@ -398,8 +423,7 @@ void MoveLookController::LookLeft()
 void MoveLookController::LookRight()
 {
     // Looking right is just spinning the camera in the positive theta direction
-    double timeDelta = m_currentTime - m_previousTime;
-    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+    float angle = static_cast<float>(m_turnSpeed * m_timeDelta);
     m_theta += angle;
 
     // If shift is NOT down, then also rotate the player
@@ -419,8 +443,7 @@ void MoveLookController::LookUp()
     // LookUp is caused by SHIFT + UP arrow
     // This really just means move the camera closer to the y-axis, 
     // which is achieved by decreasing m_phi
-    double timeDelta = m_currentTime - m_previousTime;
-    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+    float angle = static_cast<float>(m_turnSpeed * m_timeDelta);
     m_phi = std::max(0.05f, m_phi - angle);         // don't let it get below 0.05
 }
 void MoveLookController::LookDown()
@@ -428,8 +451,7 @@ void MoveLookController::LookDown()
     // LookDown is caused by SHIFT + DOWN arrow
     // This really just means move the camera further from the positive y-axis, 
     // which is achieved by increasing m_phi
-    double timeDelta = m_currentTime - m_previousTime;
-    float angle = static_cast<float>(m_turnSpeed * timeDelta);
+    float angle = static_cast<float>(m_turnSpeed * m_timeDelta);
     m_phi = std::min(DirectX::XM_PIDIV2, m_phi + angle);    // don't let it go below horizontal
 }
 

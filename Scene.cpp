@@ -103,11 +103,16 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 {
 	m_currentTime = timer->GetTotalSeconds();
 
+	// This call is necessary UNTIL you update MoveLookController and get rid of FlyMLC and CoOMLC
+	m_moveLookController->SetTimeDelta(m_currentTime - m_previousTime);
+
 	// Let the scene be responsible for processing mouse and keyboard input. This is simply easier
 	// because some events don't need to be passed along to the move look controller and the scene
 	// has access to the Drawables within the scene and can do things like mouse over testing
 	ProcessMouseEvents(timer, mouse);
 	ProcessKeyboardEvents(timer, keyboard);
+
+
 
 	/*
 	// Update the move look control and get back the new view matrix
@@ -243,44 +248,21 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 
 void Scene::ProcessKeyboardEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard)
 {
-	// The MoveLookController should process events specifically for the purpose of moving the
-	// camera in the scene. Therefore, there are several events, such as just moving the mouse
-	// without having clicked, that the scene itself should be responsible for handling. So, allow
-	// the MoveLookController to peek at the mouse events that are present first. If there are events
-	// that the MoveLookController does not want to handle, process them here (MAKE SURE TO EMPTY
-	// THE EVENT QUEUE OTHERWISE THE EVENTS WILL PERSIST)
-	/*
-	Keyboard::Event keyEvent;
-	while (!keyboard->KeyIsEmpty())
-	{
-		keyEvent = keyboard->ReadKey();
-		switch (keyEvent.GetCode())
-		{
-		case VK_SHIFT:      m_shift = keyEvent.IsPress(); break;
-		case VK_CONTROL:    m_ctrl = keyEvent.IsPress(); break;
-		case VK_MENU:       m_alt = keyEvent.IsPress(); break;    // ALT key
-		case VK_LEFT:       m_left = keyEvent.IsPress(); break;
-		case VK_UP:         m_up = keyEvent.IsPress(); break;
-		case VK_RIGHT:      m_right = keyEvent.IsPress(); break;
-		case VK_DOWN:       m_down = keyEvent.IsPress(); break;
-		case 'A':           m_a = keyEvent.IsPress(); break;
-		case 'W':           m_w = keyEvent.IsPress(); break;
-		case 'S':           m_s = keyEvent.IsPress(); break;
-		case 'D':           m_d = keyEvent.IsPress(); break;
-		}
-	}
+	// There are two types of Keyboard messages: Generic key events and character events
+	// For generic keyboard events, right now, just let the MoveLookController handle these - however, 
+	// pressing the ENTER key will be one of these events which will be required to send chat messages
+	// For character events, just handle these directly although in the future, it will need to be determined
+	// when a character should get processed here or by the HUD
+	m_moveLookController->ProcessKeyboardEvents(keyboard);
 
-	// for non-WASD keys, just read from the keyboard's char buffer. The char will be
-	// placed on the keyboard's char queue when the key is pressed down, so there is no way
-	// of knowing when the char is released. This should be fine for now
+
 	while (!keyboard->CharIsEmpty())
 	{
 		switch (keyboard->ReadChar())
 		{
-		case 'c': CenterCameraBehindPlayer(); break;
+		case 'c': m_moveLookController->CenterCameraBehindPlayer(); break;
 		}
 	}
-	*/
 }
 
 void Scene::Draw()
