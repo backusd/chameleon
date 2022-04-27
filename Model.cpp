@@ -59,7 +59,7 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 	// Once the rootNode is created, all meshes will have a BoundingBox, so gather each one and
 	// use those values to establish an all encapsulating BoundingBox
 	std::vector<XMVECTOR> positions;
-	m_rootNode->GetBoundingBoxPositionsWithTransformation(positions);
+	m_rootNode->GetBoundingBoxPositionsWithTransformation(DirectX::XMMatrixIdentity(), positions); // Pass identity as parent matrix because root should not be transformed
 	m_boundingBox = std::make_unique<BoundingBox>(m_deviceResources, positions);
 }
 

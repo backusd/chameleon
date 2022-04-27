@@ -114,18 +114,16 @@ bool BoundingBox::RayIntersectionTest(XMVECTOR rayOrigin, XMVECTOR rayDirection,
 	return found;
 }
 
-void BoundingBox::GetBoundingBoxPositionsWithTransformation(const XMMATRIX& tranformation, std::vector<XMVECTOR>& positions)
+void BoundingBox::GetBoundingBoxPositionsWithTransformation(const XMMATRIX& transformation, std::vector<XMVECTOR>& positions)
 {
-	XMFLOAT3 position;
-
-	positions.push_back(xyz);
-	positions.push_back(Xyz);
-	positions.push_back(xYz);
-	positions.push_back(xyZ);
-	positions.push_back(XYz);
-	positions.push_back(XyZ);
-	positions.push_back(xYZ);
-	positions.push_back(XYZ);
+	positions.push_back(DirectX::XMVector3Transform(xyz, transformation));
+	positions.push_back(DirectX::XMVector3Transform(Xyz, transformation));
+	positions.push_back(DirectX::XMVector3Transform(xYz, transformation));
+	positions.push_back(DirectX::XMVector3Transform(xyZ, transformation));
+	positions.push_back(DirectX::XMVector3Transform(XYz, transformation));
+	positions.push_back(DirectX::XMVector3Transform(XyZ, transformation));
+	positions.push_back(DirectX::XMVector3Transform(xYZ, transformation));
+	positions.push_back(DirectX::XMVector3Transform(XYZ, transformation));
 }
 
 #ifndef NDEBUG
@@ -205,7 +203,7 @@ void BoundingBox::LoadBuffers()
 void BoundingBox::LoadPosition(const XMVECTOR& position, std::vector<SolidColorVertex>& vertices)
 {
 	SolidColorVertex v;
-	v.color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f); // Start with BLACK
+	v.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f); // Color the box RED
 
 	DirectX::XMStoreFloat4(&v.position, position);
 	v.position.w = 1.0f;

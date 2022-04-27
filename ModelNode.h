@@ -34,7 +34,7 @@ public:
 						const DirectX::XMMATRIX& projectionMatrix, 
 						float& distance);
 
-	void GetBoundingBoxPositionsWithTransformation(std::vector<DirectX::XMVECTOR>& positions);
+	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& parentModelMatrix, std::vector<DirectX::XMVECTOR>& positions);
 
 
 #ifndef NDEBUG

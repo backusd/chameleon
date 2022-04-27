@@ -207,15 +207,15 @@ bool ModelNode::IsMouseHovered(const XMVECTOR& clickPointNear, const XMVECTOR& c
 	return found;	
 }
 
-void ModelNode::GetBoundingBoxPositionsWithTransformation(std::vector<XMVECTOR>& positions)
+void ModelNode::GetBoundingBoxPositionsWithTransformation(const XMMATRIX& parentModelMatrix, std::vector<XMVECTOR>& positions)
 {
 	// Get all positions for the meshes this node owns
 	for (std::shared_ptr<Mesh> mesh : m_meshes)
-		mesh->GetBoundingBoxPositionsWithTransformation(GetModelMatrix(), positions);
+		mesh->GetBoundingBoxPositionsWithTransformation(GetModelMatrix() * parentModelMatrix, positions);
 
 	// Get all positions for all children nodes
 	for (std::unique_ptr<ModelNode>& node : m_childNodes)
-		node->GetBoundingBoxPositionsWithTransformation(positions);
+		node->GetBoundingBoxPositionsWithTransformation(GetModelMatrix() * parentModelMatrix, positions);
 }
 
 
@@ -234,7 +234,7 @@ void ModelNode::DrawImGui(std::string id)
 	std::string treeNodeName = (m_nodeName == "") ? "Unnamed Node##" + id : m_nodeName + "##" + id;
 	if (ImGui::TreeNode(treeNodeName.c_str()))
 	{
-		ImGui::Text("Position:");
+		ImGui::Text("Translation (prior to rotation):");
 		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionX" + id).c_str(), &m_translation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
 		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionY" + id).c_str(), &m_translation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
 		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionZ" + id).c_str(), &m_translation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
