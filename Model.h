@@ -25,7 +25,8 @@ public:
 	Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string fileName);
 	Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
 	
-	void Draw(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
+	void Draw(const DirectX::XMMATRIX& projectionMatrix);
+	void Update(const DirectX::XMMATRIX& parentModelMatrix);
 
 	std::shared_ptr<Mesh> GetRootNodeMesh() { return m_rootNode->GetMesh(0); }
 
@@ -34,6 +35,8 @@ public:
 #endif
 
 	bool IsMouseHovered(float mouseX, float mouseY, const DirectX::XMMATRIX& modelMatrix, const DirectX::XMMATRIX& projectionMatrix, float& distance);
+
+
 
 private:
 	void LoadMesh(const aiMesh& mesh);

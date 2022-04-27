@@ -13,7 +13,8 @@ public:
 
 	DirectX::XMMATRIX GetScaleMatrix() override;
 
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
+protected:
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override;
 
 private:
 	void CreateMaterialData();

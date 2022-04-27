@@ -13,8 +13,6 @@ public:
 				std::shared_ptr<MoveLookController> moveLookController,
 				std::string meshLookupName);
 
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override {}
-
 	bool ContainsPoint(float x, float z);
 	float GetHeight(float x, float z);
 	float GetMinX();
@@ -24,7 +22,6 @@ public:
 	float GetMinZ();
 	float GetMaxZ();
 	bool GetClickLocation(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMFLOAT3& clickLocation, float& distance);
-
 
 private:
 

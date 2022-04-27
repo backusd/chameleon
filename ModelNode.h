@@ -22,7 +22,8 @@ public:
 	ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 	ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, const aiNode& node, std::vector<std::shared_ptr<Mesh>> meshes);
 
-	void Draw(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
+	void Draw(const DirectX::XMMATRIX& projectionMatrix);
+	void Update(const DirectX::XMMATRIX& parentModelMatrix);
 
 	void SetName(std::string name) { m_nodeName = name; }
 	void AddMesh(std::shared_ptr<Mesh> mesh) { m_meshes.push_back(mesh); }
@@ -42,7 +43,7 @@ public:
 #endif
 
 private:
-	void UpdateModelViewProjectionConstantBuffer(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
+	void UpdateModelViewProjectionConstantBuffer(const DirectX::XMMATRIX& projectionMatrix);
 	DirectX::XMMATRIX GetModelMatrix();
 
 	std::shared_ptr<DeviceResources> m_deviceResources;

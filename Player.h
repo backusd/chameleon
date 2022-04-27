@@ -9,8 +9,6 @@ class Player : public Drawable
 public:
 	Player(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
-
 	DirectX::XMFLOAT3 CenterOfModel();
 
 	void MoveTo(DirectX::XMFLOAT3 location, float speed = 10.0f);
@@ -18,6 +16,9 @@ public:
 
 	void LookLeft(float angle);
 	void LookRight(float angle);
+
+protected:
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override;
 
 private:
 

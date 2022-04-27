@@ -13,7 +13,8 @@ public:
 	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(m_radius, m_radius, m_radius); }
 	void SetRadius(float radius) { m_radius = radius; }
 
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
+protected:
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override;
 
 private:
 	void CreateMaterialData();

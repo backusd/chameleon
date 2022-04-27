@@ -36,7 +36,7 @@ public:
 	DirectX::XMMATRIX GetModelMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() { return m_projectionMatrix; }
 
-	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) {}
+	void UpdateHelper(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
 	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }
 
 	float Roll() { return m_roll; }
@@ -67,7 +67,8 @@ public:
 
 protected:
 	void UpdateModelViewProjectionConstantBuffer();
-	
+	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) {}
+
 	std::string m_name;
 
 	std::unique_ptr<PhongMaterialProperties> m_material;

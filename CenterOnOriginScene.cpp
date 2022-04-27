@@ -164,8 +164,8 @@ void CenterOnOriginScene::Update(std::shared_ptr<StepTimer> timer, std::shared_p
 	// 
 	// Drawables should NOT need updating when being displayed in Center On Origin mode
 	//
-	m_drawables[0]->Update(timer, nullptr); // Update SkyDome because it needs to follow the camera
-	m_drawables[1]->Update(timer, nullptr);	// Update the Lighting because it needs to know about the camera location
+	m_drawables[0]->UpdateHelper(timer, nullptr); // Update SkyDome because it needs to follow the camera
+	m_drawables[1]->UpdateHelper(timer, nullptr);	// Update the Lighting because it needs to know about the camera location
 	// Update all drawables
 	//for (std::shared_ptr<Drawable> drawable : m_drawables)
 	//	drawable->Update(timer);

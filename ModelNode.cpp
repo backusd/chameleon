@@ -69,15 +69,18 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 		m_childNodes.push_back(std::make_unique<ModelNode>(deviceResources, moveLookController, *node.mChildren[iii], meshes));
 }
 
-void ModelNode::Draw(const XMMATRIX& parentModelMatrix, const XMMATRIX& projectionMatrix)
+void ModelNode::Update(const XMMATRIX& parentModelMatrix)
+{
+	// Update the model matrix for this node and then update all child nodes
+	m_accumulatedModelMatrix = this->GetModelMatrix() * parentModelMatrix;
+
+	for (std::unique_ptr<ModelNode>& node : m_childNodes)
+		node->Update(m_accumulatedModelMatrix);
+}
+
+void ModelNode::Draw(const XMMATRIX& projectionMatrix)
 {
 	INFOMAN(m_deviceResources);
-
-	// First thing to do is to update the accumulated model matrix
-	// This is important even for when there are no meshes, because the
-	// parent model matrix must still make its way down to the children
-	// NOTE: Must post-multiply the parent transform
-	m_accumulatedModelMatrix = this->GetModelMatrix() * parentModelMatrix;
 
 	// Bind the mesh (vertex and index buffers)
 	for (std::shared_ptr<Mesh> mesh : m_meshes)
@@ -85,7 +88,7 @@ void ModelNode::Draw(const XMMATRIX& parentModelMatrix, const XMMATRIX& projecti
 		mesh->Bind();
 
 		// Update the Model-view-projection constant buffer with the aggregated model matrix
-		UpdateModelViewProjectionConstantBuffer(parentModelMatrix, projectionMatrix);
+		UpdateModelViewProjectionConstantBuffer(projectionMatrix);
 
 		// Determine the type of draw call from the mesh
 		if (mesh->DrawIndexed())
@@ -104,10 +107,10 @@ void ModelNode::Draw(const XMMATRIX& parentModelMatrix, const XMMATRIX& projecti
 
 	// NOTE: Must reference the unique_ptr (cannot be copied)
 	for (std::unique_ptr<ModelNode>& node : m_childNodes)
-		node->Draw(m_accumulatedModelMatrix, projectionMatrix);
+		node->Draw(projectionMatrix);
 }
 
-void ModelNode::UpdateModelViewProjectionConstantBuffer(const XMMATRIX& parentModelMatrix, const XMMATRIX& projectionMatrix)
+void ModelNode::UpdateModelViewProjectionConstantBuffer(const XMMATRIX& projectionMatrix)
 {
 	INFOMAN(m_deviceResources);
 

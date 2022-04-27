@@ -113,25 +113,12 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	ProcessKeyboardEvents(timer, keyboard);
 
 
-
-	/*
-	// Update the move look control and get back the new view matrix
-#ifndef NDEBUG
-	if (m_useFlyMoveLookController)
-		m_flyMoveLookController->Update(timer, keyboard, mouse);
-	else
-		m_moveLookController->Update(timer, keyboard, mouse);
-#else
-	m_moveLookController->Update(timer, keyboard, mouse);
-#endif
-	*/
-
 	// Update the terrain
 	m_terrain->Update(timer);
 
 	// Update all drawables
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
-		drawable->Update(timer, m_terrain);
+		drawable->UpdateHelper(timer, m_terrain);
 
 
 	// Update the location of the camera because it is possible the player has moved and therefore the

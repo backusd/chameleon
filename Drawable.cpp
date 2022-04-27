@@ -83,6 +83,16 @@ void Drawable::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
+void Drawable::UpdateHelper(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
+{
+	// This function just calls the Update() method which may or may not be implemented by
+	// a derived class.It also handles updating the model so the derived class doesn't have to
+	this->Update(timer, terrain);
+
+	// Update the model so that each model node's accumulated matrix is up-to-date
+	m_model->Update(GetModelMatrix());
+}
+
 void Drawable::Draw()
 {
 	INFOMAN(m_deviceResources);
@@ -96,7 +106,7 @@ void Drawable::Draw()
 	// before submitting the vertices to be rendered
 	PreDrawUpdate();
 
-	m_model->Draw(GetModelMatrix(), m_projectionMatrix);
+	m_model->Draw(m_projectionMatrix);
 
 #ifndef NDEBUG
 	// Draw bounding boxes one or more meshes within the model need to have their bounding box drawn
@@ -110,7 +120,6 @@ void Drawable::Draw()
 
 		ObjectStore::GetBindable("solidfill")->Bind();							// Rasterizer State
 		ObjectStore::GetBindable("depth-enabled-depth-stencil-state")->Bind();	// Depth Stencil State
-
 
 		// Issue draw call to the model
 		m_model->DrawBoundingBox(GetModelMatrix(), m_projectionMatrix);

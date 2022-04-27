@@ -283,6 +283,7 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 #endif
 	};
 
+	/*
 	std::shared_ptr<Drawable> nanosuit2 = m_centerOnOriginScene->CreateDrawable();
 	std::unique_ptr<PhongMaterialProperties> material2 = std::make_unique<PhongMaterialProperties>();
 	material2->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
@@ -309,6 +310,7 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 		}
 #endif
 	};
+	*/
 
 
 

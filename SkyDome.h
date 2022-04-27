@@ -13,8 +13,8 @@ public:
 	SkyDome& operator=(const SkyDome&) = delete;
 
 
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
-
+protected:
+	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override;
 
 private:
 	void CreateAndAddPSBufferArray(); // This is necessary because the cube will create an immutable constant buffer for the sky color

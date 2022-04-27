@@ -94,10 +94,16 @@ void Model::LoadMesh(const aiMesh& mesh)
 	m_meshes.back()->LoadBuffers<OBJVertex>(vertices, indices);
 }
 
-void Model::Draw(const XMMATRIX& parentModelMatrix, const XMMATRIX& projectionMatrix)
+void Model::Update(const XMMATRIX& parentModelMatrix)
+{
+	// Update the model matrix for each node in the hierarchy
+	m_rootNode->Update(parentModelMatrix);
+}
+
+void Model::Draw(const XMMATRIX& projectionMatrix)
 {
 	// Draw the root node applying no transformations yet
-	m_rootNode->Draw(parentModelMatrix, projectionMatrix);
+	m_rootNode->Draw(projectionMatrix);
 }
 
 bool Model::IsMouseHovered(float mouseX, float mouseY, const XMMATRIX& modelMatrix, const XMMATRIX& projectionMatrix, float& distance)
