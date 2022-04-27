@@ -75,10 +75,8 @@ private:
 	// Mouse Input state variables
 	bool m_LButtonDown, m_RButtonDown, m_MButtonDown;
 	std::shared_ptr<Drawable> m_mouseHoveredDrawable;
-	std::shared_ptr<Drawable> m_LPressDrawable;
-	std::shared_ptr<Drawable> m_MPressDrawable;
-	std::shared_ptr<Drawable> m_RPressDrawable;
 	float m_distanceToHoveredDrawable;
+	float m_mouseClickX, m_mouseClickY;
 
 	// Keyboard Input state variables
 

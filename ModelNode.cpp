@@ -197,7 +197,7 @@ bool ModelNode::IsMouseHovered(const XMVECTOR& clickPointNear, const XMVECTOR& c
 	// Second, run the test for all child nodes
 	for (std::unique_ptr<ModelNode>& node : m_childNodes)
 	{
-		if (node->IsMouseHovered(clickPointNear, clickPointFar, projectionMatrix, distance))
+		if (node->IsMouseHovered(clickPointNear, clickPointFar, projectionMatrix, dist))
 		{
 			distance = std::min(distance, dist);
 			found = true;

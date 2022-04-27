@@ -158,6 +158,18 @@ void ContentWindow::AddSceneObjects()
 		}
 #endif
 	};
+	nanosuit->OnMouseHover = []()
+	{
+		int iii = 0;
+	};
+	nanosuit->OnMouseClick = []()
+	{
+		int iii = 0;
+	};
+	nanosuit->OnRightMouseClick = []()
+	{
+		int iii = 0;
+	};
 
 	/*
 

@@ -62,6 +62,7 @@ public:
 	// Functional for user interaction events
 	std::function<void()> OnMouseHover;
 	std::function<void()> OnMouseClick;
+	std::function<void()> OnRightMouseClick;
 
 
 protected:

@@ -11,10 +11,9 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_RButtonDown(false),
 	m_MButtonDown(false),
 	m_mouseHoveredDrawable(nullptr),
-	m_LPressDrawable(nullptr),
-	m_RPressDrawable(nullptr),
-	m_MPressDrawable(nullptr),
-	m_distanceToHoveredDrawable(0.0f)
+	m_distanceToHoveredDrawable(0.0f),
+	m_mouseClickX(0.0f),
+	m_mouseClickY(0.0f)
 {
 	// Create the move look controllers
 	m_moveLookController = std::make_shared<MoveLookController>(m_hWnd, deviceResources);
@@ -149,19 +148,37 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 
 		case Mouse::Event::Type::LPress:	
 			// On LPress, keep track of what object the press down was on as well as the initial click coordinates
-			
+			m_mouseClickX = mouse->GetPosX();
+			m_mouseClickY = mouse->GetPosY();
 			break;
+
 		case Mouse::Event::Type::LRelease:	
-			// On LRelease, if the user was just pulling the screen to turn the character, do nothing
-			// If the Drawable selected from the LPress event is still the same as the hovered object, 
-			//		call Drawable->OnClick event for that object
-			
+			// Only process a click event if the mouse is in the same location as the original LPress event
+			// The reason being that the user can click down and rotate the camera around the player
+			if (m_mouseClickX == mouse->GetPosX() && m_mouseClickY == mouse->GetPosY())
+			{
+				if (m_mouseHoveredDrawable != nullptr)
+					m_mouseHoveredDrawable->OnMouseClick();
+			}
 			break;
 
-		case Mouse::Event::Type::RPress:	break; // Do the same as LRelease, but keep separate variables
-		case Mouse::Event::Type::RRelease:  break;
+		case Mouse::Event::Type::RPress:	
+			// On RPress, keep track of what object the press down was on as well as the initial click coordinates
+			m_mouseClickX = mouse->GetPosX();
+			m_mouseClickY = mouse->GetPosY();
+			break;
 
-		case Mouse::Event::Type::MPress:	break; // Do the same as LRelease, but keep separate variables
+		case Mouse::Event::Type::RRelease:  
+			// Only process a click event if the mouse is in the same location as the original RPress event
+			// The reason being that the user can click down and rotate the camera around the player
+			if (m_mouseClickX == mouse->GetPosX() && m_mouseClickY == mouse->GetPosY())
+			{
+				if (m_mouseHoveredDrawable != nullptr)
+					m_mouseHoveredDrawable->OnRightMouseClick();
+			}
+			break;
+
+		case Mouse::Event::Type::MPress:	break; // Do nothing for now until we have a purpose for these events
 		case Mouse::Event::Type::MRelease:	break;
 
 		case Mouse::Event::Type::Move:		
@@ -183,6 +200,28 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 						}
 					}
 				}
+
+				if (m_mouseHoveredDrawable != nullptr)
+					m_mouseHoveredDrawable->OnMouseHover();
+			}
+			else if (m_LButtonDown)
+			{
+				// Allow the user to pull the screen to rotate the camera around the player
+				int iii = 0;
+
+
+
+
+
+			}
+			else if (m_RButtonDown)
+			{
+				// Allow the user to move the mouse up/down with RButtonDown to zoom in/out
+				int iii = 0;
+
+
+
+
 			}
 			break;
 		default:

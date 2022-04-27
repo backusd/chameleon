@@ -18,6 +18,7 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	PreDrawUpdate([]() {}),
 	OnMouseHover([]() {}),
 	OnMouseClick([]() {}),
+	OnRightMouseClick([]() {}),
 	m_material(nullptr),
 	m_name("Unnamed Drawable")
 {
