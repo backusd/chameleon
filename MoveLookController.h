@@ -48,6 +48,9 @@ public:
 	virtual void ZoomIn(int mouseX, int mouseY);
 	virtual void ZoomOut(int mouseX, int mouseY);
 
+	virtual void LookLeftRight(float angle);
+	virtual void LookUpDown(float angle);
+
 protected:
 	virtual void ResetState();
 	void UpdateProjectionMatrix();

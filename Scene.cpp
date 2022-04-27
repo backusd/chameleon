@@ -13,7 +13,11 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 	m_mouseHoveredDrawable(nullptr),
 	m_distanceToHoveredDrawable(0.0f),
 	m_mouseClickX(0.0f),
-	m_mouseClickY(0.0f)
+	m_mouseClickY(0.0f),
+	m_currentTime(0.0),
+	m_previousTime(0.0),
+	m_previousMouseMoveX(0.0f),
+	m_previousMouseMoveY(0.0f)
 {
 	// Create the move look controllers
 	m_moveLookController = std::make_shared<MoveLookController>(m_hWnd, deviceResources);
@@ -97,6 +101,8 @@ void Scene::WindowResized()
 
 void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> keyboard, std::shared_ptr<Mouse> mouse)
 {
+	m_currentTime = timer->GetTotalSeconds();
+
 	// Let the scene be responsible for processing mouse and keyboard input. This is simply easier
 	// because some events don't need to be passed along to the move look controller and the scene
 	// has access to the Drawables within the scene and can do things like mouse over testing
@@ -126,6 +132,8 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	// Update the location of the camera because it is possible the player has moved and therefore the
 	// camera needs to follow
 	m_moveLookController->UpdateCameraLocation();
+
+	m_previousTime = m_currentTime;
 }
 
 void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr<Mouse> mouse)
@@ -148,6 +156,7 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 
 		case Mouse::Event::Type::LPress:	
 			// On LPress, keep track of what object the press down was on as well as the initial click coordinates
+			m_LButtonDown = true;
 			m_mouseClickX = mouse->GetPosX();
 			m_mouseClickY = mouse->GetPosY();
 			break;
@@ -155,6 +164,7 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 		case Mouse::Event::Type::LRelease:	
 			// Only process a click event if the mouse is in the same location as the original LPress event
 			// The reason being that the user can click down and rotate the camera around the player
+			m_LButtonDown = false;
 			if (m_mouseClickX == mouse->GetPosX() && m_mouseClickY == mouse->GetPosY())
 			{
 				if (m_mouseHoveredDrawable != nullptr)
@@ -164,6 +174,7 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 
 		case Mouse::Event::Type::RPress:	
 			// On RPress, keep track of what object the press down was on as well as the initial click coordinates
+			m_RButtonDown = true;
 			m_mouseClickX = mouse->GetPosX();
 			m_mouseClickY = mouse->GetPosY();
 			break;
@@ -171,6 +182,7 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 		case Mouse::Event::Type::RRelease:  
 			// Only process a click event if the mouse is in the same location as the original RPress event
 			// The reason being that the user can click down and rotate the camera around the player
+			m_RButtonDown = false;
 			if (m_mouseClickX == mouse->GetPosX() && m_mouseClickY == mouse->GetPosY())
 			{
 				if (m_mouseHoveredDrawable != nullptr)
@@ -178,8 +190,8 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 			}
 			break;
 
-		case Mouse::Event::Type::MPress:	break; // Do nothing for now until we have a purpose for these events
-		case Mouse::Event::Type::MRelease:	break;
+		case Mouse::Event::Type::MPress:	m_MButtonDown = true;  break; // Do nothing for now until we have a purpose for these events
+		case Mouse::Event::Type::MRelease:	m_MButtonDown = false; break;
 
 		case Mouse::Event::Type::Move:		
 			// On a Move event, we need to determine what the mouse is over
@@ -207,22 +219,21 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 			else if (m_LButtonDown)
 			{
 				// Allow the user to pull the screen to rotate the camera around the player
-				int iii = 0;
-
-
-
-
-
+				float radiansPerPixel = DirectX::XM_2PI / 500.0f;
+				m_moveLookController->LookLeftRight((mouse->GetPosX() - m_previousMouseMoveX) * radiansPerPixel);
+				m_moveLookController->LookUpDown((mouse->GetPosY() - m_previousMouseMoveY) * radiansPerPixel);
 			}
 			else if (m_RButtonDown)
 			{
-				// Allow the user to move the mouse up/down with RButtonDown to zoom in/out
-				int iii = 0;
-
-
-
-
+				if (mouse->GetPosY() - m_previousMouseMoveY < 0.0f)
+					mlc->ZoomOut(mouse->GetPosX(), mouse->GetPosY());
+				else
+					mlc->ZoomIn(mouse->GetPosX(), mouse->GetPosY());
 			}
+
+			m_previousMouseMoveX = mouse->GetPosX();
+			m_previousMouseMoveY = mouse->GetPosY();
+
 			break;
 		default:
 			break;

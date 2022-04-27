@@ -77,9 +77,13 @@ private:
 	std::shared_ptr<Drawable> m_mouseHoveredDrawable;
 	float m_distanceToHoveredDrawable;
 	float m_mouseClickX, m_mouseClickY;
+	float m_previousMouseMoveX, m_previousMouseMoveY;
 
 	// Keyboard Input state variables
 
+	// Update variables
+	double m_currentTime;
+	double m_previousTime;
 
 
 

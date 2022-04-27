@@ -406,6 +406,14 @@ void MoveLookController::LookRight()
     if (!m_shift)
         m_player->LookRight(angle);
 }
+
+void MoveLookController::LookLeftRight(float angle)
+{
+    // If the angle passed in is negative, it will look left, otherwise right
+    m_theta += angle;
+    UpdateCameraLocation();
+}
+
 void MoveLookController::LookUp()
 {
     // LookUp is caused by SHIFT + UP arrow
@@ -423,4 +431,10 @@ void MoveLookController::LookDown()
     double timeDelta = m_currentTime - m_previousTime;
     float angle = static_cast<float>(m_turnSpeed * timeDelta);
     m_phi = std::min(DirectX::XM_PIDIV2, m_phi + angle);    // don't let it go below horizontal
+}
+
+void MoveLookController::LookUpDown(float angle)
+{
+    m_phi = std::min(DirectX::XM_PIDIV2, m_phi - angle);    // don't let it go below horizontal
+    UpdateCameraLocation();
 }
