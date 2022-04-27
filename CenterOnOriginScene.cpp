@@ -192,7 +192,7 @@ void CenterOnOriginScene::DrawImGui()
 
 	// Easiest way to make each drawable unique is to pass the number of the drawable to the DrawImGui function
 	for (unsigned int iii = 0; iii < m_drawables.size(); ++iii)
-		m_drawables[iii]->DrawImGui(std::to_string(iii));
+		m_drawables[iii]->DrawImGuiCollapsable(std::to_string(iii));
 
 	ImGui::End();
 

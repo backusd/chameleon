@@ -70,13 +70,18 @@ void SkyDome::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> 
 
 
 #ifndef NDEBUG
-void SkyDome::DrawImGui(std::string id)
+void SkyDome::DrawImGuiCollapsable(std::string id)
 {
 	if (ImGui::CollapsingHeader(("Sky Dome##" + id).c_str(), ImGuiTreeNodeFlags_None))
 	{
-		ImGui::Text("Do NOT adjust position because the Sky Dome");
-		ImGui::Text("is just a sphere around the user.");
-		ImGui::Text("Could probably add sliders to adjust color.");
+		DrawImGuiDetails(id);
 	}
+}
+
+void SkyDome::DrawImGuiDetails(std::string id)
+{
+	ImGui::Text("Do NOT adjust position because the Sky Dome");
+	ImGui::Text("is just a sphere around the user.");
+	ImGui::Text("Could probably add sliders to adjust color.");
 }
 #endif

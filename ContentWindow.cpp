@@ -158,13 +158,43 @@ void ContentWindow::AddSceneObjects()
 		}
 #endif
 	};
-	nanosuit->OnMouseHover = []()
+	nanosuit->OnMouseHover = [weakNanosuit = std::weak_ptr(nanosuit)]()
 	{
-		int iii = 0;
+		std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
+		if (nanosuit != nullptr)
+		{
+			std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
+			material->Material.Emissive = XMFLOAT4(0.091f, 0.91f, 0.091f, 1.0f);
+			material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+			material->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
+			material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			material->Material.SpecularPower = 7.0f;
+			nanosuit->SetPhongMaterial(std::move(material));
+		}
 	};
-	nanosuit->OnMouseClick = []()
+	nanosuit->OnMouseNotHover = [weakNanosuit = std::weak_ptr(nanosuit)]()
 	{
-		int iii = 0;
+		std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
+		if (nanosuit != nullptr)
+		{
+			std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
+			material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
+			material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+			material->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
+			material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			material->Material.SpecularPower = 7.0f;
+			nanosuit->SetPhongMaterial(std::move(material));
+		}
+	};
+	nanosuit->OnMouseClick = [weakNanosuit = std::weak_ptr(nanosuit),
+							  weakScene = std::weak_ptr(m_scene)]()
+	{
+		std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
+		std::shared_ptr<Scene> scene = weakScene.lock();
+
+#ifndef NDEBUG
+		scene->ImGuiObjectClicked(nanosuit);
+#endif
 	};
 	nanosuit->OnRightMouseClick = []()
 	{

@@ -17,6 +17,7 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_scaleZ(1.0f),
 	PreDrawUpdate([]() {}),
 	OnMouseHover([]() {}),
+	OnMouseNotHover([]() {}),
 	OnMouseClick([]() {}),
 	OnRightMouseClick([]() {}),
 	m_material(nullptr),
@@ -174,16 +175,21 @@ bool Drawable::IsMouseHovered(float mouseX, float mouseY, float& distance)
 }
 
 #ifndef NDEBUG
-void Drawable::DrawImGui(std::string id)
+void Drawable::DrawImGuiCollapsable(std::string id)
 {
 	if (ImGui::CollapsingHeader((m_name + "##" + id).c_str(), ImGuiTreeNodeFlags_None))
 	{
-		DrawImGuiPosition(id);
-		DrawImGuiRollPitchYaw(id);
-		DrawImGuiScale(id);
-		DrawImGuiMaterialSettings(id);
-		m_model->DrawImGui(id);
+		DrawImGuiDetails(id);
 	}
+}
+
+void Drawable::DrawImGuiDetails(std::string id)
+{
+	DrawImGuiPosition(id);
+	DrawImGuiRollPitchYaw(id);
+	DrawImGuiScale(id);
+	DrawImGuiMaterialSettings(id);
+	m_model->DrawImGui(id);
 }
 
 void Drawable::DrawImGuiPosition(std::string id)

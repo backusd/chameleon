@@ -90,11 +90,13 @@ private:
 #ifndef NDEBUG
 public:
 	void DrawImGui();
+	void ImGuiObjectClicked(std::shared_ptr<Drawable> drawable) { m_clickedObject = drawable; }
 
 private:
 	void UpdateMoveLookControllerSelection();
 	std::shared_ptr<FlyMoveLookController>				m_flyMoveLookController;
 	bool												m_useFlyMoveLookController;
+	std::shared_ptr<Drawable>							m_clickedObject;
 #endif
 };
 

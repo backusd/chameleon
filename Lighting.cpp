@@ -232,19 +232,24 @@ void Lighting::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain>
 
 
 #ifndef NDEBUG
-void Lighting::DrawImGui(std::string id)
+void Lighting::DrawImGuiCollapsable(std::string id)
 {
 	if (ImGui::CollapsingHeader(("Lighting##" + id).c_str(), ImGuiTreeNodeFlags_None))
 	{
-		ImGui::Text("Position:");
-
-		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionX" + id).c_str(), &m_position.x, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
-		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionY" + id).c_str(), &m_position.y, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
-		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionZ" + id).c_str(), &m_position.z, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
-
-		ImGui::Text("");
-		ImGui::Text("Could make this an array of lights and be able to change");
-		ImGui::Text("color and light type");
+		DrawImGuiDetails(id);
 	}
+}
+
+void Lighting::DrawImGuiDetails(std::string id)
+{
+	ImGui::Text("Position:");
+
+	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionX" + id).c_str(), &m_position.x, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+	ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionY" + id).c_str(), &m_position.y, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionZ" + id).c_str(), &m_position.z, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+
+	ImGui::Text("");
+	ImGui::Text("Could make this an array of lights and be able to change");
+	ImGui::Text("color and light type");
 }
 #endif

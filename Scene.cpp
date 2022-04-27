@@ -25,6 +25,7 @@ Scene::Scene(std::shared_ptr<DeviceResources> deviceResources, HWND hWnd) :
 #ifndef NDEBUG
 	m_flyMoveLookController = std::make_shared<FlyMoveLookController>(m_hWnd, deviceResources);
 	m_useFlyMoveLookController = false;
+	m_clickedObject = nullptr;
 #endif
 
 	CreateAndBindModelViewProjectionBuffer();
@@ -190,8 +191,8 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 			// If L/M/R Buttons are all NOT down, then call Drawable->OnMouseHover for the selected object (if not null)
 			if (!(m_LButtonDown || m_RButtonDown || m_MButtonDown))
 			{
-				m_mouseHoveredDrawable = nullptr;
 				float shortestDistance = FLT_MAX;
+				std::shared_ptr<Drawable> hoveredDrawable = nullptr;
 
 				for (std::shared_ptr<Drawable> drawable : m_drawables)
 				{
@@ -200,10 +201,16 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 						if (m_distanceToHoveredDrawable < shortestDistance)
 						{
 							shortestDistance = m_distanceToHoveredDrawable;
-							m_mouseHoveredDrawable = drawable;
+							hoveredDrawable = drawable;
 						}
 					}
 				}
+
+				// If the mouse is over something else now, call OnMouseNotHovered for the previously hovered drawable
+				if (hoveredDrawable != m_mouseHoveredDrawable && m_mouseHoveredDrawable != nullptr)
+					m_mouseHoveredDrawable->OnMouseNotHover();
+
+				m_mouseHoveredDrawable = hoveredDrawable;
 
 				if (m_mouseHoveredDrawable != nullptr)
 					m_mouseHoveredDrawable->OnMouseHover();
@@ -297,9 +304,17 @@ void Scene::DrawImGui()
 
 	// Easiest way to make each drawable unique is to pass the number of the drawable to the DrawImGui function
 	for (unsigned int iii = 0; iii < m_drawables.size(); ++iii)
-		m_drawables[iii]->DrawImGui(std::to_string(iii));
+		m_drawables[iii]->DrawImGuiCollapsable(std::to_string(iii));
 
 	ImGui::End();
+
+	// If there is a clicked object, draw the menu for that as well
+	if (m_clickedObject != nullptr)
+	{
+		ImGui::Begin(("Clicked Object: " + m_clickedObject->GetName()).c_str());
+		m_clickedObject->DrawImGuiDetails("clickedObject69");
+		ImGui::End();
+	}
 }
 
 void Scene::UpdateMoveLookControllerSelection()

@@ -43,6 +43,7 @@ public:
 	float Pitch() { return m_pitch; }
 	float Yaw() { return m_yaw; }
 
+	std::string GetName() { return m_name; }
 	void SetName(std::string name) { m_name = name; }
 	void SetModel(std::string fileName);
 	void SetRoll(float roll) { m_roll = roll; }
@@ -61,6 +62,7 @@ public:
 
 	// Functional for user interaction events
 	std::function<void()> OnMouseHover;
+	std::function<void()> OnMouseNotHover;
 	std::function<void()> OnMouseClick;
 	std::function<void()> OnRightMouseClick;
 
@@ -102,7 +104,8 @@ protected:
 #ifndef NDEBUG
 public:
 	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_model->SetMoveLookController(mlc); }
-	virtual void DrawImGui(std::string id);
+	virtual void DrawImGuiCollapsable(std::string id);
+	virtual void DrawImGuiDetails(std::string id);
 	void UpdatePhongMaterial();
 
 protected:

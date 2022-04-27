@@ -33,7 +33,8 @@ private:
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG
 public:
-	void DrawImGui(std::string id) override;
+	void DrawImGuiCollapsable(std::string id) override;
+	void DrawImGuiDetails(std::string id) override;
 
 
 #endif
