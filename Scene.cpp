@@ -239,7 +239,7 @@ void Scene::Draw()
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
 		drawable->Draw();
 
-	// m_terrain->Draw();
+	m_terrain->Draw();
 }
 
 void Scene::Activate()

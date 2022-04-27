@@ -194,7 +194,8 @@ void Drawable::DrawImGuiRollPitchYaw(std::string id)
 
 void Drawable::DrawImGuiScale(std::string id)
 {
-	ImGui::Text("Scale:");
+	ImGui::Text("Scale:"); 
+	ImGui::SameLine(); 
 	ImGui::Checkbox("Sync values", &m_syncScaleValues);
 
 	if (m_syncScaleValues)

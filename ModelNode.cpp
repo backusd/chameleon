@@ -16,7 +16,7 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
 	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
 #ifndef NDEBUG
-	, m_drawBoundingBox(true)
+	, m_drawBoundingBox(false)
 #endif
 {
 	// Leave m_mesh as nullptr until CreateMesh is called because vertex loading code 
@@ -33,7 +33,7 @@ ModelNode::ModelNode(std::shared_ptr<DeviceResources> deviceResources, std::shar
 	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
 	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity())
 #ifndef NDEBUG
-	, m_drawBoundingBox(true)
+	, m_drawBoundingBox(false)
 #endif
 {
 	m_nodeName = std::string(node.mName.C_Str());
@@ -234,6 +234,7 @@ void ModelNode::DrawImGui(std::string id)
 	std::string treeNodeName = (m_nodeName == "") ? "Unnamed Node##" + id : m_nodeName + "##" + id;
 	if (ImGui::TreeNode(treeNodeName.c_str()))
 	{
+		ImGui::Checkbox(("Draw Bounding Box##" + id).c_str(), &m_drawBoundingBox);
 		ImGui::Text("Translation (prior to rotation):");
 		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionX" + id).c_str(), &m_translation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
 		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionY" + id).c_str(), &m_translation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);

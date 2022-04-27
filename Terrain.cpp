@@ -14,8 +14,8 @@ Terrain::Terrain(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	m_minZ(FLT_MAX),
 	m_maxZ(-FLT_MAX)
 {
-	// Create the frustum (will have bad values to start but will get updated later
-	m_frustum = std::make_shared<Frustum>(1000.0f, DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity());
+	// Create the frustum (will have bad values to start but will get updated later)
+	m_frustum = std::make_shared<Frustum>(1500.0f, DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity());
 
 	m_terrainMesh = ObjectStore::GetTerrainMesh("terrain-mesh");
 	for (int iii = 0; iii < m_terrainMesh->TerrainCellCount(); ++iii)

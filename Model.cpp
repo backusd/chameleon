@@ -10,7 +10,7 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 	m_moveLookController(moveLookController),
 	m_boundingBox(nullptr)
 #ifndef NDEBUG
-	,m_drawBoundingBox(true)
+	,m_drawBoundingBox(false)
 #endif
 {
 	// Create the root node - will initially have no data and no name
@@ -24,7 +24,7 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 	m_rootNode(nullptr),
 	m_boundingBox(nullptr)
 #ifndef NDEBUG
-	,m_drawBoundingBox(true)
+	,m_drawBoundingBox(false)
 #endif
 {
 	Assimp::Importer imp;
@@ -152,8 +152,7 @@ bool Model::IsMouseHovered(float mouseX, float mouseY, const XMMATRIX& modelMatr
 #ifndef NDEBUG
 void Model::DrawImGui(std::string id)
 {
-	// There is no specific data to present from the model class itself, it is just a container
-	// to hold the root node
+	ImGui::Checkbox(("Model: Draw Bounding Box##" + id).c_str(), &m_drawBoundingBox);
 	m_rootNode->DrawImGui(id);
 }
 
