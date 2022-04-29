@@ -48,6 +48,7 @@
 #include "SkyDomeMesh.h"
 #include "DepthStencilState.h"
 #include "SphereMesh.h"
+#include "PlaneMesh.h"
 
 
 #ifndef NDEBUG

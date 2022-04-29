@@ -41,7 +41,7 @@ void Texture::Create(std::string filename)
 	{
 		scratchImage = LoadTGAImage(filename);
 	}
-	else if (extension == ".bmp" || extension == ".jpeg" || extension == ".png")
+	else if (extension == ".bmp" || extension == ".jpeg" || extension == ".jpg" || extension == ".png")
 	{
 		scratchImage = LoadWICImage(filename);
 	}
@@ -50,6 +50,23 @@ void Texture::Create(std::string filename)
 	const DirectX::Image* img = scratchImage->GetImage(0, 0, 0);
 	assert(img);
 
+	// Make sure the image has the correct format
+	if (img->format != m_textureDesc.Format)
+	{
+		DirectX::ScratchImage converted;
+		GFX_THROW_INFO(
+			DirectX::Convert(
+				*scratchImage->GetImage(0, 0, 0),
+				m_textureDesc.Format,
+				DirectX::TEX_FILTER_DEFAULT,
+				DirectX::TEX_THRESHOLD_DEFAULT,
+				converted
+			)
+		);
+
+		scratchImage = std::make_unique<DirectX::ScratchImage>(std::move(converted));
+		img = scratchImage->GetImage(0, 0, 0);
+	}
 
 	m_textureDesc.Height = img->height;
 	m_textureDesc.Width = img->width;

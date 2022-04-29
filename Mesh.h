@@ -21,6 +21,7 @@ public:
 	template <typename T, typename A>
 	void LoadBuffers(std::vector<T, A>& vertices, std::vector<unsigned short>& indices);
 
+	void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
 	virtual void Bind() override;
 	unsigned int IndexCount() { return m_indexCount; }
 	unsigned int VertexCount() { return m_vertexCount; }
@@ -49,7 +50,8 @@ protected:
 	std::vector<DirectX::XMVECTOR>	m_positions;
 	std::vector<unsigned short>		m_indices;
 
-
+	// Bindables for drawing the mesh (ex. Texture and Sampler)
+	std::vector<std::shared_ptr<Bindable>> m_bindables;
 
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG

@@ -45,7 +45,7 @@ Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared
 void Lighting::CreateLightProperties()
 {
 	m_lightProperties = LightProperties();
-	m_lightProperties.GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_lightProperties.GlobalAmbient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 
 	// The initial eye position - you will want to modify MoveLookController so the Eye
 	// position can be retrieved to also update the light position

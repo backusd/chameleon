@@ -115,6 +115,12 @@
     <Filter Include="assimp\Compiler">
       <UniqueIdentifier>{9b114af5-8bbf-46fe-8777-001d34e7b44b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Data\nanosuit-textured">
+      <UniqueIdentifier>{26d451e2-14ac-4a0e-b063-ecd8cead88cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\images">
+      <UniqueIdentifier>{56828224-0209-4692-b15d-01a08bb4fa97}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -383,6 +389,9 @@
     </ClCompile>
     <ClCompile Include="BoundingBox.cpp">
       <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="PlaneMesh.cpp">
+      <Filter>Source Files\Bindable\Meshes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -908,6 +917,9 @@
     <ClInclude Include="BoundingBox.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="PlaneMesh.h">
+      <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -962,6 +974,12 @@
     <None Include="models\nanosuit2.gltf">
       <Filter>Data</Filter>
     </None>
+    <None Include="models\nanosuit-textured\nanosuit.mtl">
+      <Filter>Data\nanosuit-textured</Filter>
+    </None>
+    <None Include="models\nanosuit-textured\nanosuit.obj">
+      <Filter>Data\nanosuit-textured</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="blackforest_cm.bmp">
@@ -996,6 +1014,63 @@
     </Image>
     <Image Include="colormap.bmp">
       <Filter>Data</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\arm_dif.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\arm_showroom_ddn.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\arm_showroom_spec.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\body_dif.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\body_showroom_ddn.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\body_showroom_spec.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\glass_ddn.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\glass_dif.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\hand_dif.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\hand_showroom_ddn.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\hand_showroom_spec.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\helmet_diff.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\helmet_showroom_ddn.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\helmet_showroom_spec.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\leg_dif.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\leg_showroom_ddn.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="models\nanosuit-textured\leg_showroom_spec.png">
+      <Filter>Data\nanosuit-textured</Filter>
+    </Image>
+    <Image Include="images\brickwall.jpg">
+      <Filter>Data\images</Filter>
+    </Image>
+    <Image Include="images\brickwall_normal.jpg">
+      <Filter>Data\images</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
@@ -1050,6 +1125,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="PhongTextureVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PhongTexturePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PhongTextureSpecularPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

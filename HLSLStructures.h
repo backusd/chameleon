@@ -106,7 +106,13 @@ struct LightProperties
     Light               Lights[MAX_LIGHTS]; // 80 * 8 bytes
 };  // Total:                                  672 bytes (42 * 16)
 
-
+struct PhongPSConfigurationData
+{
+    BOOL normalMapEnabled;      // Use 4-byte boolean to align with pixel shader constant buffer layout
+    BOOL specularMapEnabled;
+    float specularIntensity;
+    float specularPower;
+};
 
 // Terrain ===========================================================
 struct TerrainVertexType

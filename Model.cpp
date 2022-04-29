@@ -18,6 +18,34 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 	m_rootNode->AddMesh(mesh);
 }
 
+Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, BasicModelType basicModelType) :
+	m_deviceResources(deviceResources),
+	m_moveLookController(moveLookController),
+	m_rootNode(nullptr),
+	m_boundingBox(nullptr)
+#ifndef NDEBUG
+	, m_drawBoundingBox(false)
+#endif
+{
+	m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
+
+	switch (basicModelType)
+	{
+	case BasicModelType::Plane:
+		m_rootNode->AddMesh(ObjectStore::GetMesh("plane-mesh"));
+		break;
+	case BasicModelType::Cube:
+		m_rootNode->AddMesh(ObjectStore::GetMesh("cube-mesh")); // NOT TESTED
+		break;
+	case BasicModelType::Sphere:
+		m_rootNode->AddMesh(ObjectStore::GetMesh("sphere-mesh"));  // NOT TESTED
+		break;
+	case BasicModelType::Cylinder:
+		m_rootNode->AddMesh(ObjectStore::GetMesh("cylinder-mesh"));  // NOT TESTED
+		break;
+	}
+}
+
 Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string fileName) :
 	m_deviceResources(deviceResources),
 	m_moveLookController(moveLookController),
@@ -47,7 +75,7 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 		else
 		{
 			// Mesh does not exist in object store, so load it from assimp and add it to ObjectStore
-			LoadMesh(*scene->mMeshes[iii]);
+			LoadMesh(*scene->mMeshes[iii], scene->mMaterials);
 			ObjectStore::AddMesh(meshLookupName, m_meshes.back());
 		}
 	}
@@ -63,21 +91,24 @@ Model::Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<M
 	m_boundingBox = std::make_unique<BoundingBox>(m_deviceResources, positions);
 }
 
-void Model::LoadMesh(const aiMesh& mesh)
+void Model::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
 {
 	std::vector<OBJVertex> vertices;		// vertices for the vertex buffer
 	std::vector<unsigned short> indices;	// indices for the index buffer
 
 	vertices.reserve(mesh.mNumVertices);
-	for (unsigned int i = 0; i < mesh.mNumVertices; i++)
+	for (unsigned int iii = 0; iii < mesh.mNumVertices; iii++)
 	{
 		vertices.push_back(
 			{
-				{ mesh.mVertices[i].x, mesh.mVertices[i].y, mesh.mVertices[i].z },
-				{ 0.0f, 0.0f },	// Not sure yet how to get the texture coordinates
-				*reinterpret_cast<XMFLOAT3*>(&mesh.mNormals[i])
+				*reinterpret_cast<XMFLOAT3*>(&mesh.mVertices[iii]),
+				*reinterpret_cast<XMFLOAT2*>(&mesh.mTextureCoords[0][iii]), // Use texture at index 0, but there can be >1 texture
+				*reinterpret_cast<XMFLOAT3*>(&mesh.mNormals[iii])
 			}
 		);
+
+		// The V coordinate is stupidly flipped - Not sure how to tell when this is needed
+		vertices.back().texture.y = 1 - vertices.back().texture.y;
 	}
 
 	indices.reserve(mesh.mNumFaces * 3);
@@ -92,6 +123,178 @@ void Model::LoadMesh(const aiMesh& mesh)
 
 	m_meshes.push_back(std::make_shared<Mesh>(m_deviceResources));
 	m_meshes.back()->LoadBuffers<OBJVertex>(vertices, indices);
+
+	// Load the material ==================================================================================================================
+	
+	// Initialize a default Pixel Shader configuration
+	PhongPSConfigurationData psConfig;
+	psConfig.normalMapEnabled = FALSE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
+	psConfig.specularMapEnabled = FALSE;
+	psConfig.specularIntensity = 0.5f;
+	psConfig.specularPower = 1.0f;
+
+	// Material index will be negative if there is no material for this 
+	if (mesh.mMaterialIndex >= 0)
+	{
+		// Get the diffuse texture
+		const aiMaterial& material = *materials[mesh.mMaterialIndex];
+		aiString textureFileName;
+		material.GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName);
+		
+		// Create the texture
+		std::shared_ptr<Texture> texture = std::make_shared<Texture>(m_deviceResources);
+		texture->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
+
+		// Add the texture to a texture array (texture itself is not bindable)
+		std::shared_ptr<TextureArray> textureArray = std::make_shared<TextureArray>(m_deviceResources, TextureBindingLocation::PIXEL_SHADER);
+		textureArray->AddTexture(texture);
+
+
+		// Determine if the material has a specular map. If not, just use the shininess value
+		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			std::shared_ptr<Texture> specular = std::make_shared<Texture>(m_deviceResources);
+			specular->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
+			textureArray->AddTexture(specular);
+
+			psConfig.specularMapEnabled = TRUE;
+		}
+		else
+		{
+			// Use the material shininess as the specular power
+			material.Get(AI_MATKEY_SHININESS, psConfig.specularPower);
+		}
+		
+		// For some reason aiTextureType_HEIGHT is used to get the normal maps for OBJ files (not sure about other formats)
+		// even though there is an aiTextureType_NORMALS option
+		if (material.GetTexture(aiTextureType_HEIGHT, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			std::shared_ptr<Texture> normals = std::make_shared<Texture>(m_deviceResources);
+			normals->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
+			textureArray->AddTexture(normals);
+
+			psConfig.normalMapEnabled = TRUE;
+		}
+
+
+
+		if (material.GetTexture(aiTextureType_AMBIENT, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_BASE_COLOR, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_CLEARCOAT, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_DISPLACEMENT, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_EMISSION_COLOR, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_EMISSIVE, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_LIGHTMAP, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_METALNESS, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_NONE, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_NORMAL_CAMERA, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_OPACITY, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_REFLECTION, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_SHEEN, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_SHININESS, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_TRANSMISSION, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+		if (material.GetTexture(aiTextureType_UNKNOWN, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			int iii = 0;
+		}
+
+
+		m_meshes.back()->AddBindable(textureArray);
+		m_meshes.back()->AddBindable(std::make_shared<SamplerState>(m_deviceResources));
+	}
+
+
+	// Create a PS constant buffer for the PS configuration data
+	std::shared_ptr<ConstantBuffer> specularBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	specularBuffer->CreateBuffer<PhongPSConfigurationData>(
+		D3D11_USAGE_DEFAULT,			// Usage: Read-only by the GPU. Not accessible via CPU. MUST be initialized at buffer creation
+		0,								// CPU Access: No CPU access
+		0,								// Misc Flags: No miscellaneous flags
+		0,								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		static_cast<void*>(&psConfig)	// Initial Data: Fill the buffer with config data
+		);
+
+	// Create a constant buffer array which will be added as a bindable
+	std::shared_ptr<ConstantBufferArray> psConstantBufferArray = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
+
+	// Add the material constant buffer and the lighting constant buffer
+	psConstantBufferArray->AddBuffer(specularBuffer);
+	m_meshes.back()->AddBindable(psConstantBufferArray);
 }
 
 void Model::Update(const XMMATRIX& parentModelMatrix)

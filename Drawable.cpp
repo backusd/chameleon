@@ -30,7 +30,19 @@ void Drawable::SetModel(std::string fileName) {
 
 	// Getting the stem gets just the filename without the extension
 	m_name = std::filesystem::path(fileName).stem().string();
-}	
+}
+void Drawable::SetModel(BasicModelType basicModelType)
+{
+	m_model = std::make_unique<Model>(m_deviceResources, m_moveLookController, basicModelType);
+
+	switch (basicModelType)
+	{
+	case BasicModelType::Plane:		m_name = "Plane"; break;
+	case BasicModelType::Cube:		m_name = "Cube"; break;
+	case BasicModelType::Sphere:	m_name = "Sphere"; break;
+	case BasicModelType::Cylinder:	m_name = "Cylinder"; break;
+	}
+}
 
 void Drawable::SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> material)
 { 
@@ -173,6 +185,8 @@ bool Drawable::IsMouseHovered(float mouseX, float mouseY, float& distance)
 	// the mouse ray
 	return m_model->IsMouseHovered(mouseX, mouseY, GetModelMatrix(), m_projectionMatrix, distance);
 }
+
+
 
 #ifndef NDEBUG
 void Drawable::DrawImGuiCollapsable(std::string id)

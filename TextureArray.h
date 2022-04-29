@@ -22,6 +22,8 @@ public:
 	TextureArray(std::shared_ptr<DeviceResources> deviceResources, TextureBindingLocation bindToStage);
 
 	void AddTexture(std::string lookupName);
+	void AddTexture(std::shared_ptr<Texture> texture) { m_textures.push_back(texture); }
+
 	void Bind() override;
 
 private:

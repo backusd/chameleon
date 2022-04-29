@@ -125,13 +125,9 @@ void ContentWindow::AddSceneObjects()
 	// Lighting
 	//		Lighting should be draw second because it will update PS constant buffers that will be required for other objects
 	std::shared_ptr<Lighting> lighting = m_scene->AddDrawable<Lighting>();
-	lighting->SetPosition(XMFLOAT3(45.0f, 20.0f, 390.0f));
+	lighting->SetPosition(XMFLOAT3(57.0f, 15.5f, 381.0f));
 
-
-	//std::shared_ptr<Nanosuit> nanosuit = m_scene->AddDrawable<Nanosuit>();
-	//nanosuit->SetPosition(XMFLOAT3(45.0f, 7.0f, 380.0f));
-	//m_scene->SetPlayer(nanosuit);
-
+	/*
 	std::shared_ptr<Player> nanosuit = m_scene->CreatePlayer();
 	std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
 	material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
@@ -200,6 +196,70 @@ void ContentWindow::AddSceneObjects()
 	{
 		int iii = 0;
 	};
+	*/
+
+	std::shared_ptr<Player> nanosuit = m_scene->CreatePlayer();
+	std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
+	material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
+	material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	material->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
+	material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material->Material.SpecularPower = 7.0f;
+	//nanosuit->SetPhongMaterial(std::move(material));
+	nanosuit->SetModel("models/nanosuit-textured/nanosuit.obj");
+	nanosuit->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
+	nanosuit->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
+	nanosuit->AddBindable("phong-texture-pixel-shader");			// Pixel Shader
+	nanosuit->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
+	nanosuit->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
+	nanosuit->SetPosition(XMFLOAT3(55.1f, 9.3f, 377.7f));
+	//nanosuit->CreateAndAddPSBufferArray();
+	nanosuit->PreDrawUpdate = [weakNanosuit = std::weak_ptr(nanosuit)]() {
+#ifndef NDEBUG
+		std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
+		if (nanosuit != nullptr)
+		{
+			nanosuit->UpdatePhongMaterial();
+		}
+#endif
+	};
+
+
+	std::shared_ptr<Drawable> wall = m_scene->CreateDrawable();
+	wall->SetModel(BasicModelType::Plane);
+	wall->AddBindable("brick-wall-texture-array");
+	wall->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
+	wall->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
+	wall->AddBindable("phong-texture-pixel-shader");			// Pixel Shader
+	wall->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
+	wall->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
+	wall->SetPosition(XMFLOAT3(55.0f, 15.0f, 380.0f));
+	wall->SetScale(5.0f, 5.0f, 1.0f);
+
+	PhongPSConfigurationData psConfig;
+	psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
+	psConfig.specularMapEnabled = FALSE;
+	psConfig.specularIntensity = 0.1f;
+	psConfig.specularPower = 10.0f;
+
+	// Create a PS constant buffer for the PS configuration data
+	std::shared_ptr<ConstantBuffer> specularBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	specularBuffer->CreateBuffer<PhongPSConfigurationData>(
+		D3D11_USAGE_DEFAULT,			// Usage: Read-only by the GPU. Not accessible via CPU. MUST be initialized at buffer creation
+		0,								// CPU Access: No CPU access
+		0,								// Misc Flags: No miscellaneous flags
+		0,								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		static_cast<void*>(&psConfig)	// Initial Data: Fill the buffer with config data
+		);
+
+	// Create a constant buffer array which will be added as a bindable
+	std::shared_ptr<ConstantBufferArray> psConstantBufferArray = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
+
+	// Add the material constant buffer and the lighting constant buffer
+	psConstantBufferArray->AddBuffer(specularBuffer);
+	wall->AddBindable(psConstantBufferArray);
+	wall->AddBindable(std::make_shared<SamplerState>(m_deviceResources));
+
 
 	/*
 
@@ -286,6 +346,7 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 	suzanne->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	*/
 
+	/*
 	std::shared_ptr<Drawable> nanosuit = m_centerOnOriginScene->CreateDrawable();
 	std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
 	material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
@@ -297,7 +358,7 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 	nanosuit->SetModel("models/nanosuit.gltf");
 	nanosuit->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
 	nanosuit->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
-	nanosuit->AddBindable("phong-pixel-shader");					// Pixel Shader
+	nanosuit->AddBindable("phong-texture-pixel-shader");			// Pixel Shader
 	nanosuit->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
 	nanosuit->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
 	nanosuit->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -312,7 +373,7 @@ void ContentWindow::AddCenterOnOriginSceneObjects()
 		}
 #endif
 	};
-
+	*/
 	/*
 	std::shared_ptr<Drawable> nanosuit2 = m_centerOnOriginScene->CreateDrawable();
 	std::unique_ptr<PhongMaterialProperties> material2 = std::make_unique<PhongMaterialProperties>();
@@ -405,6 +466,8 @@ void ContentWindow::ObjectStoreAddShaders()
 
 	ObjectStore::AddBindable("phong-texture-vertex-shader-IA", phongTextureLayout);
 	ObjectStore::AddBindable("phong-texture-vertex-shader", std::make_shared<VertexShader>(m_deviceResources, phongTextureLayout->GetVertexShaderFileBlob()));
+	ObjectStore::AddBindable("phong-texture-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PhongTexturePixelShader.cso"));
+	ObjectStore::AddBindable("phong-texture-specular-pixel-shader", std::make_shared<PixelShader>(m_deviceResources, L"PhongTextureSpecularPixelShader.cso"));
 
 
 	// Sky Dome ======================================================================================================
@@ -433,6 +496,7 @@ void ContentWindow::ObjectStoreAddTerrains()
 }
 void ContentWindow::ObjectStoreAddMeshes()
 {
+	ObjectStore::AddMesh("plane-mesh", std::make_shared<PlaneMesh>(m_deviceResources));
 	ObjectStore::AddMesh("sphere-mesh", std::make_shared<SphereMesh>(m_deviceResources));
 	ObjectStore::AddMesh("solid-sphere-mesh", std::make_shared<SphereMesh>(m_deviceResources, true));
 	ObjectStore::AddMesh("box-filled-mesh", std::make_shared<BoxMesh>(m_deviceResources, true));
@@ -452,19 +516,19 @@ void ContentWindow::ObjectStoreAddConstantBuffers()
 {
 	std::shared_ptr<ConstantBuffer> b1 = std::make_shared<ConstantBuffer>(m_deviceResources);
 	std::shared_ptr<ConstantBuffer> b2 = std::make_shared<ConstantBuffer>(m_deviceResources);
-	std::shared_ptr<ConstantBuffer> b3 = std::make_shared<ConstantBuffer>(m_deviceResources);
+	std::shared_ptr<ConstantBuffer> b4 = std::make_shared<ConstantBuffer>(m_deviceResources);
 	std::shared_ptr<ConstantBuffer> b5 = std::make_shared<ConstantBuffer>(m_deviceResources);
 	std::shared_ptr<ConstantBuffer> b7 = std::make_shared<ConstantBuffer>(m_deviceResources);
 
 	b1->CreateBuffer<ModelViewProjectionConstantBuffer>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b2->CreateBuffer<PhongMaterialProperties>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
-	b3->CreateBuffer<LightProperties>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
+	b4->CreateBuffer<LightProperties>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b5->CreateBuffer<TerrainLightBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 	b7->CreateBuffer<SkyDomeColorBufferType>(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, 0, 0);
 
 	ObjectStore::AddConstantBuffer("model-view-projection-buffer", b1);
 	ObjectStore::AddConstantBuffer("phong-material-properties-buffer", b2);
-	ObjectStore::AddConstantBuffer("light-properties-buffer", b3);
+	ObjectStore::AddConstantBuffer("light-properties-buffer", b4);
 	ObjectStore::AddConstantBuffer("terrain-light-buffer", b5);
 	ObjectStore::AddConstantBuffer("sky-dome-gradient-buffer", b7);
 
@@ -542,6 +606,22 @@ void ContentWindow::ObjectStoreAddTextures()
 	dirtTextureArray->AddTexture("terrain-texture");
 	dirtTextureArray->AddTexture("terrain-normal-map-texture");
 	ObjectStore::AddBindable("dirt-terrain-texture-array", dirtTextureArray);
+
+
+	// Brick Wall
+	std::shared_ptr<Texture> brickWall = std::make_shared<Texture>(m_deviceResources);
+	brickWall->Create("images/brickwall.jpg");
+	ObjectStore::AddTexture("brick-wall-texture", brickWall);
+
+	std::shared_ptr<Texture> brickWallNormals = std::make_shared<Texture>(m_deviceResources);
+	brickWallNormals->Create("images/brickwall_normal.jpg");
+	ObjectStore::AddTexture("brick-wall-normals-texture", brickWallNormals);
+
+	std::shared_ptr<TextureArray> brickWallTextureArray = std::make_shared<TextureArray>(m_deviceResources, TextureBindingLocation::PIXEL_SHADER);
+	brickWallTextureArray->AddTexture("brick-wall-texture");
+	brickWallTextureArray->AddTexture("brick-wall-normals-texture");
+	brickWallTextureArray->AddTexture("brick-wall-normals-texture");
+	ObjectStore::AddBindable("brick-wall-texture-array", brickWallTextureArray);
 
 }
 void ContentWindow::ObjectStoreAddDepthStencilStates()

@@ -12,6 +12,8 @@
 #include <functional>
 #include <filesystem>
 
+
+
 // Forward declare the Terrain class because we will be passing a pointer to Terrain
 // to the pure virtual Update function
 class Terrain;
@@ -22,6 +24,7 @@ public:
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
 	void AddBindable(std::string lookupName) { m_bindables.push_back(ObjectStore::GetBindable(lookupName)); }
+	void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
 	void SetProjectionMatrix(DirectX::XMMATRIX projection) { m_projectionMatrix = projection; }
 
 	// The PreDrawUpdate function will execute immediately prior to performing the actual Draw call
@@ -46,6 +49,7 @@ public:
 	std::string GetName() { return m_name; }
 	void SetName(std::string name) { m_name = name; }
 	void SetModel(std::string fileName);
+	void SetModel(BasicModelType basicModelType);
 	void SetRoll(float roll) { m_roll = roll; }
 	void SetPitch(float pitch) { m_pitch = pitch; }
 	void SetYaw(float yaw) { m_yaw = yaw; }

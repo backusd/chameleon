@@ -18,12 +18,20 @@
 #include <fstream>
 #include <vector>
 
+enum class BasicModelType
+{
+	Plane,
+	Cube,
+	Sphere,
+	Cylinder
+};
 
 class Model
 {
 public:
 	Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string fileName);
 	Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
+	Model(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, BasicModelType basicModelType);
 	
 	void Draw(const DirectX::XMMATRIX& projectionMatrix);
 	void Update(const DirectX::XMMATRIX& parentModelMatrix);
@@ -39,7 +47,8 @@ public:
 
 
 private:
-	void LoadMesh(const aiMesh& mesh);
+	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials);
+
 
 	std::shared_ptr<DeviceResources>	m_deviceResources;
 	std::shared_ptr<MoveLookController> m_moveLookController;
@@ -56,6 +65,8 @@ private:
 
 	// BoundingBox to excapsulate the entire Model
 	std::unique_ptr<BoundingBox>	m_boundingBox;
+
+
 
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG

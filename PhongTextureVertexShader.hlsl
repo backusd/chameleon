@@ -13,6 +13,7 @@ struct PixelShaderInput
     float4 position : SV_POSITION;
     float4 positionWS : POS_WS;
     float3 normalWS : NORM_WS;
+    float2 tex : TEXCOORD0;
 };
 
 
@@ -25,6 +26,6 @@ PixelShaderInput main(VertexShaderInput input)
     output.position = mul(modelViewProjection, position); // Screen position
     output.positionWS = mul(model, position); // World space position
     output.normalWS = mul((float3x3) inverseTransposeModel, input.normal); // compute the world space normal
-
+    output.tex = input.tex;
     return output;
 }
