@@ -17,7 +17,6 @@ void PlaneMesh::LoadVertices()
 	INFOMAN(m_deviceResources);
 
 	// Vertex Buffer =================================================================================
-	// Create a plane in the xy-plane with bottom left at (0, 0) and top right at (1, 1)
 	std::vector<PlaneVertex> v(4);
 	v[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
 	v[1].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
@@ -29,12 +28,7 @@ void PlaneMesh::LoadVertices()
 	v[2].normal = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	v[3].normal = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
-//	v[0].texture = XMFLOAT2(0.0f, 0.0f);
-//	v[1].texture = XMFLOAT2(1.0f, 0.0f);
-//	v[2].texture = XMFLOAT2(0.0f, 1.0f);
-//	v[3].texture = XMFLOAT2(1.0f, 1.0f);
-
-	v[0].texture = XMFLOAT2(0.0f, 1.0f);
+	v[0].texture = XMFLOAT2(0.0f, 1.0f); // Texture coordinates must be (0,0) in top left and (1,1) in bottom right
 	v[1].texture = XMFLOAT2(1.0f, 1.0f);
 	v[2].texture = XMFLOAT2(0.0f, 0.0f);
 	v[3].texture = XMFLOAT2(1.0f, 0.0f);

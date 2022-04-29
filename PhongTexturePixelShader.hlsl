@@ -24,6 +24,13 @@ cbuffer PhongPSConfigurationData : register(b1)
     float specularPower;        // Specular Power - Will ONLY be used if specularMapEnabled is FALSE
 };
 
+cbuffer ModelViewProjectionConstantBuffer : register(b2)
+{
+    matrix model;
+    matrix modelViewProjection;
+    matrix inverseTransposeModel;
+};
+
 
 struct LightingResult
 {
@@ -167,10 +174,12 @@ float4 main(PixelShaderInput input) : SV_TARGET
         //input.normalWS = normalSample;
         
         input.normalWS.x = normalSample.x * 2.0f - 1.0f;
-        input.normalWS.y = normalSample.y * 2.0f - 1.0f;
-        input.normalWS.z = normalSample.z;
+        input.normalWS.y = -normalSample.y * 2.0f + 1.0f;
+        input.normalWS.z = normalSample.z * 2.0f - 1.0f;       
         
-        lit = ComputeLighting(input.positionWS, normalize(input.normalWS), input.tex);
+        float3 normal = mul((float3x3) inverseTransposeModel, input.normalWS);
+        
+        lit = ComputeLighting(input.positionWS, normalize(normal), input.tex);
     }
     else
     {

@@ -47,6 +47,9 @@ public:
 	std::shared_ptr<Drawable> CreateDrawable();
 	std::shared_ptr<Player> CreatePlayer();
 
+	std::shared_ptr<MoveLookController> GetMoveLookController() { return m_moveLookController; }
+
+
 	// In the future, we will need to be able to create a scene in memory before rendering it,
 	// which will require that certain events happen to finally render the scene. Right now, it is
 	// just used for switch the lighting PS constant buffer between the main scene and the center
