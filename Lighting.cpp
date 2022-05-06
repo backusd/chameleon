@@ -6,16 +6,12 @@ using DirectX::XMVECTORF32;
 using DirectX::XMVECTOR;
 
 Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController)
+	Drawable(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh"))
 {
 	m_position = XMFLOAT3(0.0f, 5.0f, 10.0f);
 
 	// This must be run first because some of the following methods may use the lighting data
 	CreateLightProperties();
-
-	// Can't seem to get solid coloring for the sphere, so I'm just going to use phong shading for now
-	// with material settings that make it solid white
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh"));
 
 	AddBindable("phong-vertex-shader");					// Vertex Shader
 	AddBindable("phong-vertex-shader-IA");				// Input Layout

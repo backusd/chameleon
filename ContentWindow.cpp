@@ -200,7 +200,7 @@ void ContentWindow::AddSceneObjects()
 
 	// Nanosuit
 	{
-		std::shared_ptr<Player> nanosuit = m_scene->CreatePlayer();
+		std::shared_ptr<Player> nanosuit = m_scene->CreatePlayer("models/nanosuit-textured/nanosuit.obj");
 		std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
 		material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
 		material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -208,7 +208,6 @@ void ContentWindow::AddSceneObjects()
 		material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		material->Material.SpecularPower = 7.0f;
 		//nanosuit->SetPhongMaterial(std::move(material));
-		nanosuit->SetModel("models/nanosuit-textured/nanosuit.obj");
 		nanosuit->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
 		nanosuit->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
 		nanosuit->AddBindable("phong-texture-pixel-shader");			// Pixel Shader
@@ -300,15 +299,9 @@ void ContentWindow::AddSceneObjects()
 
 
 
-
-
-
-
-
 	// Wall
 	{
-		std::shared_ptr<Drawable> wall = m_scene->CreateDrawable();
-		wall->SetModel(BasicModelType::Plane);
+		std::shared_ptr<Drawable> wall = m_scene->CreateDrawable(BasicModelType::Plane);
 		wall->AddBindable("brick-wall-texture-array");
 		wall->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
 		wall->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout

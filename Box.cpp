@@ -5,13 +5,10 @@ using DirectX::XMMATRIX;
 using DirectX::XMFLOAT4;
 
 Box::Box(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController)
+	Drawable(deviceResources, moveLookController, ObjectStore::GetMesh("box-filled-mesh"))
 {
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
-
-	//SetMesh("box-filled-mesh");
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("box-filled-mesh"));
 
 	AddBindable("phong-vertex-shader");					// Vertex Shader
 	AddBindable("phong-vertex-shader-IA");				// Input Layout

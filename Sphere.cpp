@@ -3,14 +3,11 @@
 using DirectX::XMFLOAT4;
 
 Sphere::Sphere(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController),
+	Drawable(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh")),
 	m_radius(1.0f)
 {
 	// This must be run first because some of the following methods may use the material data
 	CreateMaterialData();
-
-	//SetMesh("sphere-mesh");
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh"));
 
 	AddBindable("phong-vertex-shader");					// Vertex Shader
 	AddBindable("phong-vertex-shader-IA");				// Input Layout

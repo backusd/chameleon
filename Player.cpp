@@ -3,8 +3,8 @@
 
 using DirectX::XMFLOAT3;
 
-Player::Player(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController),
+Player::Player(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string modelFilename) :
+	Drawable(deviceResources, moveLookController, modelFilename),
 	m_movementSpeed(10.0f),
 	m_movingForward(false),
 	m_currentTime(0.0),

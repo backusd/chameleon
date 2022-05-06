@@ -137,6 +137,7 @@ void CenterOnOriginScene::CreateAndBindModelViewProjectionBuffer()
 	*/
 }
 
+/*
 std::shared_ptr<Drawable> CenterOnOriginScene::CreateDrawable()
 {
 	std::shared_ptr<Drawable> newItem = std::make_shared<Drawable>(m_deviceResources, m_moveLookController);
@@ -144,6 +145,7 @@ std::shared_ptr<Drawable> CenterOnOriginScene::CreateDrawable()
 	m_drawables.push_back(newItem);
 	return newItem;
 }
+*/
 
 void CenterOnOriginScene::WindowResized()
 {

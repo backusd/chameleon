@@ -15,6 +15,7 @@
 #include "Frustum.h"
 #include "FlyMoveLookController.h"
 #include "CenterOnOriginMoveLookController.h"
+#include "BoundingBox.h"
 
 #include "Drawable.h"
 #include "Box.h"
@@ -27,6 +28,7 @@
 #include <memory>
 #include <vector>
 #include <type_traits>
+#include <string>
 
 
 
@@ -44,8 +46,9 @@ public:
 
 	template <typename T>
 	std::shared_ptr<T> AddDrawable();
-	std::shared_ptr<Drawable> CreateDrawable();
-	std::shared_ptr<Player> CreatePlayer();
+	std::shared_ptr<Drawable> CreateDrawable(BasicModelType modelType);
+	std::shared_ptr<Drawable> CreateDrawable(std::string modelFilename);
+	std::shared_ptr<Player> CreatePlayer(std::string modelFilename);
 
 	std::shared_ptr<MoveLookController> GetMoveLookController() { return m_moveLookController; }
 
@@ -87,6 +90,23 @@ private:
 	// Update variables
 	double m_currentTime;
 	double m_previousTime;
+
+
+	// ----------------------------------
+	std::unique_ptr<ModelNode> m_rootNode;
+
+	// When loading a scene/model via assimp, the meshes are just stored in a flat
+	// array. The hierarchy of nodes then just have an index into that array. So, 
+	// for our purpose, the model we are building needs to first create a vector
+	// of shared pointers to these meshes and then as we build the node hierarchy,
+	// we assign out the meshes to the corresponding nodes
+	std::vector<std::shared_ptr<Mesh>> m_meshes;
+
+	// BoundingBox to excapsulate the entire Model
+	std::unique_ptr<::BoundingBox>	m_boundingBox;
+
+
+	// ----------------------------------
 
 
 

@@ -3,13 +3,10 @@
 using DirectX::XMFLOAT4;
 
 SkyDome::SkyDome(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
-	Drawable(deviceResources, moveLookController),
+	Drawable(deviceResources, moveLookController, ObjectStore::GetMesh("sky-dome-mesh")),
 	m_apexColor(XMFLOAT4(0.0f, 0.05f, 0.6f, 1.0f)),
 	m_centerColor(XMFLOAT4(0.0f, 0.5f, 0.8f, 1.0f))
 {
-	//SetMesh("sky-dome-mesh");
-	m_model = std::make_unique<Model>(deviceResources, moveLookController, ObjectStore::GetMesh("sky-dome-mesh"));
-
 	AddBindable("sky-dome-vertex-shader");				// Vertex Shader
 	AddBindable("sky-dome-vertex-shader-IA");			// Input Layout
 	AddBindable("sky-dome-pixel-shader");				// Pixel Shader

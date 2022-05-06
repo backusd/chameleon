@@ -2,12 +2,12 @@
 #include "pch.h"
 #include "Drawable.h"
 
-
+#include <string>
 
 class Player : public Drawable
 {
 public:
-	Player(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
+	Player(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string modelFilename);
 
 	DirectX::XMFLOAT3 CenterOfModel();
 

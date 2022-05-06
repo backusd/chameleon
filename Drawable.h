@@ -2,9 +2,11 @@
 #include "pch.h"
 #include "Bindable.h"
 #include "ObjectStore.h"
-#include "Model.h"
+#include "ModelNode.h"
+#include "BoundingBox.h"
 #include "StepTimer.h"
 #include "MoveLookController.h"
+#include "DrawableException.h"
 
 #include <vector>
 #include <memory>
@@ -13,6 +15,13 @@
 #include <filesystem>
 
 
+enum class BasicModelType
+{
+	Plane,
+	Cube,
+	Sphere,
+	Cylinder
+};
 
 // Forward declare the Terrain class because we will be passing a pointer to Terrain
 // to the pure virtual Update function
@@ -21,7 +30,9 @@ class Terrain;
 class Drawable
 {
 public:
-	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
+	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, BasicModelType modelType);
+	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string filename);
+	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
 
 	void AddBindable(std::string lookupName) { m_bindables.push_back(ObjectStore::GetBindable(lookupName)); }
 	void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
@@ -48,8 +59,6 @@ public:
 
 	std::string GetName() { return m_name; }
 	void SetName(std::string name) { m_name = name; }
-	void SetModel(std::string fileName);
-	void SetModel(BasicModelType basicModelType);
 	void SetRoll(float roll) { m_roll = roll; }
 	void SetPitch(float pitch) { m_pitch = pitch; }
 	void SetYaw(float yaw) { m_yaw = yaw; }
@@ -71,9 +80,37 @@ public:
 	std::function<void()> OnRightMouseClick;
 
 
+
+	// -------------------------------------------------------------
+	//std::shared_ptr<RasterizerState> m_rasterizerState;
+	//std::vector<std::shared_ptr<SamplerState>> m_samplerStates;
+	//ShadingEffect m_shadingEffect;
+
+
+
+	std::unique_ptr<ModelNode> m_rootNode;
+
+	// When loading a scene/model via assimp, the meshes are just stored in a flat
+	// array. The hierarchy of nodes then just have an index into that array. So, 
+	// for our purpose, the model we are building needs to first create a vector
+	// of shared pointers to these meshes and then as we build the node hierarchy,
+	// we assign out the meshes to the corresponding nodes
+	std::vector<std::shared_ptr<Mesh>> m_meshes;
+
+	// BoundingBox to excapsulate the entire Model
+	std::unique_ptr<::BoundingBox>	m_boundingBox;
+
+
+	// -------------------------------------------------------------
+
+
+
+
+
 protected:
 	void UpdateModelViewProjectionConstantBuffer();
 	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) {}
+	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials);
 
 	std::string m_name;
 
@@ -88,7 +125,6 @@ protected:
 	DirectX::XMMATRIX m_projectionMatrix;
 
 	std::vector<std::shared_ptr<Bindable>> m_bindables;
-	std::unique_ptr<Model> m_model;
 
 
 	DirectX::XMFLOAT3 m_position; // Every object will have a "center point" location
@@ -107,7 +143,7 @@ protected:
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG
 public:
-	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_model->SetMoveLookController(mlc); }
+	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_rootNode->SetMoveLookController(mlc); }
 	virtual void DrawImGuiCollapsable(std::string id);
 	virtual void DrawImGuiDetails(std::string id);
 	void UpdatePhongMaterial();
@@ -117,9 +153,6 @@ protected:
 	void DrawImGuiRollPitchYaw(std::string id);
 	void DrawImGuiScale(std::string id);
 	virtual void DrawImGuiMaterialSettings(std::string id);
-
-	// Bool on whether or not one or more of the meshes need to have a bounding box drawn
-	bool NeedDrawBoundingBox();
 
 	// Phong material
 	bool m_materialNeedsUpdate = false;
@@ -132,6 +165,11 @@ protected:
 	// Bool on whether or not to sync the scale values together
 	bool m_syncScaleValues = true;
 
-	// Bool on whether or not one or more of the meshes need to have a bounding box drawn
+	// ------------------------
+	void DrawBoundingBox(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
+	bool NeedDrawBoundingBox();
+	bool m_drawBoundingBox;
+
+	// ---------------------------
 #endif
 };

@@ -40,7 +40,7 @@ public:
 	void Draw();
 	template <typename T>
 	std::shared_ptr<T> AddDrawable();
-	std::shared_ptr<Drawable> CreateDrawable();
+	//std::shared_ptr<Drawable> CreateDrawable();
 
 	// In the future, we will need to be able to create a scene in memory before rendering it,
 	// which will require that certain events happen to finally render the scene. Right now, it is
