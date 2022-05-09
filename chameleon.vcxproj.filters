@@ -357,9 +357,6 @@
     <ClCompile Include="Sphere.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
-    <ClCompile Include="ModelNode.cpp">
-      <Filter>Source Files\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="DrawableException.cpp">
       <Filter>Source Files\Exceptions</Filter>
     </ClCompile>
@@ -639,9 +636,6 @@
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="Sphere.h">
-      <Filter>Header Files\Drawable</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelNode.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="DrawableException.h">

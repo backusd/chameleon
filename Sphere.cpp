@@ -70,8 +70,3 @@ void Sphere::CreateAndAddPSBufferArray()
 	psConstantBufferArray->AddBuffer(materialBuffer);
 	m_bindables.push_back(psConstantBufferArray);
 }
-
-void Sphere::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
-{
-
-}

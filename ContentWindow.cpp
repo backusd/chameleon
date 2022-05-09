@@ -215,6 +215,7 @@ void ContentWindow::AddSceneObjects()
 		nanosuit->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
 		nanosuit->SetPosition(XMFLOAT3(55.1f, 9.3f, 377.7f));
 		//nanosuit->CreateAndAddPSBufferArray();
+		/*
 		nanosuit->PreDrawUpdate = [this, weakNanosuit = std::weak_ptr(nanosuit), weakScene = std::weak_ptr(m_scene)]() {
 
 			std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
@@ -239,7 +240,8 @@ void ContentWindow::AddSceneObjects()
 				);
 
 				ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-				XMMATRIX model = nanosuit->GetModelMatrix();
+				//XMMATRIX model = nanosuit->GetModelMatrix();
+				XMMATRIX model = nanosuit->GetPreParentTransformModelMatrix();
 				XMMATRIX viewProjection = scene->GetMoveLookController()->ViewMatrix() * scene->GetMoveLookController()->ProjectionMatrix();
 				DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
 				DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
@@ -251,18 +253,19 @@ void ContentWindow::AddSceneObjects()
 			}
 
 
-/*#ifndef NDEBUG
-			
-			if (nanosuit != nullptr)
-			{
-				nanosuit->UpdatePhongMaterial();
-			}
-#endif*/
+//#ifndef NDEBUG
+//			
+//			if (nanosuit != nullptr)
+//			{
+//				nanosuit->UpdatePhongMaterial();
+//			}
+//#endif
 		};
+		*/
 
 		PhongPSConfigurationData psConfig;
-		psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
-		psConfig.specularMapEnabled = TRUE;
+		psConfig.normalMapEnabled = FALSE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
+		psConfig.specularMapEnabled = FALSE;
 		psConfig.specularIntensity = 0.2f;
 		psConfig.specularPower = 10.0f;
 
@@ -334,7 +337,7 @@ void ContentWindow::AddSceneObjects()
 				);
 
 				ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-				XMMATRIX model = wall->GetModelMatrix();
+				XMMATRIX model = wall->GetPreParentTransformModelMatrix();
 				XMMATRIX viewProjection = scene->GetMoveLookController()->ViewMatrix() * scene->GetMoveLookController()->ProjectionMatrix();
 				DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
 				DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);

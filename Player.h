@@ -17,8 +17,7 @@ public:
 	void LookLeft(float angle);
 	void LookRight(float angle);
 
-protected:
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override;
+	void UpdatePhysics(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override;
 
 private:
 

@@ -8,7 +8,7 @@ using DirectX::XMVECTOR;
 Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController) :
 	Drawable(deviceResources, moveLookController, ObjectStore::GetMesh("sphere-mesh"))
 {
-	m_position = XMFLOAT3(0.0f, 5.0f, 10.0f);
+	m_translation = XMFLOAT3(0.0f, 5.0f, 10.0f);
 
 	// This must be run first because some of the following methods may use the lighting data
 	CreateLightProperties();
@@ -33,6 +33,11 @@ Lighting::Lighting(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	CreateAndAddPSBufferArray();
 
 	PreDrawUpdate = [this]() {
+
+		// Update the light location as well as the eye position of the camera
+		DirectX::XMStoreFloat4(&m_lightProperties.EyePosition, m_moveLookController->Position());
+		m_lightProperties.Lights[0].Position = XMFLOAT4(m_translation.x, m_translation.y, m_translation.z, 1.0f);
+
 		// Updating of any additional constant buffers or other pipeline resources should go here
 		UpdatePSConstantBuffer();
 	};
@@ -83,7 +88,7 @@ void Lighting::CreateLightProperties()
 		// Make the light slightly offset from the initial eye position
 		//XMFLOAT4 LightPosition = XMFLOAT4(std::sin(totalTime + offset * i) * radius, 9.0f, std::cos(totalTime + offset * i) * radius, 1.0f);
 		
-		XMFLOAT4 LightPosition = XMFLOAT4(m_position.x, m_position.y, m_position.z, 1.0f);
+		XMFLOAT4 LightPosition = XMFLOAT4(m_translation.x, m_translation.y, m_translation.z, 1.0f);
 		light.Position = LightPosition;
 		XMVECTOR LightDirection = DirectX::XMVectorSet(-LightPosition.x, -LightPosition.y, -LightPosition.z, 0.0f);
 		XMStoreFloat4(&light.Direction, DirectX::XMVector3Normalize(LightDirection));
@@ -218,13 +223,6 @@ void Lighting::UpdatePSConstantBuffer()
 	*/
 }
 
-void Lighting::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
-{
-	// Update the light location as well as the eye position of the camera
-	DirectX::XMStoreFloat4(&m_lightProperties.EyePosition, m_moveLookController->Position());
-	m_lightProperties.Lights[0].Position = XMFLOAT4(m_position.x, m_position.y, m_position.z, 1.0f);
-}
-
 
 
 #ifndef NDEBUG
@@ -240,9 +238,9 @@ void Lighting::DrawImGuiDetails(std::string id)
 {
 	ImGui::Text("Position:");
 
-	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionX" + id).c_str(), &m_position.x, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
-	ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionY" + id).c_str(), &m_position.y, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
-	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionZ" + id).c_str(), &m_position.z, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionX" + id).c_str(), &m_translation.x, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+	ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionY" + id).c_str(), &m_translation.y, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
+	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##lightPositionZ" + id).c_str(), &m_translation.z, 0.5f, -FLT_MAX, FLT_MAX, "%.1f", ImGuiSliderFlags_None);
 
 	ImGui::Text("");
 	ImGui::Text("Could make this an array of lights and be able to change");

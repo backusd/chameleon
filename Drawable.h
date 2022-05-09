@@ -2,7 +2,6 @@
 #include "pch.h"
 #include "Bindable.h"
 #include "ObjectStore.h"
-#include "ModelNode.h"
 #include "BoundingBox.h"
 #include "StepTimer.h"
 #include "MoveLookController.h"
@@ -13,6 +12,11 @@
 #include <string>
 #include <functional>
 #include <filesystem>
+
+// Assimp
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 enum class BasicModelType
@@ -33,10 +37,12 @@ public:
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, BasicModelType modelType);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string filename);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
+	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
+
 
 	void AddBindable(std::string lookupName) { m_bindables.push_back(ObjectStore::GetBindable(lookupName)); }
 	void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
-	void SetProjectionMatrix(DirectX::XMMATRIX projection) { m_projectionMatrix = projection; }
+	void SetProjectionMatrix(DirectX::XMMATRIX projection);
 
 	// The PreDrawUpdate function will execute immediately prior to performing the actual Draw call
 	// within the Draw function. This allows updating of any constant buffers that may have been
@@ -46,12 +52,14 @@ public:
 	void Draw();
 
 	// Every object should provide how to scale itself
-	virtual DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixScaling(m_scaleX, m_scaleY, m_scaleZ); }
-	DirectX::XMMATRIX GetModelMatrix();
+	virtual DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixScaling(m_scaling.x, m_scaling.y, m_scaling.z); }
+	DirectX::XMMATRIX GetPreParentTransformModelMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() { return m_projectionMatrix; }
 
-	void UpdateHelper(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain);
-	void SetPosition(DirectX::XMFLOAT3 position) { m_position = position; }
+	virtual void UpdatePhysics(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) {}
+	void UpdateRenderData();
+	
+	void SetPosition(DirectX::XMFLOAT3 position) { m_translation = position; }
 
 	float Roll() { return m_roll; }
 	float Pitch() { return m_pitch; }
@@ -62,9 +70,9 @@ public:
 	void SetRoll(float roll) { m_roll = roll; }
 	void SetPitch(float pitch) { m_pitch = pitch; }
 	void SetYaw(float yaw) { m_yaw = yaw; }
-	void SetScale(DirectX::XMFLOAT3 scale) { m_scaleX = scale.x; m_scaleY = scale.y; m_scaleZ = scale.z; }
-	void SetScale(float x, float y, float z) { m_scaleX = x; m_scaleY = y; m_scaleZ = z; }
-	void SetScale(float xyz) { m_scaleX = xyz; m_scaleY = xyz; m_scaleZ = xyz; }
+	void SetScale(DirectX::XMFLOAT3 scale) { m_scaling = scale; }
+	void SetScale(float x, float y, float z) { m_scaling = DirectX::XMFLOAT3(x, y, z); }
+	void SetScale(float xyz) { m_scaling = DirectX::XMFLOAT3(xyz, xyz, xyz); }
 	void SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> material);
 	void CreateAndAddPSBufferArray();
 
@@ -81,14 +89,66 @@ public:
 
 
 
+
+
+
+
+
+
+protected:
+	// This Update function is designed to be called during the recursive Update of a Drawable hierarchy.
+	void UpdateRenderData(const DirectX::XMMATRIX& parentModelMatrix);
+	void UpdateModelViewProjectionConstantBuffer();
+	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials);
+	void ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
+	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& parentModelMatrix, std::vector<DirectX::XMVECTOR>& positions);
+	bool IsMouseHovered(const DirectX::XMVECTOR& clickPointNear,
+		const DirectX::XMVECTOR& clickPointFar,
+		const DirectX::XMMATRIX& projectionMatrix,
+		float& distance);
+
+	std::string m_name;			// Name for the object hierarchy as a whole
+	std::string m_nodeName;		// Name for this specific drawable node within the hierarchy
+
+	std::unique_ptr<PhongMaterialProperties> m_material;
+	std::shared_ptr<ConstantBuffer> m_materialConstantBuffer;
+
+
+
+	std::shared_ptr<DeviceResources> m_deviceResources;
+	std::shared_ptr<MoveLookController> m_moveLookController;
+
+	DirectX::XMMATRIX m_projectionMatrix;
+
+	std::vector<std::shared_ptr<Bindable>> m_bindables;
+
+
+	// DirectX::XMFLOAT3 m_position; // Every object will have a "center point" location
+
+	// Rotation about the internal center point
+	float m_roll;
+	float m_pitch;
+	float m_yaw;
+
+
 	// -------------------------------------------------------------
 	//std::shared_ptr<RasterizerState> m_rasterizerState;
+	//std::shared_ptr<DepthStencilState> m_depthStencilState;
 	//std::vector<std::shared_ptr<SamplerState>> m_samplerStates;
 	//ShadingEffect m_shadingEffect;
 
 
+	std::vector<std::unique_ptr<Drawable>> m_children;
+	std::shared_ptr<Mesh> m_mesh;
 
-	std::unique_ptr<ModelNode> m_rootNode;
+	DirectX::XMFLOAT3 m_rotation;
+	DirectX::XMFLOAT3 m_translation;
+	DirectX::XMFLOAT3 m_scaling;
+	DirectX::XMMATRIX m_accumulatedModelMatrix;
+
+	// std::unique_ptr<ModelNode> m_rootNode;
+
+
 
 	// When loading a scene/model via assimp, the meshes are just stored in a flat
 	// array. The hierarchy of nodes then just have an index into that array. So, 
@@ -104,46 +164,10 @@ public:
 	// -------------------------------------------------------------
 
 
-
-
-
-protected:
-	void UpdateModelViewProjectionConstantBuffer();
-	virtual void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) {}
-	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials);
-
-	std::string m_name;
-
-	std::unique_ptr<PhongMaterialProperties> m_material;
-	std::shared_ptr<ConstantBuffer> m_materialConstantBuffer;
-
-
-
-	std::shared_ptr<DeviceResources> m_deviceResources;
-	std::shared_ptr<MoveLookController> m_moveLookController;
-
-	DirectX::XMMATRIX m_projectionMatrix;
-
-	std::vector<std::shared_ptr<Bindable>> m_bindables;
-
-
-	DirectX::XMFLOAT3 m_position; // Every object will have a "center point" location
-
-	// Rotation about the internal center point
-	float m_roll;
-	float m_pitch;
-	float m_yaw;
-
-	// Scale Values
-	float m_scaleX;
-	float m_scaleY;
-	float m_scaleZ;
-
-
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG
 public:
-	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc) { m_moveLookController = mlc; m_rootNode->SetMoveLookController(mlc); }
+	void SetMoveLookController(std::shared_ptr<MoveLookController> mlc);
 	virtual void DrawImGuiCollapsable(std::string id);
 	virtual void DrawImGuiDetails(std::string id);
 	void UpdatePhongMaterial();
@@ -153,6 +177,7 @@ protected:
 	void DrawImGuiRollPitchYaw(std::string id);
 	void DrawImGuiScale(std::string id);
 	virtual void DrawImGuiMaterialSettings(std::string id);
+	void DrawImGuiNodeHierarchy(std::string id);
 
 	// Phong material
 	bool m_materialNeedsUpdate = false;
@@ -166,9 +191,10 @@ protected:
 	bool m_syncScaleValues = true;
 
 	// ------------------------
-	void DrawBoundingBox(const DirectX::XMMATRIX& parentModelMatrix, const DirectX::XMMATRIX& projectionMatrix);
+	void DrawBoundingBox();
 	bool NeedDrawBoundingBox();
 	bool m_drawBoundingBox;
+	bool m_drawWholeBoundingBox;
 
 	// ---------------------------
 #endif

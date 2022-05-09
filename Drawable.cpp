@@ -3,6 +3,7 @@
 using DirectX::XMFLOAT2;
 using DirectX::XMFLOAT3;
 using DirectX::XMFLOAT4;
+using DirectX::XMFLOAT4X4;
 using DirectX::XMMATRIX;
 using DirectX::XMVECTOR;
 
@@ -10,13 +11,13 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_deviceResources(deviceResources),
 	m_moveLookController(moveLookController),
 	m_projectionMatrix(DirectX::XMMatrixIdentity()),
-	m_position(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_rotation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
+	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity()),
 	m_roll(0.0f),
 	m_pitch(0.0f),
 	m_yaw(0.0f),
-	m_scaleX(1.0f),
-	m_scaleY(1.0f),
-	m_scaleZ(1.0f),
 	PreDrawUpdate([]() {}),
 	OnMouseHover([]() {}),
 	OnMouseNotHover([]() {}),
@@ -24,30 +25,29 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	OnRightMouseClick([]() {}),
 	m_material(nullptr),
 	m_name("Unnamed Drawable"),
-	m_rootNode(nullptr),
+	m_nodeName("Unnamed Drawable Node"),
 	m_boundingBox(nullptr)
 #ifndef NDEBUG
-	, m_drawBoundingBox(false)
+	, m_drawBoundingBox(false),
+	m_drawWholeBoundingBox(false)
 #endif
 {
-	m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
-
 	switch (modelType)
 	{
 	case BasicModelType::Plane:
-		m_rootNode->AddMesh(ObjectStore::GetMesh("plane-mesh"));
+		m_mesh = ObjectStore::GetMesh("plane-mesh");
 		m_name = "Plane";
 		break;
 	case BasicModelType::Cube:
-		m_rootNode->AddMesh(ObjectStore::GetMesh("cube-mesh")); // NOT TESTED
+		m_mesh = ObjectStore::GetMesh("cube-mesh"); // NOT TESTED
 		m_name = "Cube";
 		break;
 	case BasicModelType::Sphere:
-		m_rootNode->AddMesh(ObjectStore::GetMesh("sphere-mesh"));  // NOT TESTED
+		m_mesh = ObjectStore::GetMesh("sphere-mesh"); // NOT TESTED
 		m_name = "Sphere";
 		break;
 	case BasicModelType::Cylinder:
-		m_rootNode->AddMesh(ObjectStore::GetMesh("cylinder-mesh"));  // NOT TESTED
+		m_mesh = ObjectStore::GetMesh("cylinder-mesh"); // NOT TESTED
 		m_name = "Cylinder";
 		break;
 	}
@@ -57,13 +57,13 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_deviceResources(deviceResources),
 	m_moveLookController(moveLookController),
 	m_projectionMatrix(DirectX::XMMatrixIdentity()),
-	m_position(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_rotation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
+	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity()),
 	m_roll(0.0f),
 	m_pitch(0.0f),
 	m_yaw(0.0f),
-	m_scaleX(1.0f),
-	m_scaleY(1.0f),
-	m_scaleZ(1.0f),
 	PreDrawUpdate([]() {}),
 	OnMouseHover([]() {}),
 	OnMouseNotHover([]() {}),
@@ -71,27 +71,27 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	OnRightMouseClick([]() {}),
 	m_material(nullptr),
 	m_name("Unnamed Drawable"),
-	m_rootNode(nullptr),
+	m_nodeName("Unnamed Drawable Node"),
 	m_boundingBox(nullptr)
 #ifndef NDEBUG
-	, m_drawBoundingBox(false)
+	, m_drawBoundingBox(false),
+	m_drawWholeBoundingBox(false)
 #endif
 {
-	m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController);
-	m_rootNode->AddMesh(mesh);
+	m_mesh = mesh;
 }
 
 Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string filename) :
 	m_deviceResources(deviceResources),
 	m_moveLookController(moveLookController),
 	m_projectionMatrix(DirectX::XMMatrixIdentity()),
-	m_position(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_rotation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
+	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity()),
 	m_roll(0.0f),
 	m_pitch(0.0f),
 	m_yaw(0.0f),
-	m_scaleX(1.0f),
-	m_scaleY(1.0f),
-	m_scaleZ(1.0f),
 	PreDrawUpdate([]() {}),
 	OnMouseHover([]() {}),
 	OnMouseNotHover([]() {}),
@@ -99,10 +99,11 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	OnRightMouseClick([]() {}),
 	m_material(nullptr),
 	m_name("Unnamed Drawable"),
-	m_rootNode(nullptr),
+	m_nodeName("Unnamed Drawable Node"),
 	m_boundingBox(nullptr)
 #ifndef NDEBUG
-	, m_drawBoundingBox(false)
+	, m_drawBoundingBox(false),
+	m_drawWholeBoundingBox(false)
 #endif
 {
 	// Getting the stem gets just the filename without the extension
@@ -133,15 +134,106 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 		}
 	}
 
-	// Build up the node hierarchy (just requires constructing the root node, which will 
-	// recursively build up the children nodes)
-	m_rootNode = std::make_unique<ModelNode>(m_deviceResources, m_moveLookController, *scene->mRootNode, m_meshes);
+
+	// This constructor is only used for the root node, so just get the root node and if there are any children,
+	// a different constructor will be used
+	//aiNode node = *scene->mRootNode;
+	ConstructFromAiNode(*scene->mRootNode, m_meshes);
+
+	// Once the drawable hierarchy is created, we can clear out the vector of all meshes that resides in the root node
+	// because each child node now has a shared_ptr to the necessary mesh
+	m_meshes.clear();
 
 	// Once the rootNode is created, all meshes will have a BoundingBox, so gather each one and
 	// use those values to establish an all encapsulating BoundingBox
 	std::vector<XMVECTOR> positions;
-	m_rootNode->GetBoundingBoxPositionsWithTransformation(DirectX::XMMatrixIdentity(), positions); // Pass identity as parent matrix because root should not be transformed
+	GetBoundingBoxPositionsWithTransformation(DirectX::XMMatrixIdentity(), positions); // Pass identity as parent matrix because root should not be transformed
 	m_boundingBox = std::make_unique<BoundingBox>(m_deviceResources, positions);
+}
+
+Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes) :
+	m_deviceResources(deviceResources),
+	m_moveLookController(moveLookController),
+	m_projectionMatrix(DirectX::XMMatrixIdentity()),
+	m_translation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_rotation(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	m_scaling(XMFLOAT3(1.0f, 1.0f, 1.0f)),
+	m_accumulatedModelMatrix(DirectX::XMMatrixIdentity()),
+	m_roll(0.0f),
+	m_pitch(0.0f),
+	m_yaw(0.0f),
+	PreDrawUpdate([]() {}),
+	OnMouseHover([]() {}),
+	OnMouseNotHover([]() {}),
+	OnMouseClick([]() {}),
+	OnRightMouseClick([]() {}),
+	m_material(nullptr),
+	m_name(name),
+	m_nodeName("Unnamed Drawable Node"),
+	m_boundingBox(nullptr)
+#ifndef NDEBUG
+	, m_drawBoundingBox(false),
+	m_drawWholeBoundingBox(false)
+#endif
+{
+	ConstructFromAiNode(node, meshes);
+}
+
+void Drawable::ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes)
+{
+	// Keep track of the node name
+	m_nodeName = std::string(node.mName.C_Str());
+
+	// Decompose the transformation to get the individual components
+	XMMATRIX transform = DirectX::XMMatrixTranspose(
+		DirectX::XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&node.mTransformation))
+	);
+	XMVECTOR scale, rotation, translation;
+	DirectX::XMMatrixDecompose(&scale, &rotation, &translation, transform);
+
+	DirectX::XMStoreFloat3(&m_scaling, scale);
+	DirectX::XMStoreFloat3(&m_rotation, rotation);
+	DirectX::XMStoreFloat3(&m_translation, translation);
+
+	if (m_rotation.x != 0.0f || m_rotation.y != 0.0f || m_rotation.z != 0.0f)
+	{
+		std::ostringstream oss;
+		oss << "Drawable: '" << m_name << "' Node: '" << m_nodeName << "' has non - unity rotation transform : " << std::endl;
+		oss << "   " << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << std::endl;
+		oss << "This is not yet supported";
+		throw DrawableException(__LINE__, __FILE__, oss.str());
+	}
+
+	// Right now, we are forcing each drawable node to only contain a single mesh
+	if (node.mNumMeshes > 1)
+	{
+		std::ostringstream oss;
+		oss << "Drawable: '" << m_name << "' Node: '" << m_nodeName << "' has more than one mesh: " << std::endl;
+		oss << "   Number of meshes: " << node.mNumMeshes << std::endl;
+		oss << "We currently only support a Drawable having at most one mesh";
+		throw DrawableException(__LINE__, __FILE__, oss.str());
+	}
+
+	// NOTE: the node is NOT required to have a mesh. In the case of OBJ files, 
+	// the root node is basically an empty node that houses all the children nodes
+	if (node.mNumMeshes == 1)
+		m_mesh = meshes[node.mMeshes[0]]; // Reminder: node.mMeshes is just an int array where each int is an index into the all meshes array
+
+	// Construct the children, must be sure to pass the name that represents the drawable as a whole as well as a reference
+	// to the entire list of meshes
+	for (unsigned int iii = 0; iii < node.mNumChildren; ++iii)
+		m_children.push_back(std::make_unique<Drawable>(m_deviceResources, m_moveLookController, m_name, *node.mChildren[iii], m_meshes));
+}
+
+void Drawable::GetBoundingBoxPositionsWithTransformation(const XMMATRIX& parentModelMatrix, std::vector<XMVECTOR>& positions)
+{
+	// Right now, we force there to be at most one mesh per drawable
+	if (m_mesh != nullptr)
+		m_mesh->GetBoundingBoxPositionsWithTransformation(GetPreParentTransformModelMatrix() * parentModelMatrix, positions);
+	
+	// Get all positions for all children nodes
+	for (std::unique_ptr<Drawable>& child : m_children)
+		child->GetBoundingBoxPositionsWithTransformation(GetPreParentTransformModelMatrix() * parentModelMatrix, positions);
 }
 
 void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
@@ -201,7 +293,6 @@ void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
 		// Add the texture to a texture array (texture itself is not bindable)
 		std::shared_ptr<TextureArray> textureArray = std::make_shared<TextureArray>(m_deviceResources, TextureBindingLocation::PIXEL_SHADER);
 		textureArray->AddTexture(texture);
-
 
 		// Determine if the material has a specular map. If not, just use the shininess value
 		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS)
@@ -351,7 +442,12 @@ void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
 }
 
 
-
+void Drawable::SetProjectionMatrix(DirectX::XMMATRIX projection) 
+{ 
+	m_projectionMatrix = projection; 
+	for (std::unique_ptr<Drawable>& child : m_children)
+		child->SetProjectionMatrix(projection);
+}
 
 void Drawable::SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> material)
 { 
@@ -405,15 +501,24 @@ void Drawable::CreateAndAddPSBufferArray()
 	m_bindables.push_back(psConstantBufferArray);
 }
 
-void Drawable::UpdateHelper(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
+void Drawable::UpdateRenderData()
 {
-	// This function just calls the Update() method which may or may not be implemented by
-	// a derived class.It also handles updating the model so the derived class doesn't have to
-	this->Update(timer, terrain);
-
-	// Update the model matrix for each node in the hierarchy
-	m_rootNode->Update(GetModelMatrix());
+	// This Update function is public and will be called by the Scene. In order to recursively
+	// update the drawable hierarchy, we must call the other Update function (which is protected)
+	// Because this is the root node in the hierarchy, we can pass in the identity matrix and the
+	// next Update function will correctly compute the accumulated model matrix
+	UpdateRenderData(DirectX::XMMatrixIdentity());
 }
+
+void Drawable::UpdateRenderData(const XMMATRIX& parentModelMatrix)
+{
+	// Update the model matrix for this node and then update all children
+	m_accumulatedModelMatrix = this->GetPreParentTransformModelMatrix() * parentModelMatrix;
+
+	for (std::unique_ptr<Drawable>& child : m_children)
+		child->UpdateRenderData(m_accumulatedModelMatrix);
+}
+
 
 void Drawable::Draw()
 {
@@ -428,8 +533,34 @@ void Drawable::Draw()
 	// before submitting the vertices to be rendered
 	PreDrawUpdate();
 
-	// Drawing the root node will recursively draw all children nodes
-	m_rootNode->Draw(m_projectionMatrix);
+	// Bind the mesh (vertex and index buffers) 
+	// NOTE: Only allowing a single mesh per Drawable at most
+	if (m_mesh != nullptr)
+	{
+		m_mesh->Bind();
+
+		// Update the Model-view-projection constant buffer with the aggregated model matrix
+		UpdateModelViewProjectionConstantBuffer();
+
+		// Determine the type of draw call from the mesh
+		if (m_mesh->DrawIndexed())
+		{
+			GFX_THROW_INFO_ONLY(
+				m_deviceResources->D3DDeviceContext()->DrawIndexed(m_mesh->IndexCount(), 0u, 0u)
+			);
+		}
+		else
+		{
+			GFX_THROW_INFO_ONLY(
+				m_deviceResources->D3DDeviceContext()->Draw(m_mesh->VertexCount(), 0u)
+			);
+		}
+	}
+
+	// Draw all children
+	for (std::unique_ptr<Drawable>& child : m_children)
+		child->Draw();
+
 
 #ifndef NDEBUG
 	// Determine if any bounding boxes need to be draw for any of the nodes
@@ -445,7 +576,7 @@ void Drawable::Draw()
 		ObjectStore::GetBindable("depth-enabled-depth-stencil-state")->Bind();	// Depth Stencil State
 
 		// Recursively draw any visible bounding boxes
-		DrawBoundingBox(GetModelMatrix(), m_projectionMatrix);
+		DrawBoundingBox();
 	}
 #endif
 }
@@ -471,7 +602,8 @@ void Drawable::UpdateModelViewProjectionConstantBuffer()
 	);
 
 	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-	XMMATRIX model = this->GetModelMatrix();
+	//XMMATRIX model = this->GetModelMatrix();
+	XMMATRIX model = m_accumulatedModelMatrix;
 	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_projectionMatrix;
 	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
 	DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
@@ -482,11 +614,11 @@ void Drawable::UpdateModelViewProjectionConstantBuffer()
 	);
 }
 
-XMMATRIX Drawable::GetModelMatrix()
+XMMATRIX Drawable::GetPreParentTransformModelMatrix()
 {
 	return DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *
 		GetScaleMatrix() *
-		DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+		DirectX::XMMatrixTranslation(m_translation.x, m_translation.y, m_translation.z);
 }
 
 bool Drawable::IsMouseHovered(float mouseX, float mouseY, float& distance)
@@ -509,7 +641,7 @@ bool Drawable::IsMouseHovered(float mouseX, float mouseY, float& distance)
 		0, 1,
 		m_projectionMatrix,
 		viewMatrix,
-		GetModelMatrix());		// Use the model matrix for the drawable itself because the bounding box should be offset according to that transformation
+		m_accumulatedModelMatrix);		// Use the model matrix for the drawable itself because the bounding box should be offset according to that transformation
 
 	rayDestination = XMVector3Unproject(
 		clickPointFar,
@@ -518,23 +650,92 @@ bool Drawable::IsMouseHovered(float mouseX, float mouseY, float& distance)
 		0, 1,
 		m_projectionMatrix,
 		viewMatrix,
-		GetModelMatrix());
+		m_accumulatedModelMatrix);
 
 	rayDirection = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(rayDestination, rayOrigin));
 
-	// Determine if the mouse ray intersects the bounding box. If so, pass it along to the root node
+	// Determine if the mouse ray intersects the bounding box. If so, call the other IsMouseHovered function to recursively determine if the mouse is over the drawable
 	//		- Have to add a check here to make sure the bounding box is not null because we don't yet have a 
 	//		- a bounding box for terrain
-	// NOTE: We do NOT have to pass the model matrix because each node already keeps track of it's accumulated model matrix
+	// NOTE: We do NOT have to pass the model matrix because each drawable already keeps track of it's accumulated model matrix
 	if (m_boundingBox != nullptr && m_boundingBox->RayIntersectionTest(rayOrigin, rayDirection, distance))
-		return m_rootNode->IsMouseHovered(clickPointNear, clickPointFar, m_projectionMatrix, distance);
+		return IsMouseHovered(clickPointNear, clickPointFar, m_projectionMatrix, distance);
 
 	return false;
+}
+
+bool Drawable::IsMouseHovered(const XMVECTOR& clickPointNear, const XMVECTOR& clickPointFar, const XMMATRIX& projectionMatrix, float& distance)
+{
+	// NOTE: We do NOT need to pass the parent's model matrix into this function because this class keeps
+	//		 track of the accumulated model matrix. Assuming the Update is done correctly, this class will
+	//		 already have an up-to-date model matrix
+
+	// Compute the ray origin and ray direction vector
+	XMVECTOR rayOrigin, rayDestination, rayDirection;
+
+	D3D11_VIEWPORT viewport = m_deviceResources->GetScreenViewport();
+	XMMATRIX viewMatrix = m_moveLookController->ViewMatrix();
+
+	// Here, we use the identity matrix for the World matrix because we don't want to translate
+	// the vectors as if they were at the origin. If we did want to do that, we would use XMMatrixTranslation(eye.x, eye.y, eye.z)
+	rayOrigin = XMVector3Unproject(
+		clickPointNear,
+		viewport.TopLeftX, viewport.TopLeftY,
+		viewport.Width, viewport.Height,
+		0, 1,
+		projectionMatrix,
+		viewMatrix,
+		m_accumulatedModelMatrix);
+
+	rayDestination = XMVector3Unproject(
+		clickPointFar,
+		viewport.TopLeftX, viewport.TopLeftY,
+		viewport.Width, viewport.Height,
+		0, 1,
+		projectionMatrix,
+		viewMatrix,
+		m_accumulatedModelMatrix);
+
+	rayDirection = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(rayDestination, rayOrigin));
+
+
+	// First, run the test for the meshes of this node
+	float dist;
+	bool found = false;
+	distance = FLT_MAX;
+
+	// ModelNode can have multiple meshes, so loop over each one
+	if (m_mesh != nullptr && m_mesh->RayIntersectionTest(rayOrigin, rayDirection, dist))
+	{
+		distance = std::min(distance, dist);
+		found = true;
+	}
+
+	// Second, run the test for all child nodes
+	for (std::unique_ptr<Drawable>& child : m_children)
+	{
+		if (child->IsMouseHovered(clickPointNear, clickPointFar, projectionMatrix, dist))
+		{
+			distance = std::min(distance, dist);
+			found = true;
+		}
+	}
+
+	return found;
 }
 
 
 
 #ifndef NDEBUG
+void Drawable::SetMoveLookController(std::shared_ptr<MoveLookController> mlc) 
+{ 
+	m_moveLookController = mlc; 
+
+	for (std::unique_ptr<Drawable>& child : m_children)
+		child->SetMoveLookController(mlc);
+}
+
+
 void Drawable::DrawImGuiCollapsable(std::string id)
 {
 	if (ImGui::CollapsingHeader((m_name + "##" + id).c_str(), ImGuiTreeNodeFlags_None))
@@ -550,16 +751,40 @@ void Drawable::DrawImGuiDetails(std::string id)
 	DrawImGuiScale(id);
 	DrawImGuiMaterialSettings(id);
 
-	ImGui::Checkbox(("Draw Bounding Box##" + id).c_str(), &m_drawBoundingBox);
-	m_rootNode->DrawImGui(id);
+	ImGui::Checkbox(("Draw Whole Bounding Box##" + id).c_str(), &m_drawWholeBoundingBox);
+	DrawImGuiNodeHierarchy(id);
+}
+
+void Drawable::DrawImGuiNodeHierarchy(std::string id)
+{
+	std::string treeNodeName = (m_nodeName == "") ? "Unnamed Node##" + id : m_nodeName + "##" + id;
+	if (ImGui::TreeNode(treeNodeName.c_str()))
+	{
+		ImGui::Checkbox(("Draw Bounding Box##" + id).c_str(), &m_drawBoundingBox);
+		ImGui::Text("Translation (prior to rotation):");
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionX" + id).c_str(), &m_translation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionY" + id).c_str(), &m_translation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionZ" + id).c_str(), &m_translation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+
+		ImGui::Text("Orientation:");
+		ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeRoll" + m_nodeName + id).c_str(), &m_roll, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+		ImGui::Text("   Pitch: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePitch" + m_nodeName + id).c_str(), &m_pitch, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+		ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeYaw" + m_nodeName + id).c_str(), &m_yaw, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+
+		// NOTE: Must reference the unique_ptr (cannot be copied)
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->DrawImGuiNodeHierarchy(id);
+
+		ImGui::TreePop();
+	}
 }
 
 void Drawable::DrawImGuiPosition(std::string id)
 {
 	ImGui::Text("Position:");
-	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionX" + id).c_str(), &m_position.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
-	ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionY" + id).c_str(), &m_position.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
-	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionZ" + id).c_str(), &m_position.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+	ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionX" + id).c_str(), &m_translation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+	ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionY" + id).c_str(), &m_translation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+	ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##drawablePositionZ" + id).c_str(), &m_translation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
 }
 
 void Drawable::DrawImGuiRollPitchYaw(std::string id)
@@ -578,15 +803,15 @@ void Drawable::DrawImGuiScale(std::string id)
 
 	if (m_syncScaleValues)
 	{
-		ImGui::Text("    XYZ: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleXYZ" + id).c_str(), &m_scaleX, 0.055f, 0.0f, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
-		m_scaleY = m_scaleX;
-		m_scaleZ = m_scaleX;
+		ImGui::Text("    XYZ: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleXYZ" + id).c_str(), &m_scaling.x, 0.055f, 0.0f, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		m_scaling.y = m_scaling.x;
+		m_scaling.z = m_scaling.x;
 	}
 	else
 	{
-		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleX" + id).c_str(), &m_scaleX, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
-		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleY" + id).c_str(), &m_scaleY, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
-		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleZ" + id).c_str(), &m_scaleZ, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
+		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleX" + id).c_str(), &m_scaling.x, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
+		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleY" + id).c_str(), &m_scaling.y, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
+		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##drawableScaleZ" + id).c_str(), &m_scaling.z, 0.005f, 0.0f, FLT_MAX, "%.001f", ImGuiSliderFlags_None);
 	}
 }
 
@@ -646,17 +871,28 @@ void Drawable::UpdatePhongMaterial()
 
 bool Drawable::NeedDrawBoundingBox()
 {
-	return m_drawBoundingBox || m_rootNode->NeedDrawBoundingBox();
+	if (m_drawBoundingBox || m_drawWholeBoundingBox)
+		return true;
+
+	for (std::unique_ptr<Drawable>& child : m_children)
+		if (child->NeedDrawBoundingBox())
+			return true;
+
+	return false;
 }
 
-void Drawable::DrawBoundingBox(const XMMATRIX& parentModelMatrix, const XMMATRIX& projectionMatrix)
+void Drawable::DrawBoundingBox()
 {
-	// Draw the bounding box for the model if necessary then pass the call to the root node
-	if (m_drawBoundingBox && m_boundingBox != nullptr)
-		m_boundingBox->Draw(parentModelMatrix, m_moveLookController->ViewMatrix(), projectionMatrix);
+	// Draw the bounding box for the drawable as a whole if necessary
+	if (m_drawWholeBoundingBox && m_boundingBox != nullptr)
+		m_boundingBox->Draw(m_accumulatedModelMatrix, m_moveLookController->ViewMatrix(), m_projectionMatrix);
 
-	// NOTE: Don't need to pass the model matrix to the root node because it should already have 
-	// an updated accumulated model matrix
-	m_rootNode->DrawBoundingBox(projectionMatrix);
+
+	// Draw the bounding box for the root mesh if necessary then pass the call to the child nodes
+	if (m_drawBoundingBox && m_mesh != nullptr)
+		m_mesh->DrawBoundingBox(m_accumulatedModelMatrix, m_moveLookController->ViewMatrix(), m_projectionMatrix);
+
+	for (std::unique_ptr<Drawable>& child : m_children)
+		child->DrawBoundingBox();
 }
 #endif

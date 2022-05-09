@@ -14,9 +14,6 @@ public:
 	// when switching between the normal scene and the center on origin scene
 	void Activate();
 
-protected:
-	void Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain) override;
-
 private:
 	void CreateLightProperties();
 	void CreateAndBindLightPropertiesBuffer();

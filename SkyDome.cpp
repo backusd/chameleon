@@ -19,6 +19,10 @@ SkyDome::SkyDome(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 
 
 	PreDrawUpdate = [this]() {
+
+		// Make sure the location of the sky dome is always centered on the camera
+		DirectX::XMStoreFloat3(&m_translation, m_moveLookController->Position());
+
 		// Pretty much every object will need to submit model/view/projection data to the vertex shader
 		// The Scene binds a ModelViewProjectionConstantBuffer object to slot 0 of the vertex shader that
 		// can be mapped and written to by any object. The reason we don't automatically perform this update
@@ -56,11 +60,6 @@ void SkyDome::CreateAndAddPSBufferArray()
 	psConstantBufferArray->AddBuffer(skyColorBuffer);
 
 	m_bindables.push_back(psConstantBufferArray);
-}
-
-void SkyDome::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
-{
-	DirectX::XMStoreFloat3(&m_position, m_moveLookController->Position());
 }
 
 

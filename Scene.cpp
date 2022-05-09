@@ -124,9 +124,13 @@ void Scene::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Keyboard> k
 	// Update the terrain
 	m_terrain->Update(timer);
 
-	// Update all drawables
+	// Update the physics of all the drawables
 	for (std::shared_ptr<Drawable> drawable : m_drawables)
-		drawable->UpdateHelper(timer, m_terrain);
+		drawable->UpdatePhysics(timer, m_terrain);
+
+	// Now that the physics has been updated, update the render data
+	for (std::shared_ptr<Drawable> drawable : m_drawables)
+		drawable->UpdateRenderData();
 
 
 	// Update the location of the camera because it is possible the player has moved and therefore the
@@ -157,15 +161,15 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 		case Mouse::Event::Type::LPress:	
 			// On LPress, keep track of what object the press down was on as well as the initial click coordinates
 			m_LButtonDown = true;
-			m_mouseClickX = mouse->GetPosX();
-			m_mouseClickY = mouse->GetPosY();
+			m_mouseClickX = static_cast<float>(mouse->GetPosX());
+			m_mouseClickY = static_cast<float>(mouse->GetPosY());
 			break;
 
 		case Mouse::Event::Type::LRelease:	
 			// Only process a click event if the mouse is in the same location as the original LPress event
 			// The reason being that the user can click down and rotate the camera around the player
 			m_LButtonDown = false;
-			if (m_mouseClickX == mouse->GetPosX() && m_mouseClickY == mouse->GetPosY())
+			if (m_mouseClickX == static_cast<float>(mouse->GetPosX()) && m_mouseClickY == static_cast<float>(mouse->GetPosY()))
 			{
 				if (m_mouseHoveredDrawable != nullptr)
 					m_mouseHoveredDrawable->OnMouseClick();
@@ -175,8 +179,8 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 		case Mouse::Event::Type::RPress:	
 			// On RPress, keep track of what object the press down was on as well as the initial click coordinates
 			m_RButtonDown = true;
-			m_mouseClickX = mouse->GetPosX();
-			m_mouseClickY = mouse->GetPosY();
+			m_mouseClickX = static_cast<float>(mouse->GetPosX());
+			m_mouseClickY = static_cast<float>(mouse->GetPosY());
 			break;
 
 		case Mouse::Event::Type::RRelease:  
@@ -203,7 +207,7 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 
 				for (std::shared_ptr<Drawable> drawable : m_drawables)
 				{
-					if (drawable->IsMouseHovered(mouse->GetPosX(), mouse->GetPosY(), m_distanceToHoveredDrawable))
+					if (drawable->IsMouseHovered(static_cast<float>(mouse->GetPosX()), static_cast<float>(mouse->GetPosY()), m_distanceToHoveredDrawable))
 					{
 						if (m_distanceToHoveredDrawable < shortestDistance)
 						{
@@ -237,8 +241,8 @@ void Scene::ProcessMouseEvents(std::shared_ptr<StepTimer> timer, std::shared_ptr
 					mlc->ZoomIn(mouse->GetPosX(), mouse->GetPosY());
 			}
 
-			m_previousMouseMoveX = mouse->GetPosX();
-			m_previousMouseMoveY = mouse->GetPosY();
+			m_previousMouseMoveX = static_cast<float>(mouse->GetPosX());
+			m_previousMouseMoveY = static_cast<float>(mouse->GetPosY());
 
 			break;
 		default:

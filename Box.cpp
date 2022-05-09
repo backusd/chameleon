@@ -70,8 +70,3 @@ DirectX::XMMATRIX Box::GetScaleMatrix()
 {
 	return DirectX::XMMatrixScaling(m_xSideLength, m_ySideLength, m_zSideLength);
 }
-
-void Box::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
-{
-
-}

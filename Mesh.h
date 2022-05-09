@@ -32,6 +32,7 @@ public:
 	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& tranformation, std::vector<DirectX::XMVECTOR>& positions);
 
 protected:
+	std::string m_name;
 
 	D3D11_PRIMITIVE_TOPOLOGY m_topology;
 	DXGI_FORMAT m_indexFormat;

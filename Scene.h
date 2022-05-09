@@ -93,7 +93,6 @@ private:
 
 
 	// ----------------------------------
-	std::unique_ptr<ModelNode> m_rootNode;
 
 	// When loading a scene/model via assimp, the meshes are just stored in a flat
 	// array. The hierarchy of nodes then just have an index into that array. So, 

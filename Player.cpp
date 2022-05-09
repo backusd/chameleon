@@ -21,7 +21,7 @@ Player::Player(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr
 
 }
 
-void Player::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
+void Player::UpdatePhysics(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> terrain)
 {
 	// If the terrain has changed, update it first
 	if (m_currentTerrain != terrain)
@@ -33,10 +33,10 @@ void Player::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> t
 	if (m_movingForward)
 	{
 		float deltaX = static_cast<float>(m_movementSpeed * sin(m_yaw) * timeDelta);
-		m_position.x += deltaX;
+		m_translation.x += deltaX;
 
 		float deltaZ = static_cast<float>(m_movementSpeed * cos(m_yaw) * timeDelta);
-		m_position.z += deltaZ;
+		m_translation.z += deltaZ;
 
 
 		// stop automated move
@@ -46,14 +46,14 @@ void Player::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> t
 	{
 		if (m_currentTime > m_endTime)
 		{
-			m_position = m_clickLocation;
+			m_translation = m_clickLocation;
 			m_movingToClickLocation = false;
 		}
 		else
 		{
-			m_position.x += static_cast<float>(m_velocityVector.x * timeDelta);
-			m_position.y += static_cast<float>(m_velocityVector.y * timeDelta);
-			m_position.z += static_cast<float>(m_velocityVector.z * timeDelta);
+			m_translation.x += static_cast<float>(m_velocityVector.x * timeDelta);
+			m_translation.y += static_cast<float>(m_velocityVector.y * timeDelta);
+			m_translation.z += static_cast<float>(m_velocityVector.z * timeDelta);
 		}
 	}
 
@@ -85,7 +85,7 @@ void Player::Update(std::shared_ptr<StepTimer> timer, std::shared_ptr<Terrain> t
 	// the player is actuall moving forward. However, getting the terrain height
 	// SHOULD be constant time lookup and it helps with debugging to just make
 	// sure it is always set.
-	m_position.y = m_currentTerrain->GetHeight(m_position.x, m_position.z);
+	m_translation.y = m_currentTerrain->GetHeight(m_translation.x, m_translation.z);
 
 	m_previousTime = m_currentTime;
 }
@@ -98,7 +98,7 @@ XMFLOAT3 Player::CenterOfModel()
 
 	// Top of the nanosuit is about 15.4 units, so halfway up is about 7.7
 	// Scale this down by some scale factor
-	return XMFLOAT3(m_position.x, m_position.y + (7.7f * m_scaleY), m_position.z);
+	return XMFLOAT3(m_translation.x, m_translation.y + (7.7f * m_scaling.y), m_translation.z);
 }
 
 void Player::MoveTo(DirectX::XMFLOAT3 location, float speed)
@@ -111,9 +111,9 @@ void Player::MoveTo(DirectX::XMFLOAT3 location, float speed)
 
 	// Compute the direction between start and finish
 	XMFLOAT3 direction;
-	direction.x = m_clickLocation.x - m_position.x;
-	direction.y = m_clickLocation.y - m_position.y;
-	direction.z = m_clickLocation.z - m_position.z;
+	direction.x = m_clickLocation.x - m_translation.x;
+	direction.y = m_clickLocation.y - m_translation.y;
+	direction.z = m_clickLocation.z - m_translation.z;
 
 	// Compute the expected end time for the movement
 	XMFLOAT3 length;
