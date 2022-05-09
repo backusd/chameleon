@@ -7,6 +7,7 @@
 #include "TerrainMesh.h"
 #include "Frustum.h"
 #include "Bindable.h"
+#include "SamplerStateArray.h"
 
 #include <memory>
 #include <vector>

@@ -32,6 +32,8 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_drawWholeBoundingBox(false)
 #endif
 {
+	InitializePipelineConfiguration();
+
 	switch (modelType)
 	{
 	case BasicModelType::Plane:
@@ -78,6 +80,8 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_drawWholeBoundingBox(false)
 #endif
 {
+	InitializePipelineConfiguration();
+
 	m_mesh = mesh;
 }
 
@@ -106,6 +110,8 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_drawWholeBoundingBox(false)
 #endif
 {
+	InitializePipelineConfiguration();
+
 	// Getting the stem gets just the filename without the extension
 	m_name = std::filesystem::path(filename).stem().string();
 
@@ -179,7 +185,15 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_drawWholeBoundingBox(false)
 #endif
 {
+	InitializePipelineConfiguration();
+
 	ConstructFromAiNode(node, meshes);
+}
+
+void Drawable::InitializePipelineConfiguration()
+{
+	m_rasterizerState = std::dynamic_pointer_cast<RasterizerState>(ObjectStore::GetBindable("solidfill"));
+	m_depthStencilState = std::dynamic_pointer_cast<DepthStencilState>(ObjectStore::GetBindable("depth-enabled-depth-stencil-state"));
 }
 
 void Drawable::ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes)
@@ -422,7 +436,10 @@ void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials, 
 
 
 		meshes.back()->AddBindable(textureArray);
-		meshes.back()->AddBindable(std::make_shared<SamplerState>(m_deviceResources));
+
+		std::shared_ptr<SamplerStateArray> samplers = std::make_shared<SamplerStateArray>(m_deviceResources, SamplerStateBindingLocation::PIXEL_SHADER);
+		samplers->AddSamplerState("default-sampler-state");
+		meshes.back()->AddBindable(samplers);
 	}
 
 
@@ -483,6 +500,27 @@ void Drawable::SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> materia
 #endif
 }
 
+void Drawable::SetRasterizerState(std::string lookupName, bool recursive)
+{
+	m_rasterizerState = std::dynamic_pointer_cast<RasterizerState>(ObjectStore::GetBindable(lookupName));
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->SetRasterizerState(lookupName, true);
+	}
+}
+
+void Drawable::SetDepthStencilState(std::string lookupName, bool recursive)
+{
+	m_depthStencilState = std::dynamic_pointer_cast<DepthStencilState>(ObjectStore::GetBindable(lookupName));
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->SetDepthStencilState(lookupName, true);
+	}
+}
 
 void Drawable::CreateAndAddPSBufferArray()
 {
@@ -526,6 +564,9 @@ void Drawable::UpdateRenderData(const XMMATRIX& parentModelMatrix)
 void Drawable::Draw()
 {
 	INFOMAN(m_deviceResources);
+
+	// Bind pipeline configuration variables
+	m_rasterizerState->Bind();
 
 	// Bind all bindables and then draw the model
 	for (std::shared_ptr<Bindable> bindable : m_bindables)
@@ -754,7 +795,9 @@ void Drawable::DrawImGuiDetails(std::string id)
 	DrawImGuiScale(id);
 	DrawImGuiMaterialSettings(id);
 
-	ImGui::Checkbox(("Draw Whole Bounding Box##" + id).c_str(), &m_drawWholeBoundingBox);
+	if (m_boundingBox != nullptr)
+		ImGui::Checkbox(("Draw Whole Bounding Box##" + id).c_str(), &m_drawWholeBoundingBox);
+
 	DrawImGuiNodeHierarchy(id);
 }
 
@@ -763,16 +806,21 @@ void Drawable::DrawImGuiNodeHierarchy(std::string id)
 	std::string treeNodeName = (m_nodeName == "") ? "Unnamed Node##" + id : m_nodeName + "##" + id;
 	if (ImGui::TreeNode(treeNodeName.c_str()))
 	{
-		ImGui::Checkbox(("Draw Bounding Box##" + id).c_str(), &m_drawBoundingBox);
-		ImGui::Text("Translation (prior to rotation):");
-		ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionX" + id).c_str(), &m_translation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
-		ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionY" + id).c_str(), &m_translation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
-		ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionZ" + id).c_str(), &m_translation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+		if (m_mesh != nullptr)
+		{
+			if (m_boundingBox != nullptr)
+				ImGui::Checkbox(("Draw Bounding Box##" + id).c_str(), &m_drawBoundingBox);
 
-		ImGui::Text("Orientation:");
-		ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeRoll" + m_nodeName + id).c_str(), &m_roll, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
-		ImGui::Text("   Pitch: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePitch" + m_nodeName + id).c_str(), &m_pitch, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
-		ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeYaw" + m_nodeName + id).c_str(), &m_yaw, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+			ImGui::Text("Translation (prior to rotation):");
+			ImGui::Text("    X: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionX" + id).c_str(), &m_translation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+			ImGui::Text("    Y: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionY" + id).c_str(), &m_translation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+			ImGui::Text("    Z: "); ImGui::SameLine(); ImGui::DragFloat(("##modelNodePositionZ" + id).c_str(), &m_translation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.01f", ImGuiSliderFlags_None);
+
+			ImGui::Text("Orientation:");
+			ImGui::Text("   Roll:  "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeRoll" + m_nodeName + id).c_str(), &m_roll, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+			ImGui::Text("   Pitch: "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodePitch" + m_nodeName + id).c_str(), &m_pitch, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+			ImGui::Text("   Yaw:   "); ImGui::SameLine(); ImGui::SliderFloat(("##modelNodeYaw" + m_nodeName + id).c_str(), &m_yaw, -DirectX::XM_2PI, DirectX::XM_2PI, "%.3f");
+		}
 
 		// NOTE: Must reference the unique_ptr (cannot be copied)
 		for (std::unique_ptr<Drawable>& child : m_children)

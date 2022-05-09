@@ -1,7 +1,7 @@
 #include "SamplerState.h"
 
 SamplerState::SamplerState(std::shared_ptr<DeviceResources> deviceResources) :
-	Bindable(deviceResources)
+	m_deviceResources(deviceResources)
 {
 	ResetState();
 	LoadChanges();
@@ -33,10 +33,3 @@ void SamplerState::LoadChanges()
 	);
 }
 
-void SamplerState::Bind()
-{
-	INFOMAN(m_deviceResources);
-	GFX_THROW_INFO_ONLY(
-		m_deviceResources->D3DDeviceContext()->PSSetSamplers(0, 1, m_samplerState.GetAddressOf())
-	);
-}

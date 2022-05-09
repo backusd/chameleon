@@ -387,6 +387,9 @@
     <ClCompile Include="PlaneMesh.cpp">
       <Filter>Source Files\Bindable\Meshes</Filter>
     </ClCompile>
+    <ClCompile Include="SamplerStateArray.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -907,6 +910,9 @@
     </ClInclude>
     <ClInclude Include="PlaneMesh.h">
       <Filter>Header Files\Bindable\Meshes</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerStateArray.h">
+      <Filter>Header Files\Bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

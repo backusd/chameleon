@@ -53,9 +53,11 @@ Terrain::Terrain(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	//AddBindable("terrain-buffers-VS");					// VS Constant buffers - Are controlled by Terrain
 	// AddBindable("terrain-buffers-PS");					// PS Constant buffers - Are controlled by Terrain
 	AddBindable("dirt-terrain-texture-array");			// Terrain Textures for PS
-	AddBindable("terrain-texture-sampler");				// Sampler State
-
-
+	
+	// Sampler State (need to do it this way because
+	std::shared_ptr<SamplerStateArray> samplers = std::make_shared<SamplerStateArray>(m_deviceResources, SamplerStateBindingLocation::PIXEL_SHADER);
+	samplers->AddSamplerState("terrain-texture-sampler");
+	m_bindables.push_back(samplers);
 
 
 

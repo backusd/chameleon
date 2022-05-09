@@ -230,6 +230,7 @@
     <ClCompile Include="PositionClass.cpp" />
     <ClCompile Include="RasterizerState.cpp" />
     <ClCompile Include="SamplerState.cpp" />
+    <ClCompile Include="SamplerStateArray.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SkyDome.cpp" />
     <ClCompile Include="SkyDomeClass.cpp" />
@@ -404,6 +405,7 @@
     <ClInclude Include="PositionClass.h" />
     <ClInclude Include="RasterizerState.h" />
     <ClInclude Include="SamplerState.h" />
+    <ClInclude Include="SamplerStateArray.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SkyDome.h" />
     <ClInclude Include="SkyDomeClass.h" />

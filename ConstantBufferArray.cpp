@@ -18,14 +18,21 @@ ConstantBufferArray::ConstantBufferArray(std::shared_ptr<DeviceResources> device
 void ConstantBufferArray::AddBuffer(std::string lookupName) 
 { 
 	m_buffers.push_back(ObjectStore::GetConstantBuffer(lookupName));
+	m_rawBufferPointers.push_back(m_buffers.back()->GetRawBufferPointer());
+}
+void ConstantBufferArray::AddBuffer(std::shared_ptr<ConstantBuffer> buffer) 
+{ 
+	m_buffers.push_back(buffer); 
+	m_rawBufferPointers.push_back(m_buffers.back()->GetRawBufferPointer());
+}
+void ConstantBufferArray::ClearBuffers()
+{
+	m_buffers.clear();
+	m_rawBufferPointers.clear();
 }
 
 void ConstantBufferArray::Bind()
 {
-	m_rawBufferPointers.clear();
-	for (std::shared_ptr<ConstantBuffer> buffer : m_buffers)
-		m_rawBufferPointers.push_back(buffer->GetRawBufferPointer());
-
 	BindFunc();
 }
 

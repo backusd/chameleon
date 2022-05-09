@@ -4,7 +4,7 @@
 
 
 
-class SamplerState : public Bindable
+class SamplerState
 {
 public:
 	SamplerState(std::shared_ptr<DeviceResources> deviceResources);
@@ -23,8 +23,7 @@ public:
 	void MinLOD(float min) { m_desc.MinLOD = min; LoadChanges(); }
 	void MaxLOD(float max) { m_desc.MaxLOD = max; LoadChanges(); }
 
-
-	void Bind() override;
+	ID3D11SamplerState* GetRawPointer() { return m_samplerState.Get(); }
 
 	void ResetState();
 
@@ -33,5 +32,6 @@ private:
 
 	D3D11_SAMPLER_DESC m_desc;
 
+	std::shared_ptr<DeviceResources> m_deviceResources;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerState;
 };

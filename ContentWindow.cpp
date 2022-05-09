@@ -201,21 +201,20 @@ void ContentWindow::AddSceneObjects()
 	// Nanosuit
 	{
 		std::shared_ptr<Player> nanosuit = m_scene->CreatePlayer("models/nanosuit-textured/nanosuit.obj");
-		std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
-		material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
-		material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-		material->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
-		material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-		material->Material.SpecularPower = 7.0f;
+		//std::unique_ptr<PhongMaterialProperties> material = std::make_unique<PhongMaterialProperties>();
+		//material->Material.Emissive = XMFLOAT4(0.091f, 0.091f, 0.091f, 1.0f);
+		//material->Material.Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+		//material->Material.Diffuse = XMFLOAT4(0.197f, 0.197f, 0.197f, 1.0f);
+		//material->Material.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		//material->Material.SpecularPower = 7.0f;
 		//nanosuit->SetPhongMaterial(std::move(material));
 		nanosuit->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
 		nanosuit->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
 		nanosuit->AddBindable("phong-texture-pixel-shader");			// Pixel Shader
-		nanosuit->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
+		//nanosuit->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
 		nanosuit->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
 		nanosuit->SetPosition(XMFLOAT3(55.1f, 9.3f, 377.7f));
 		//nanosuit->CreateAndAddPSBufferArray();
-		/*
 		nanosuit->PreDrawUpdate = [this, weakNanosuit = std::weak_ptr(nanosuit), weakScene = std::weak_ptr(m_scene)]() {
 
 			std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
@@ -240,7 +239,6 @@ void ContentWindow::AddSceneObjects()
 				);
 
 				ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-				//XMMATRIX model = nanosuit->GetModelMatrix();
 				XMMATRIX model = nanosuit->GetPreParentTransformModelMatrix();
 				XMMATRIX viewProjection = scene->GetMoveLookController()->ViewMatrix() * scene->GetMoveLookController()->ProjectionMatrix();
 				DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
@@ -261,11 +259,10 @@ void ContentWindow::AddSceneObjects()
 //			}
 //#endif
 		};
-		*/
 
 		PhongPSConfigurationData psConfig;
-		psConfig.normalMapEnabled = FALSE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
-		psConfig.specularMapEnabled = FALSE;
+		psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
+		psConfig.specularMapEnabled = TRUE;
 		psConfig.specularIntensity = 0.2f;
 		psConfig.specularPower = 10.0f;
 
@@ -297,7 +294,9 @@ void ContentWindow::AddSceneObjects()
 		psConstantBufferArray->AddBuffer(modelViewProjectionConstantBuffer);	// Buffer bound to slot 2
 		nanosuit->AddBindable(psConstantBufferArray);
 
-		nanosuit->AddBindable(std::make_shared<SamplerState>(m_deviceResources));
+		std::shared_ptr<SamplerStateArray> samplers = std::make_shared<SamplerStateArray>(m_deviceResources, SamplerStateBindingLocation::PIXEL_SHADER);
+		samplers->AddSamplerState("default-sampler-state");
+		nanosuit->AddBindable(samplers);
 	}
 
 
@@ -384,7 +383,9 @@ void ContentWindow::AddSceneObjects()
 		psConstantBufferArray->AddBuffer(modelViewProjectionConstantBuffer);	// Buffer bound to slot 2
 		wall->AddBindable(psConstantBufferArray);
 
-		wall->AddBindable(std::make_shared<SamplerState>(m_deviceResources));
+		std::shared_ptr<SamplerStateArray> samplers = std::make_shared<SamplerStateArray>(m_deviceResources, SamplerStateBindingLocation::PIXEL_SHADER);
+		samplers->AddSamplerState("default-sampler-state");
+		wall->AddBindable(samplers);
 	}
 
 	/*
@@ -711,7 +712,8 @@ void ContentWindow::ObjectStoreAddSamplerStates()
 {
 	// This will just use the default values for a sampler, but all values can be customized
 	std::shared_ptr<SamplerState> sampler = std::make_shared<SamplerState>(m_deviceResources);
-	ObjectStore::AddBindable("terrain-texture-sampler", sampler);
+	ObjectStore::AddSamplerState("default-sampler-state", sampler);
+	ObjectStore::AddSamplerState("terrain-texture-sampler", sampler);
 }
 void ContentWindow::ObjectStoreAddTextures()
 {

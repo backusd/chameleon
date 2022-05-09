@@ -40,6 +40,7 @@ public:
 
 	static void AddTexture(std::string lookupName, std::shared_ptr<Texture> texture) { m_textureMap.insert(std::pair(lookupName, texture)); }
 	static void AddConstantBuffer(std::string lookupName, std::shared_ptr<ConstantBuffer> constantBuffer) { m_constantBufferMap.insert(std::pair(lookupName, constantBuffer)); }
+	static void AddSamplerState(std::string lookupName, std::shared_ptr<SamplerState> samplerState) { m_sampleStateMap.insert(std::pair(lookupName, samplerState)); }
 	static void AddMesh(std::string lookupName, std::shared_ptr<Mesh> mesh) { m_meshMap.insert(std::pair(lookupName, mesh)); }
 	static void AddTerrainMesh(std::shared_ptr<TerrainMesh> terrainMesh, std::string lookupName) { m_terrainMeshMap.insert(std::pair(lookupName, terrainMesh)); }
 	static void AddBindable(std::string lookupName, std::shared_ptr<Bindable> bindable) { m_bindablesMap.insert(std::pair(lookupName, bindable)); }
@@ -47,6 +48,7 @@ public:
 
 	static std::shared_ptr<Mesh> GetMesh(std::string lookupName) { MAP_LOOKUP(m_meshMap, lookupName); }
 	static std::shared_ptr<ConstantBuffer> GetConstantBuffer(std::string lookupName) { MAP_LOOKUP(m_constantBufferMap, lookupName); }
+	static std::shared_ptr<SamplerState> GetSamplerState(std::string lookupName) { MAP_LOOKUP(m_sampleStateMap, lookupName); }
 	static std::shared_ptr<Texture> GetTexture(std::string lookupName) { MAP_LOOKUP(m_textureMap, lookupName); }
 	static std::shared_ptr<TerrainMesh> GetTerrainMesh(std::string lookupName) { MAP_LOOKUP(m_terrainMeshMap, lookupName); }
 	static std::shared_ptr<Bindable> GetBindable(std::string lookupName) { MAP_LOOKUP(m_bindablesMap, lookupName); }
@@ -60,6 +62,7 @@ private:
 	
 	static std::map<std::string, std::shared_ptr<ConstantBuffer>>	m_constantBufferMap;
 	static std::map<std::string, std::shared_ptr<Texture>>			m_textureMap;
+	static std::map<std::string, std::shared_ptr<SamplerState>>		m_sampleStateMap;
 	static std::map<std::string, std::shared_ptr<TerrainMesh>>		m_terrainMeshMap;
 	static std::map<std::string, std::shared_ptr<Mesh>>				m_meshMap;
 	static std::map<std::string, std::shared_ptr<Bindable>>			m_bindablesMap;

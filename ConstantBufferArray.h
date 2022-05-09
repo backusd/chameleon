@@ -23,7 +23,9 @@ public:
 	ConstantBufferArray(std::shared_ptr<DeviceResources> deviceResources, ConstantBufferBindingLocation bindToStage);
 
 	void AddBuffer(std::string lookupName);
-	void AddBuffer(std::shared_ptr<ConstantBuffer> buffer) { m_buffers.push_back(buffer); }
+	void AddBuffer(std::shared_ptr<ConstantBuffer> buffer);
+	void ClearBuffers();
+	
 	void Bind() override;
 
 	void UpdateSubresource(int index, void* data);

@@ -6,6 +6,7 @@
 #include "StepTimer.h"
 #include "MoveLookController.h"
 #include "DrawableException.h"
+#include "SamplerStateArray.h"
 
 #include <vector>
 #include <memory>
@@ -86,7 +87,8 @@ public:
 
 
 
-
+	void SetRasterizerState(std::string lookupName, bool recursive = true);
+	void SetDepthStencilState(std::string lookupName, bool recursive = true);
 
 
 
@@ -94,6 +96,7 @@ protected:
 	// This Update function is designed to be called during the recursive Update of a Drawable hierarchy.
 	void UpdateRenderData(const DirectX::XMMATRIX& parentModelMatrix);
 	void UpdateModelViewProjectionConstantBuffer();
+	void InitializePipelineConfiguration();
 	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials, std::vector<std::shared_ptr<Mesh>>& meshes);
 	void ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
 	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& parentModelMatrix, std::vector<DirectX::XMVECTOR>& positions);
@@ -124,8 +127,8 @@ protected:
 
 
 	// -------------------------------------------------------------
-	//std::shared_ptr<RasterizerState> m_rasterizerState;
-	//std::shared_ptr<DepthStencilState> m_depthStencilState;
+	std::shared_ptr<RasterizerState>		m_rasterizerState;
+	std::shared_ptr<DepthStencilState>		m_depthStencilState;
 	//std::vector<std::shared_ptr<SamplerState>> m_samplerStates;
 	//ShadingEffect m_shadingEffect;
 
