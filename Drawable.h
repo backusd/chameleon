@@ -44,15 +44,10 @@ public:
 	void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
 	void SetProjectionMatrix(DirectX::XMMATRIX projection);
 
-	// The PreDrawUpdate function will execute immediately prior to performing the actual Draw call
-	// within the Draw function. This allows updating of any constant buffers that may have been
-	// bound to a shader stage that need to be updated
-	// virtual void PreDrawUpdate() {}
-	
 	void Draw();
 
 	// Every object should provide how to scale itself
-	virtual DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixScaling(m_scaling.x, m_scaling.y, m_scaling.z); }
+	DirectX::XMMATRIX GetScaleMatrix() { return DirectX::XMMatrixScaling(m_scaling.x, m_scaling.y, m_scaling.z); }
 	DirectX::XMMATRIX GetPreParentTransformModelMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() { return m_projectionMatrix; }
 
@@ -99,7 +94,7 @@ protected:
 	// This Update function is designed to be called during the recursive Update of a Drawable hierarchy.
 	void UpdateRenderData(const DirectX::XMMATRIX& parentModelMatrix);
 	void UpdateModelViewProjectionConstantBuffer();
-	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials);
+	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials, std::vector<std::shared_ptr<Mesh>>& meshes);
 	void ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
 	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& parentModelMatrix, std::vector<DirectX::XMVECTOR>& positions);
 	bool IsMouseHovered(const DirectX::XMVECTOR& clickPointNear,
@@ -122,9 +117,6 @@ protected:
 
 	std::vector<std::shared_ptr<Bindable>> m_bindables;
 
-
-	// DirectX::XMFLOAT3 m_position; // Every object will have a "center point" location
-
 	// Rotation about the internal center point
 	float m_roll;
 	float m_pitch;
@@ -145,17 +137,6 @@ protected:
 	DirectX::XMFLOAT3 m_translation;
 	DirectX::XMFLOAT3 m_scaling;
 	DirectX::XMMATRIX m_accumulatedModelMatrix;
-
-	// std::unique_ptr<ModelNode> m_rootNode;
-
-
-
-	// When loading a scene/model via assimp, the meshes are just stored in a flat
-	// array. The hierarchy of nodes then just have an index into that array. So, 
-	// for our purpose, the model we are building needs to first create a vector
-	// of shared pointers to these meshes and then as we build the node hierarchy,
-	// we assign out the meshes to the corresponding nodes
-	std::vector<std::shared_ptr<Mesh>> m_meshes;
 
 	// BoundingBox to excapsulate the entire Model
 	std::unique_ptr<::BoundingBox>	m_boundingBox;

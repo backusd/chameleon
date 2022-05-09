@@ -10,8 +10,7 @@ class Sphere : public Drawable
 public:
 	Sphere(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController);
 
-	DirectX::XMMATRIX GetScaleMatrix() override { return DirectX::XMMatrixScaling(m_radius, m_radius, m_radius); }
-	void SetRadius(float radius) { m_radius = radius; }
+	void SetRadius(float radius) { m_scaling = DirectX::XMFLOAT3(radius, radius, radius); }
 
 private:
 	void CreateMaterialData();

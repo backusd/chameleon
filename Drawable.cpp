@@ -116,6 +116,13 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 		throw DrawableException(__LINE__, __FILE__, "AssImp ReadFile Error:\n" + std::string(imp.GetErrorString()));
 	}
 
+	// When loading a scene/model via assimp, the meshes are just stored in a flat
+	// array. The hierarchy of drawables just have an index into that array. So, 
+	// for our purpose, the drawable we are building needs to first create a vector
+	// of shared pointers to these meshes and then as we build the hierarchy, we
+	// assign out the meshes to the corresponding nodes
+	std::vector<std::shared_ptr<Mesh>> allMeshes;
+
 	// Build up the vector of all meshes for this model
 	std::string meshLookupName;
 	for (unsigned int iii = 0; iii < scene->mNumMeshes; ++iii)
@@ -125,12 +132,12 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 
 		// If the mesh already exists in ObjectStore, just get it from there
 		if (ObjectStore::MeshExists(meshLookupName))
-			m_meshes.push_back(ObjectStore::GetMesh(meshLookupName));
+			allMeshes.push_back(ObjectStore::GetMesh(meshLookupName));
 		else
 		{
 			// Mesh does not exist in object store, so load it from assimp and add it to ObjectStore
-			LoadMesh(*scene->mMeshes[iii], scene->mMaterials);
-			ObjectStore::AddMesh(meshLookupName, m_meshes.back());
+			LoadMesh(*scene->mMeshes[iii], scene->mMaterials, allMeshes);
+			ObjectStore::AddMesh(meshLookupName, allMeshes.back());
 		}
 	}
 
@@ -138,11 +145,7 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	// This constructor is only used for the root node, so just get the root node and if there are any children,
 	// a different constructor will be used
 	//aiNode node = *scene->mRootNode;
-	ConstructFromAiNode(*scene->mRootNode, m_meshes);
-
-	// Once the drawable hierarchy is created, we can clear out the vector of all meshes that resides in the root node
-	// because each child node now has a shared_ptr to the necessary mesh
-	m_meshes.clear();
+	ConstructFromAiNode(*scene->mRootNode, allMeshes);
 
 	// Once the rootNode is created, all meshes will have a BoundingBox, so gather each one and
 	// use those values to establish an all encapsulating BoundingBox
@@ -222,7 +225,7 @@ void Drawable::ConstructFromAiNode(const aiNode& node, const std::vector<std::sh
 	// Construct the children, must be sure to pass the name that represents the drawable as a whole as well as a reference
 	// to the entire list of meshes
 	for (unsigned int iii = 0; iii < node.mNumChildren; ++iii)
-		m_children.push_back(std::make_unique<Drawable>(m_deviceResources, m_moveLookController, m_name, *node.mChildren[iii], m_meshes));
+		m_children.push_back(std::make_unique<Drawable>(m_deviceResources, m_moveLookController, m_name, *node.mChildren[iii], meshes));
 }
 
 void Drawable::GetBoundingBoxPositionsWithTransformation(const XMMATRIX& parentModelMatrix, std::vector<XMVECTOR>& positions)
@@ -236,7 +239,7 @@ void Drawable::GetBoundingBoxPositionsWithTransformation(const XMMATRIX& parentM
 		child->GetBoundingBoxPositionsWithTransformation(GetPreParentTransformModelMatrix() * parentModelMatrix, positions);
 }
 
-void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
+void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials, std::vector<std::shared_ptr<Mesh>>& meshes)
 {
 	std::vector<OBJVertex> vertices;		// vertices for the vertex buffer
 	std::vector<unsigned short> indices;	// indices for the index buffer
@@ -266,8 +269,8 @@ void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
 		indices.push_back(face.mIndices[2]);
 	}
 
-	m_meshes.push_back(std::make_shared<Mesh>(m_deviceResources));
-	m_meshes.back()->LoadBuffers<OBJVertex>(vertices, indices);
+	meshes.push_back(std::make_shared<Mesh>(m_deviceResources));
+	meshes.back()->LoadBuffers<OBJVertex>(vertices, indices);
 
 	// Load the material ==================================================================================================================
 
@@ -418,8 +421,8 @@ void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
 		}
 
 
-		m_meshes.back()->AddBindable(textureArray);
-		m_meshes.back()->AddBindable(std::make_shared<SamplerState>(m_deviceResources));
+		meshes.back()->AddBindable(textureArray);
+		meshes.back()->AddBindable(std::make_shared<SamplerState>(m_deviceResources));
 	}
 
 
@@ -438,7 +441,7 @@ void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials)
 
 	// Add the material constant buffer and the lighting constant buffer
 	psConstantBufferArray->AddBuffer(specularBuffer);
-	m_meshes.back()->AddBindable(psConstantBufferArray);
+	meshes.back()->AddBindable(psConstantBufferArray);
 }
 
 

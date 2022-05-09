@@ -65,8 +65,3 @@ void Box::CreateAndAddPSBufferArray()
 	psConstantBufferArray->AddBuffer(materialBuffer);
 	m_bindables.push_back(psConstantBufferArray);
 }
-
-DirectX::XMMATRIX Box::GetScaleMatrix()
-{
-	return DirectX::XMMatrixScaling(m_xSideLength, m_ySideLength, m_zSideLength);
-}
