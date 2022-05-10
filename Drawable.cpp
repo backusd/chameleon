@@ -190,10 +190,56 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	ConstructFromAiNode(node, meshes);
 }
 
+Drawable::~Drawable()
+{
+	m_updateFunctions.clear();
+	m_bindables.clear();
+
+	m_rasterizerState = nullptr;
+	m_depthStencilState = nullptr;
+
+	m_inputLayout = nullptr;
+	m_vertexShader = nullptr;
+	m_pixelShader = nullptr;
+
+	m_samplerStateArrayCS = nullptr;
+	m_samplerStateArrayVS = nullptr;
+	m_samplerStateArrayHS = nullptr;
+	m_samplerStateArrayDS = nullptr;
+	m_samplerStateArrayGS = nullptr;
+	m_samplerStateArrayPS = nullptr;
+
+	m_constantBufferArrayCS = nullptr;
+	m_constantBufferArrayVS = nullptr;
+	m_constantBufferArrayHS = nullptr;
+	m_constantBufferArrayDS = nullptr;
+	m_constantBufferArrayGS = nullptr;
+	m_constantBufferArrayPS = nullptr;
+}
+
 void Drawable::InitializePipelineConfiguration()
 {
-	m_rasterizerState = std::dynamic_pointer_cast<RasterizerState>(ObjectStore::GetBindable("solidfill"));
-	m_depthStencilState = std::dynamic_pointer_cast<DepthStencilState>(ObjectStore::GetBindable("depth-enabled-depth-stencil-state"));
+	// Use common defaults where possible, otherwise set to nullptr
+	SetRasterizerState("solidfill", true);
+	SetDepthStencilState("depth-enabled-depth-stencil-state", true);
+
+	m_inputLayout  = nullptr;
+	m_vertexShader = nullptr;
+	m_pixelShader  = nullptr;
+
+	m_samplerStateArrayCS = nullptr;
+	m_samplerStateArrayVS = nullptr;
+	m_samplerStateArrayHS = nullptr;
+	m_samplerStateArrayDS = nullptr;
+	m_samplerStateArrayGS = nullptr;
+	m_samplerStateArrayPS = nullptr;
+
+	m_constantBufferArrayCS = nullptr;
+	m_constantBufferArrayVS = nullptr;
+	m_constantBufferArrayHS = nullptr;
+	m_constantBufferArrayDS = nullptr;
+	m_constantBufferArrayGS = nullptr;
+	m_constantBufferArrayPS = nullptr;
 }
 
 void Drawable::ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes)
@@ -502,7 +548,10 @@ void Drawable::SetPhongMaterial(std::unique_ptr<PhongMaterialProperties> materia
 
 void Drawable::SetRasterizerState(std::string lookupName, bool recursive)
 {
+	// Create the rasterizer state and try adding it to the vector of bindables (NOTE: it will only get added if
+	// it was NOT previously added)
 	m_rasterizerState = std::dynamic_pointer_cast<RasterizerState>(ObjectStore::GetBindable(lookupName));
+	AddBindable(m_rasterizerState);
 
 	if (recursive)
 	{
@@ -513,13 +562,85 @@ void Drawable::SetRasterizerState(std::string lookupName, bool recursive)
 
 void Drawable::SetDepthStencilState(std::string lookupName, bool recursive)
 {
+	// Create the depth stencil state and try adding it to the vector of bindables (NOTE: it will only get added if
+	// it was NOT previously added)
 	m_depthStencilState = std::dynamic_pointer_cast<DepthStencilState>(ObjectStore::GetBindable(lookupName));
+	AddBindable(m_depthStencilState);
 
 	if (recursive)
 	{
 		for (std::unique_ptr<Drawable>& child : m_children)
 			child->SetDepthStencilState(lookupName, true);
 	}
+}
+
+void Drawable::AddSamplerState(std::string lookupName, SamplerStateBindingLocation bindingLocation, bool recursive)
+{
+	switch (bindingLocation)
+	{
+	case SamplerStateBindingLocation::COMPUTE_SHADER: 
+		if (m_samplerStateArrayCS == nullptr)
+			m_samplerStateArrayCS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
+		m_samplerStateArrayCS->AddSamplerState(lookupName);
+		AddBindable(m_samplerStateArrayCS);
+		break;
+
+	case SamplerStateBindingLocation::VERTEX_SHADER:
+		if (m_samplerStateArrayVS == nullptr)
+			m_samplerStateArrayVS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
+		m_samplerStateArrayVS->AddSamplerState(lookupName);
+		AddBindable(m_samplerStateArrayVS);
+		break;
+
+	case SamplerStateBindingLocation::HULL_SHADER:
+		if (m_samplerStateArrayHS == nullptr)
+			m_samplerStateArrayHS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
+		m_samplerStateArrayHS->AddSamplerState(lookupName);
+		AddBindable(m_samplerStateArrayHS);
+		break;
+
+	case SamplerStateBindingLocation::DOMAIN_SHADER:
+		if (m_samplerStateArrayDS == nullptr)
+			m_samplerStateArrayDS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
+		m_samplerStateArrayDS->AddSamplerState(lookupName);
+		AddBindable(m_samplerStateArrayDS);
+		break;
+
+	case SamplerStateBindingLocation::GEOMETRY_SHADER:
+		if (m_samplerStateArrayGS == nullptr)
+			m_samplerStateArrayGS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
+		m_samplerStateArrayGS->AddSamplerState(lookupName);
+		AddBindable(m_samplerStateArrayGS);
+		break;
+
+	case SamplerStateBindingLocation::PIXEL_SHADER:
+		if (m_samplerStateArrayPS == nullptr)
+			m_samplerStateArrayPS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
+		m_samplerStateArrayPS->AddSamplerState(lookupName);
+		AddBindable(m_samplerStateArrayPS);
+		break;
+
+	default:
+		throw DrawableException(__LINE__, __FILE__, "Unrecognized SamplerStateBindingLocation enum value");
+	}
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->AddSamplerState(lookupName, bindingLocation, true);
+	}
+}
+
+
+void Drawable::AddBindable(std::string lookupName) 
+{ 
+	AddBindable(ObjectStore::GetBindable(lookupName));
+}
+void Drawable::AddBindable(std::shared_ptr<Bindable> bindable) 
+{ 
+	// Only add bindable if it does not already exist
+	if (!std::any_of(m_bindables.begin(), m_bindables.end(), [bindable](std::shared_ptr<Bindable> const& b) { return b.get() == bindable.get(); }))
+		m_bindables.push_back(bindable);
 }
 
 void Drawable::CreateAndAddPSBufferArray()
@@ -556,17 +677,48 @@ void Drawable::UpdateRenderData(const XMMATRIX& parentModelMatrix)
 	// Update the model matrix for this node and then update all children
 	m_accumulatedModelMatrix = this->GetPreParentTransformModelMatrix() * parentModelMatrix;
 
+	// Update the constant buffers that need updating
+	for (std::tuple<std::shared_ptr<ConstantBuffer>, std::function<void(std::shared_ptr<ConstantBuffer>)>> tup : m_updateFunctions)
+	{
+		// Pass the constant buffer to the update functional
+		std::get<1>(tup)(std::get<0>(tup));
+	}
+
+
 	for (std::unique_ptr<Drawable>& child : m_children)
 		child->UpdateRenderData(m_accumulatedModelMatrix);
+}
+
+void Drawable::UpdateModelViewProjectionBuffer(std::shared_ptr<ConstantBuffer> constantBuffer)
+{
+	INFOMAN(m_deviceResources);
+
+	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
+	D3D11_MAPPED_SUBRESOURCE ms;
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+	ID3D11Buffer* buffer = constantBuffer->GetRawBufferPointer();
+
+	GFX_THROW_INFO(
+		context->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
+	);
+
+	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
+	XMMATRIX model = GetPreParentTransformModelMatrix();
+	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_moveLookController->ProjectionMatrix();
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
+	DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, model)));
+
+	GFX_THROW_INFO_ONLY(
+		context->Unmap(buffer, 0)
+	);
 }
 
 
 void Drawable::Draw()
 {
 	INFOMAN(m_deviceResources);
-
-	// Bind pipeline configuration variables
-	m_rasterizerState->Bind();
 
 	// Bind all bindables and then draw the model
 	for (std::shared_ptr<Bindable> bindable : m_bindables)

@@ -60,7 +60,6 @@ Terrain::Terrain(std::shared_ptr<DeviceResources> deviceResources, std::shared_p
 	m_bindables.push_back(samplers);
 
 
-
 	TerrainLightBufferType lightData;
 	lightData.diffuseColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	lightData.lightDirection = XMFLOAT3(-0.5f, -1.0f, -0.5f);

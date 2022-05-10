@@ -13,6 +13,8 @@
 #include <string>
 #include <functional>
 #include <filesystem>
+#include <algorithm>
+#include <tuple>
 
 // Assimp
 #include <assimp/Importer.hpp>
@@ -39,10 +41,10 @@ public:
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string filename);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
+	~Drawable();
 
-
-	void AddBindable(std::string lookupName) { m_bindables.push_back(ObjectStore::GetBindable(lookupName)); }
-	void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
+	void AddBindable(std::string lookupName);
+	void AddBindable(std::shared_ptr<Bindable> bindable);
 	void SetProjectionMatrix(DirectX::XMMATRIX projection);
 
 	void Draw();
@@ -86,11 +88,19 @@ public:
 
 
 
+	void UpdateModelViewProjectionBuffer(std::shared_ptr<ConstantBuffer> constantBuffer);
 
 	void SetRasterizerState(std::string lookupName, bool recursive = true);
 	void SetDepthStencilState(std::string lookupName, bool recursive = true);
+		
+	void AddSamplerState(std::string lookupName, SamplerStateBindingLocation bindingLocation, bool recursive = true);
 
-
+	template <typename T>
+	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive = true);
+	template <typename T>
+	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, bool recursive = true);
+	template <typename T>
+	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive = true);
 
 protected:
 	// This Update function is designed to be called during the recursive Update of a Drawable hierarchy.
@@ -127,11 +137,29 @@ protected:
 
 
 	// -------------------------------------------------------------
-	std::shared_ptr<RasterizerState>		m_rasterizerState;
-	std::shared_ptr<DepthStencilState>		m_depthStencilState;
-	//std::vector<std::shared_ptr<SamplerState>> m_samplerStates;
+	std::shared_ptr<InputLayout>			m_inputLayout;
+	std::shared_ptr<VertexShader>			m_vertexShader;
+	std::shared_ptr<PixelShader>			m_pixelShader;
 	//ShadingEffect m_shadingEffect;
 
+	std::shared_ptr<RasterizerState>		m_rasterizerState;
+	std::shared_ptr<DepthStencilState>		m_depthStencilState;
+
+	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayCS;
+	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayVS;
+	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayHS;
+	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayDS;
+	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayGS;
+	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayPS;
+
+	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayCS;
+	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayVS;
+	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayHS;
+	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayDS;
+	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayGS;
+	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayPS;
+
+	std::vector<std::tuple<std::shared_ptr<ConstantBuffer>, std::function<void(std::shared_ptr<ConstantBuffer>)>>> m_updateFunctions;
 
 	std::vector<std::unique_ptr<Drawable>> m_children;
 	std::shared_ptr<Mesh> m_mesh;
@@ -183,3 +211,215 @@ protected:
 	// ---------------------------
 #endif
 };
+
+
+template <typename T>
+void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, bool recursive)
+{
+	// Because we are supplying initial data with no update functional, this buffer will be presumed
+	// to be usage default
+	std::shared_ptr<ConstantBuffer> buffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	buffer->CreateBuffer<T>(
+		D3D11_USAGE_DEFAULT,	// Usage: Read-only by the GPU. Not accessible via CPU. MUST be initialized at buffer creation
+		0,						// CPU Access: No CPU access
+		0,						// Misc Flags: No miscellaneous flags
+		0,						// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		initialData				// Initial Data: Fill the buffer with config data
+	);
+
+	switch (bindingLocation)
+	{
+	case ConstantBufferBindingLocation::COMPUTE_SHADER:
+		if (m_constantBufferArrayCS == nullptr)
+			m_constantBufferArrayCS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayCS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayCS);
+		break;
+
+	case ConstantBufferBindingLocation::VERTEX_SHADER:
+		if (m_constantBufferArrayVS == nullptr)
+			m_constantBufferArrayVS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayVS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayVS);
+		break;
+
+	case ConstantBufferBindingLocation::HULL_SHADER:
+		if (m_constantBufferArrayHS == nullptr)
+			m_constantBufferArrayHS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayHS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayHS);
+		break;
+
+	case ConstantBufferBindingLocation::DOMAIN_SHADER:
+		if (m_constantBufferArrayDS == nullptr)
+			m_constantBufferArrayDS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayDS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayDS);
+		break;
+
+	case ConstantBufferBindingLocation::GEOMETRY_SHADER:
+		if (m_constantBufferArrayGS == nullptr)
+			m_constantBufferArrayGS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayGS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayGS);
+		break;
+
+	case ConstantBufferBindingLocation::PIXEL_SHADER:
+		if (m_constantBufferArrayPS == nullptr)
+			m_constantBufferArrayPS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayPS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayPS);
+		break;
+
+	default:
+		throw DrawableException(__LINE__, __FILE__, "Unrecognized ConstantBufferBindingLocation enum value");
+	}
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->AddConstantBuffer<T>(bindingLocation, initialData, true);
+	}
+}
+
+template <typename T>
+void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive)
+{
+	// Because we are supplying the update functional, we need to allow this buffer to be mappable
+	std::shared_ptr<ConstantBuffer> buffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	buffer->CreateBuffer<T>(
+		D3D11_USAGE_DYNAMIC,	// Usage: Dynamic
+		D3D11_CPU_ACCESS_WRITE,	// CPU Access: CPU will be able to write using Map
+		0,						// Misc Flags: No miscellaneous flags
+		0						// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		// No Initial Data
+		);
+
+	switch (bindingLocation)
+	{
+	case ConstantBufferBindingLocation::COMPUTE_SHADER:
+		if (m_constantBufferArrayCS == nullptr)
+			m_constantBufferArrayCS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayCS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayCS);
+		break;
+
+	case ConstantBufferBindingLocation::VERTEX_SHADER:
+		if (m_constantBufferArrayVS == nullptr)
+			m_constantBufferArrayVS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayVS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayVS);
+		break;
+
+	case ConstantBufferBindingLocation::HULL_SHADER:
+		if (m_constantBufferArrayHS == nullptr)
+			m_constantBufferArrayHS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayHS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayHS);
+		break;
+
+	case ConstantBufferBindingLocation::DOMAIN_SHADER:
+		if (m_constantBufferArrayDS == nullptr)
+			m_constantBufferArrayDS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayDS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayDS);
+		break;
+
+	case ConstantBufferBindingLocation::GEOMETRY_SHADER:
+		if (m_constantBufferArrayGS == nullptr)
+			m_constantBufferArrayGS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayGS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayGS);
+		break;
+
+	case ConstantBufferBindingLocation::PIXEL_SHADER:
+		if (m_constantBufferArrayPS == nullptr)
+			m_constantBufferArrayPS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayPS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayPS);
+		break;
+
+	default:
+		throw DrawableException(__LINE__, __FILE__, "Unrecognized ConstantBufferBindingLocation enum value");
+	}
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->AddConstantBuffer<T>(bindingLocation, updateFunc, true);
+	}
+
+	// Add the constant buffer and update functional to the vector of update functionals
+	m_updateFunctions.push_back(std::make_tuple(buffer,updateFunc));
+}
+
+template <typename T>
+void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive)
+{
+	// Because we are supplying the update functional, we need to allow this buffer to be mappable
+	std::shared_ptr<ConstantBuffer> buffer = std::make_shared<ConstantBuffer>(m_deviceResources);
+	buffer->CreateBuffer<T>(
+		D3D11_USAGE_DYNAMIC,	// Usage: Dynamic
+		D3D11_CPU_ACCESS_WRITE,	// CPU Access: CPU will be able to write using Map
+		0,						// Misc Flags: No miscellaneous flags
+		0,						// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
+		initialData				// Initial Data
+		);
+
+	switch (bindingLocation)
+	{
+	case ConstantBufferBindingLocation::COMPUTE_SHADER:
+		if (m_constantBufferArrayCS == nullptr)
+			m_constantBufferArrayCS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayCS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayCS);
+		break;
+
+	case ConstantBufferBindingLocation::VERTEX_SHADER:
+		if (m_constantBufferArrayVS == nullptr)
+			m_constantBufferArrayVS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayVS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayVS);
+		break;
+
+	case ConstantBufferBindingLocation::HULL_SHADER:
+		if (m_constantBufferArrayHS == nullptr)
+			m_constantBufferArrayHS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayHS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayHS);
+		break;
+
+	case ConstantBufferBindingLocation::DOMAIN_SHADER:
+		if (m_constantBufferArrayDS == nullptr)
+			m_constantBufferArrayDS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayDS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayDS);
+		break;
+
+	case ConstantBufferBindingLocation::GEOMETRY_SHADER:
+		if (m_constantBufferArrayGS == nullptr)
+			m_constantBufferArrayGS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayGS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayGS);
+		break;
+
+	case ConstantBufferBindingLocation::PIXEL_SHADER:
+		if (m_constantBufferArrayPS == nullptr)
+			m_constantBufferArrayPS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
+		m_constantBufferArrayPS->AddBuffer(buffer);
+		AddBindable(m_constantBufferArrayPS);
+		break;
+
+	default:
+		throw DrawableException(__LINE__, __FILE__, "Unrecognized ConstantBufferBindingLocation enum value");
+	}
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->AddConstantBuffer<T>(bindingLocation, initialData, updateFunc, true);
+	}
+
+	// Add the constant buffer and update functional to the vector of update functionals
+	m_updateFunctions.push_back(std::make_tuple(buffer, updateFunc));
+}

@@ -20,7 +20,7 @@ public:
 	ID3D11Buffer* GetRawBufferPointer() { return m_buffer.Get(); }
 
 private:;
-	   std::shared_ptr<DeviceResources> m_deviceResources;
+	std::shared_ptr<DeviceResources> m_deviceResources;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_buffer;
 

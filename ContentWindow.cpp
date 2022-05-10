@@ -211,54 +211,7 @@ void ContentWindow::AddSceneObjects()
 		nanosuit->AddBindable("phong-texture-vertex-shader");			// Vertex Shader
 		nanosuit->AddBindable("phong-texture-vertex-shader-IA");		// Input Layout
 		nanosuit->AddBindable("phong-texture-pixel-shader");			// Pixel Shader
-		//nanosuit->AddBindable("solidfill"); //wireframe/solidfill 	// Rasterizer State
-		nanosuit->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
 		nanosuit->SetPosition(XMFLOAT3(55.1f, 9.3f, 377.7f));
-		//nanosuit->CreateAndAddPSBufferArray();
-		nanosuit->PreDrawUpdate = [this, weakNanosuit = std::weak_ptr(nanosuit), weakScene = std::weak_ptr(m_scene)]() {
-
-			std::shared_ptr<Player> nanosuit = weakNanosuit.lock();
-			std::shared_ptr<Scene> scene = weakScene.lock();
-
-			if (nanosuit != nullptr && scene != nullptr)
-			{
-				INFOMAN(m_deviceResources);
-
-				ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
-				D3D11_MAPPED_SUBRESOURCE ms;
-				ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
-				// Update VS constant buffer with model/view/projection info
-				Microsoft::WRL::ComPtr<ID3D11Buffer> vsBuffer;
-				GFX_THROW_INFO_ONLY(
-					context->PSGetConstantBuffers(2, 1, vsBuffer.ReleaseAndGetAddressOf()) // Get PS buffer at slot 2
-				);
-
-				GFX_THROW_INFO(
-					context->Map(vsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
-				);
-
-				ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-				XMMATRIX model = nanosuit->GetPreParentTransformModelMatrix();
-				XMMATRIX viewProjection = scene->GetMoveLookController()->ViewMatrix() * scene->GetMoveLookController()->ProjectionMatrix();
-				DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
-				DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
-				DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, model)));
-
-				GFX_THROW_INFO_ONLY(
-					context->Unmap(vsBuffer.Get(), 0)
-				);
-			}
-
-
-//#ifndef NDEBUG
-//			
-//			if (nanosuit != nullptr)
-//			{
-//				nanosuit->UpdatePhongMaterial();
-//			}
-//#endif
-		};
 
 		PhongPSConfigurationData psConfig;
 		psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
@@ -266,37 +219,11 @@ void ContentWindow::AddSceneObjects()
 		psConfig.specularIntensity = 0.2f;
 		psConfig.specularPower = 10.0f;
 
-		// Create a PS constant buffer for the PS configuration data
-		std::shared_ptr<ConstantBuffer> specularBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
-		specularBuffer->CreateBuffer<PhongPSConfigurationData>(
-			D3D11_USAGE_DEFAULT,			// Usage: Read-only by the GPU. Not accessible via CPU. MUST be initialized at buffer creation
-			0,								// CPU Access: No CPU access
-			0,								// Misc Flags: No miscellaneous flags
-			0,								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
-			static_cast<void*>(&psConfig)	// Initial Data: Fill the buffer with config data
-			);
+		nanosuit->AddConstantBuffer<PhongPSConfigurationData>(ConstantBufferBindingLocation::PIXEL_SHADER, static_cast<void*>(&psConfig), true);
+		nanosuit->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, std::bind(&Drawable::UpdateModelViewProjectionBuffer, nanosuit, std::placeholders::_1), true);
 
-		// PS Buffer for model, view, projection matrices
-		std::shared_ptr<ConstantBuffer> modelViewProjectionConstantBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
-		modelViewProjectionConstantBuffer->CreateBuffer<ModelViewProjectionConstantBuffer>(
-			D3D11_USAGE_DYNAMIC,			// Usage: Dynamic
-			D3D11_CPU_ACCESS_WRITE,			// CPU Access: CPU will be able to write using Map
-			0,								// Misc Flags: No miscellaneous flags
-			0								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
-			// Not supplying any initial data
-			);
 
-		// Create a constant buffer array which will be added as a bindable
-		std::shared_ptr<ConstantBufferArray> psConstantBufferArray = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
-
-		// Add the material constant buffer and the lighting constant buffer
-		psConstantBufferArray->AddBuffer(specularBuffer);						// Buffer bound to slot 1
-		psConstantBufferArray->AddBuffer(modelViewProjectionConstantBuffer);	// Buffer bound to slot 2
-		nanosuit->AddBindable(psConstantBufferArray);
-
-		std::shared_ptr<SamplerStateArray> samplers = std::make_shared<SamplerStateArray>(m_deviceResources, SamplerStateBindingLocation::PIXEL_SHADER);
-		samplers->AddSamplerState("default-sampler-state");
-		nanosuit->AddBindable(samplers);
+		nanosuit->AddSamplerState("default-sampler-state", SamplerStateBindingLocation::PIXEL_SHADER, true);
 	}
 
 
@@ -312,42 +239,6 @@ void ContentWindow::AddSceneObjects()
 		wall->AddBindable("depth-enabled-depth-stencil-state");	// Depth Stencil State
 		wall->SetPosition(XMFLOAT3(55.0f, 15.0f, 380.0f));
 		wall->SetScale(5.0f, 5.0f, 1.0f);
-		wall->PreDrawUpdate = [this, weakWall = std::weak_ptr(wall), weakScene = std::weak_ptr(m_scene)]() {
-
-			std::shared_ptr<Drawable> wall = weakWall.lock();
-			std::shared_ptr<Scene> scene = weakScene.lock();
-
-			if (wall != nullptr && scene != nullptr)
-			{
-				INFOMAN(m_deviceResources);
-
-				ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
-				D3D11_MAPPED_SUBRESOURCE ms;
-				ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
-				// Update VS constant buffer with model/view/projection info
-				Microsoft::WRL::ComPtr<ID3D11Buffer> vsBuffer;
-				GFX_THROW_INFO_ONLY(
-					context->PSGetConstantBuffers(2, 1, vsBuffer.ReleaseAndGetAddressOf()) // Get PS buffer at slot 2
-				);
-
-				GFX_THROW_INFO(
-					context->Map(vsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
-				);
-
-				ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-				XMMATRIX model = wall->GetPreParentTransformModelMatrix();
-				XMMATRIX viewProjection = scene->GetMoveLookController()->ViewMatrix() * scene->GetMoveLookController()->ProjectionMatrix();
-				DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
-				DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
-				DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, model)));
-
-				GFX_THROW_INFO_ONLY(
-					context->Unmap(vsBuffer.Get(), 0)
-				);
-			}
-
-		};
 
 		PhongPSConfigurationData psConfig;
 		psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
@@ -355,37 +246,11 @@ void ContentWindow::AddSceneObjects()
 		psConfig.specularIntensity = 0.8f;
 		psConfig.specularPower = 100.0f;
 
-		// Create a PS constant buffer for the PS configuration data
-		std::shared_ptr<ConstantBuffer> specularBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
-		specularBuffer->CreateBuffer<PhongPSConfigurationData>(
-			D3D11_USAGE_DEFAULT,			// Usage: Read-only by the GPU. Not accessible via CPU. MUST be initialized at buffer creation
-			0,								// CPU Access: No CPU access
-			0,								// Misc Flags: No miscellaneous flags
-			0,								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
-			static_cast<void*>(&psConfig)	// Initial Data: Fill the buffer with config data
-			);
+		wall->AddConstantBuffer<PhongPSConfigurationData>(ConstantBufferBindingLocation::PIXEL_SHADER, static_cast<void*>(&psConfig), true);
+		wall->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, std::bind(&Drawable::UpdateModelViewProjectionBuffer, wall, std::placeholders::_1), true);
 
-		// PS Buffer for model, view, projection matrices
-		std::shared_ptr<ConstantBuffer> modelViewProjectionConstantBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
-		modelViewProjectionConstantBuffer->CreateBuffer<ModelViewProjectionConstantBuffer>(
-			D3D11_USAGE_DYNAMIC,			// Usage: Dynamic
-			D3D11_CPU_ACCESS_WRITE,			// CPU Access: CPU will be able to write using Map
-			0,								// Misc Flags: No miscellaneous flags
-			0								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
-			// Not supplying any initial data
-			);
 
-		// Create a constant buffer array which will be added as a bindable
-		std::shared_ptr<ConstantBufferArray> psConstantBufferArray = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
-
-		// Add the material constant buffer and the lighting constant buffer
-		psConstantBufferArray->AddBuffer(specularBuffer);						// Buffer bound to slot 1
-		psConstantBufferArray->AddBuffer(modelViewProjectionConstantBuffer);	// Buffer bound to slot 2
-		wall->AddBindable(psConstantBufferArray);
-
-		std::shared_ptr<SamplerStateArray> samplers = std::make_shared<SamplerStateArray>(m_deviceResources, SamplerStateBindingLocation::PIXEL_SHADER);
-		samplers->AddSamplerState("default-sampler-state");
-		wall->AddBindable(samplers);
+		wall->AddSamplerState("default-sampler-state", SamplerStateBindingLocation::PIXEL_SHADER, true);
 	}
 
 	/*
