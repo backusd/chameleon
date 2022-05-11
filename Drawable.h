@@ -41,7 +41,6 @@ public:
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string filename);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
-	~Drawable();
 
 	void AddBindable(std::string lookupName);
 	void AddBindable(std::shared_ptr<Bindable> bindable);
@@ -96,11 +95,11 @@ public:
 	void AddSamplerState(std::string lookupName, SamplerStateBindingLocation bindingLocation, bool recursive = true);
 
 	template <typename T>
-	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive = true);
+	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void (Drawable::* updateFunc)(std::shared_ptr<ConstantBuffer>), bool recursive = true);
 	template <typename T>
 	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, bool recursive = true);
 	template <typename T>
-	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive = true);
+	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, void (Drawable::* updateFunc)(std::shared_ptr<ConstantBuffer>), bool recursive = true);
 
 protected:
 	// This Update function is designed to be called during the recursive Update of a Drawable hierarchy.
@@ -283,7 +282,7 @@ void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, 
 }
 
 template <typename T>
-void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive)
+void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void (Drawable::* updateFunc)(std::shared_ptr<ConstantBuffer>), bool recursive)
 {
 	// Because we are supplying the update functional, we need to allow this buffer to be mappable
 	std::shared_ptr<ConstantBuffer> buffer = std::make_shared<ConstantBuffer>(m_deviceResources);
@@ -350,11 +349,11 @@ void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, 
 	}
 
 	// Add the constant buffer and update functional to the vector of update functionals
-	m_updateFunctions.push_back(std::make_tuple(buffer,updateFunc));
+	m_updateFunctions.push_back(std::make_tuple(buffer, std::bind(updateFunc, this, std::placeholders::_1)));
 }
 
 template <typename T>
-void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, std::function<void(std::shared_ptr<ConstantBuffer>)> updateFunc, bool recursive)
+void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void* initialData, void (Drawable::* updateFunc)(std::shared_ptr<ConstantBuffer>), bool recursive)
 {
 	// Because we are supplying the update functional, we need to allow this buffer to be mappable
 	std::shared_ptr<ConstantBuffer> buffer = std::make_shared<ConstantBuffer>(m_deviceResources);
@@ -421,5 +420,5 @@ void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, 
 	}
 
 	// Add the constant buffer and update functional to the vector of update functionals
-	m_updateFunctions.push_back(std::make_tuple(buffer, updateFunc));
+	m_updateFunctions.push_back(std::make_tuple(buffer, std::bind(updateFunc, this, std::placeholders::_1)));
 }

@@ -190,33 +190,6 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	ConstructFromAiNode(node, meshes);
 }
 
-Drawable::~Drawable()
-{
-	m_updateFunctions.clear();
-	m_bindables.clear();
-
-	m_rasterizerState = nullptr;
-	m_depthStencilState = nullptr;
-
-	m_inputLayout = nullptr;
-	m_vertexShader = nullptr;
-	m_pixelShader = nullptr;
-
-	m_samplerStateArrayCS = nullptr;
-	m_samplerStateArrayVS = nullptr;
-	m_samplerStateArrayHS = nullptr;
-	m_samplerStateArrayDS = nullptr;
-	m_samplerStateArrayGS = nullptr;
-	m_samplerStateArrayPS = nullptr;
-
-	m_constantBufferArrayCS = nullptr;
-	m_constantBufferArrayVS = nullptr;
-	m_constantBufferArrayHS = nullptr;
-	m_constantBufferArrayDS = nullptr;
-	m_constantBufferArrayGS = nullptr;
-	m_constantBufferArrayPS = nullptr;
-}
-
 void Drawable::InitializePipelineConfiguration()
 {
 	// Use common defaults where possible, otherwise set to nullptr

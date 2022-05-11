@@ -220,8 +220,7 @@ void ContentWindow::AddSceneObjects()
 		psConfig.specularPower = 10.0f;
 
 		nanosuit->AddConstantBuffer<PhongPSConfigurationData>(ConstantBufferBindingLocation::PIXEL_SHADER, static_cast<void*>(&psConfig), true);
-		nanosuit->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, std::bind(&Drawable::UpdateModelViewProjectionBuffer, nanosuit, std::placeholders::_1), true);
-
+		nanosuit->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, &Drawable::UpdateModelViewProjectionBuffer, true);
 
 		nanosuit->AddSamplerState("default-sampler-state", SamplerStateBindingLocation::PIXEL_SHADER, true);
 	}
@@ -229,6 +228,7 @@ void ContentWindow::AddSceneObjects()
 
 
 	// Wall
+	/*
 	{
 		std::shared_ptr<Drawable> wall = m_scene->CreateDrawable(BasicModelType::Plane);
 		wall->AddBindable("brick-wall-texture-array");
@@ -252,6 +252,7 @@ void ContentWindow::AddSceneObjects()
 
 		wall->AddSamplerState("default-sampler-state", SamplerStateBindingLocation::PIXEL_SHADER, true);
 	}
+	*/
 
 	/*
 
