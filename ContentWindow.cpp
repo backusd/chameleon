@@ -217,7 +217,7 @@ void ContentWindow::AddSceneObjects()
 		psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
 		psConfig.specularMapEnabled = TRUE;
 		psConfig.specularIntensity = 0.2f;
-		psConfig.specularPower = 10.0f;
+		psConfig.specularPower = 96.0f;
 
 		nanosuit->AddConstantBuffer<PhongPSConfigurationData>(ConstantBufferBindingLocation::PIXEL_SHADER, static_cast<void*>(&psConfig), true);
 		nanosuit->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, &Drawable::UpdateModelViewProjectionBuffer, true);
@@ -240,8 +240,8 @@ void ContentWindow::AddSceneObjects()
 		wall->SetScale(5.0f, 5.0f, 1.0f);
 
 		PhongPSConfigurationData psConfig;
-		psConfig.normalMapEnabled = FALSE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
-		psConfig.specularMapEnabled = TRUE;
+		psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
+		psConfig.specularMapEnabled = FALSE;
 		psConfig.specularIntensity = 0.8f;
 		psConfig.specularPower = 100.0f;
 
