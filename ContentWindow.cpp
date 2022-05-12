@@ -222,13 +222,12 @@ void ContentWindow::AddSceneObjects()
 		nanosuit->AddConstantBuffer<PhongPSConfigurationData>(ConstantBufferBindingLocation::PIXEL_SHADER, static_cast<void*>(&psConfig), true);
 		nanosuit->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, &Drawable::UpdateModelViewProjectionBuffer, true);
 
-		nanosuit->AddSamplerState("default-sampler-state", SamplerStateBindingLocation::PIXEL_SHADER, true);
+		nanosuit->AddSamplerState(SamplerStateBindingLocation::PIXEL_SHADER, "default-sampler-state", true);
 	}
 
 
 
 	// Wall
-	/*
 	{
 		std::shared_ptr<Drawable> wall = m_scene->CreateDrawable(BasicModelType::Plane);
 		wall->AddBindable("brick-wall-texture-array");
@@ -241,18 +240,17 @@ void ContentWindow::AddSceneObjects()
 		wall->SetScale(5.0f, 5.0f, 1.0f);
 
 		PhongPSConfigurationData psConfig;
-		psConfig.normalMapEnabled = TRUE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
-		psConfig.specularMapEnabled = FALSE;
+		psConfig.normalMapEnabled = FALSE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
+		psConfig.specularMapEnabled = TRUE;
 		psConfig.specularIntensity = 0.8f;
 		psConfig.specularPower = 100.0f;
 
 		wall->AddConstantBuffer<PhongPSConfigurationData>(ConstantBufferBindingLocation::PIXEL_SHADER, static_cast<void*>(&psConfig), true);
-		wall->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, std::bind(&Drawable::UpdateModelViewProjectionBuffer, wall, std::placeholders::_1), true);
+		wall->AddConstantBuffer<ModelViewProjectionConstantBuffer>(ConstantBufferBindingLocation::PIXEL_SHADER, &Drawable::UpdateModelViewProjectionBuffer, true);
 
 
-		wall->AddSamplerState("default-sampler-state", SamplerStateBindingLocation::PIXEL_SHADER, true);
+		wall->AddSamplerState(SamplerStateBindingLocation::PIXEL_SHADER, "default-sampler-state", true);
 	}
-	*/
 
 	/*
 

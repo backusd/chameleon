@@ -21,7 +21,7 @@ public:
 	template <typename T, typename A>
 	void LoadBuffers(std::vector<T, A>& vertices, std::vector<unsigned short>& indices);
 
-	void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
+	// void AddBindable(std::shared_ptr<Bindable> bindable) { m_bindables.push_back(bindable); }
 	virtual void Bind() override;
 	unsigned int IndexCount() { return m_indexCount; }
 	unsigned int VertexCount() { return m_vertexCount; }
@@ -31,8 +31,12 @@ public:
 	bool RayIntersectionTest(const DirectX::XMVECTOR& rayOrigin, const DirectX::XMVECTOR& rayDirection, float& distance);
 	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& tranformation, std::vector<DirectX::XMVECTOR>& positions);
 
+	void SetMaterialIndex(unsigned int index) { m_materialIndex = index; }
+	unsigned int GetMaterialIndex() { return m_materialIndex; }
+
 protected:
 	std::string m_name;
+	unsigned int m_materialIndex;
 
 	D3D11_PRIMITIVE_TOPOLOGY m_topology;
 	DXGI_FORMAT m_indexFormat;
@@ -52,7 +56,7 @@ protected:
 	std::vector<unsigned short>		m_indices;
 
 	// Bindables for drawing the mesh (ex. Texture and Sampler)
-	std::vector<std::shared_ptr<Bindable>> m_bindables;
+	// std::vector<std::shared_ptr<Bindable>> m_bindables;
 
 	// DEBUG SPECIFIC --------------------------------------------------------
 #ifndef NDEBUG

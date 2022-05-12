@@ -14,7 +14,8 @@ Mesh::Mesh(std::shared_ptr<DeviceResources> deviceResources) :
 	m_sizeOfVertex(0),
 	m_indexFormat(DXGI_FORMAT_R16_UINT),
 	m_drawIndexed(true),
-	m_boundingBox(nullptr)
+	m_boundingBox(nullptr),
+	m_materialIndex(0)
 {
 }
 
@@ -23,8 +24,8 @@ void Mesh::Bind()
 	INFOMAN(m_deviceResources);
 
 	// First, bind any of the attached bindables
-	for (std::shared_ptr<Bindable> bindable : m_bindables)
-		bindable->Bind();
+	//for (std::shared_ptr<Bindable> bindable : m_bindables)
+	//	bindable->Bind();
 
 	// Next, bind the vertex and index buffers
 	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();

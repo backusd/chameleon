@@ -40,7 +40,7 @@ public:
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, BasicModelType modelType);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string filename);
 	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::shared_ptr<Mesh> mesh);
-	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
+	Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes, const aiMaterial* const* materials);
 
 	void AddBindable(std::string lookupName);
 	void AddBindable(std::shared_ptr<Bindable> bindable);
@@ -92,7 +92,10 @@ public:
 	void SetRasterizerState(std::string lookupName, bool recursive = true);
 	void SetDepthStencilState(std::string lookupName, bool recursive = true);
 		
-	void AddSamplerState(std::string lookupName, SamplerStateBindingLocation bindingLocation, bool recursive = true);
+	void AddSamplerState(SamplerStateBindingLocation bindingLocation, std::string lookupName, bool recursive = true);
+
+	void AddTexture(TextureBindingLocation bindingLocation, std::shared_ptr<Texture> texture, bool recursive = true);
+	void AddTexture(TextureBindingLocation bindingLocation, std::string lookupName, bool recursive = true);
 
 	template <typename T>
 	void AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, void (Drawable::* updateFunc)(std::shared_ptr<ConstantBuffer>), bool recursive = true);
@@ -107,7 +110,7 @@ protected:
 	void UpdateModelViewProjectionConstantBuffer();
 	void InitializePipelineConfiguration();
 	void LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials, std::vector<std::shared_ptr<Mesh>>& meshes);
-	void ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes);
+	void ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes, const aiMaterial* const* materials);
 	void GetBoundingBoxPositionsWithTransformation(const DirectX::XMMATRIX& parentModelMatrix, std::vector<DirectX::XMVECTOR>& positions);
 	bool IsMouseHovered(const DirectX::XMVECTOR& clickPointNear,
 		const DirectX::XMVECTOR& clickPointFar,
@@ -136,6 +139,8 @@ protected:
 
 
 	// -------------------------------------------------------------
+	DirectX::XMMATRIX m_previousModelViewProjection;
+
 	std::shared_ptr<InputLayout>			m_inputLayout;
 	std::shared_ptr<VertexShader>			m_vertexShader;
 	std::shared_ptr<PixelShader>			m_pixelShader;
@@ -144,19 +149,9 @@ protected:
 	std::shared_ptr<RasterizerState>		m_rasterizerState;
 	std::shared_ptr<DepthStencilState>		m_depthStencilState;
 
-	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayCS;
-	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayVS;
-	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayHS;
-	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayDS;
-	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayGS;
-	std::shared_ptr<SamplerStateArray>		m_samplerStateArrayPS;
-
-	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayCS;
-	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayVS;
-	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayHS;
-	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayDS;
-	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayGS;
-	std::shared_ptr<ConstantBufferArray>	m_constantBufferArrayPS;
+	std::vector<std::shared_ptr<SamplerStateArray>>		m_samplerStateArrays;
+	std::vector<std::shared_ptr<TextureArray>>			m_textureArrays;
+	std::vector<std::shared_ptr<ConstantBufferArray>>	m_constantBufferArrays;
 
 	std::vector<std::tuple<std::shared_ptr<ConstantBuffer>, std::function<void(std::shared_ptr<ConstantBuffer>)>>> m_updateFunctions;
 
@@ -226,53 +221,11 @@ void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, 
 		initialData				// Initial Data: Fill the buffer with config data
 	);
 
-	switch (bindingLocation)
-	{
-	case ConstantBufferBindingLocation::COMPUTE_SHADER:
-		if (m_constantBufferArrayCS == nullptr)
-			m_constantBufferArrayCS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayCS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayCS);
-		break;
+	if (m_constantBufferArrays[(int)bindingLocation] == nullptr)
+		m_constantBufferArrays[(int)bindingLocation] = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
 
-	case ConstantBufferBindingLocation::VERTEX_SHADER:
-		if (m_constantBufferArrayVS == nullptr)
-			m_constantBufferArrayVS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayVS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayVS);
-		break;
-
-	case ConstantBufferBindingLocation::HULL_SHADER:
-		if (m_constantBufferArrayHS == nullptr)
-			m_constantBufferArrayHS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayHS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayHS);
-		break;
-
-	case ConstantBufferBindingLocation::DOMAIN_SHADER:
-		if (m_constantBufferArrayDS == nullptr)
-			m_constantBufferArrayDS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayDS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayDS);
-		break;
-
-	case ConstantBufferBindingLocation::GEOMETRY_SHADER:
-		if (m_constantBufferArrayGS == nullptr)
-			m_constantBufferArrayGS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayGS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayGS);
-		break;
-
-	case ConstantBufferBindingLocation::PIXEL_SHADER:
-		if (m_constantBufferArrayPS == nullptr)
-			m_constantBufferArrayPS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayPS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayPS);
-		break;
-
-	default:
-		throw DrawableException(__LINE__, __FILE__, "Unrecognized ConstantBufferBindingLocation enum value");
-	}
+	m_constantBufferArrays[(int)bindingLocation]->AddBuffer(buffer);
+	AddBindable(m_constantBufferArrays[(int)bindingLocation]);
 
 	if (recursive)
 	{
@@ -294,53 +247,11 @@ void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, 
 		// No Initial Data
 		);
 
-	switch (bindingLocation)
-	{
-	case ConstantBufferBindingLocation::COMPUTE_SHADER:
-		if (m_constantBufferArrayCS == nullptr)
-			m_constantBufferArrayCS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayCS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayCS);
-		break;
+	if (m_constantBufferArrays[(int)bindingLocation] == nullptr)
+		m_constantBufferArrays[(int)bindingLocation] = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
 
-	case ConstantBufferBindingLocation::VERTEX_SHADER:
-		if (m_constantBufferArrayVS == nullptr)
-			m_constantBufferArrayVS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayVS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayVS);
-		break;
-
-	case ConstantBufferBindingLocation::HULL_SHADER:
-		if (m_constantBufferArrayHS == nullptr)
-			m_constantBufferArrayHS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayHS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayHS);
-		break;
-
-	case ConstantBufferBindingLocation::DOMAIN_SHADER:
-		if (m_constantBufferArrayDS == nullptr)
-			m_constantBufferArrayDS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayDS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayDS);
-		break;
-
-	case ConstantBufferBindingLocation::GEOMETRY_SHADER:
-		if (m_constantBufferArrayGS == nullptr)
-			m_constantBufferArrayGS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayGS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayGS);
-		break;
-
-	case ConstantBufferBindingLocation::PIXEL_SHADER:
-		if (m_constantBufferArrayPS == nullptr)
-			m_constantBufferArrayPS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayPS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayPS);
-		break;
-
-	default:
-		throw DrawableException(__LINE__, __FILE__, "Unrecognized ConstantBufferBindingLocation enum value");
-	}
+	m_constantBufferArrays[(int)bindingLocation]->AddBuffer(buffer);
+	AddBindable(m_constantBufferArrays[(int)bindingLocation]);
 
 	if (recursive)
 	{
@@ -365,53 +276,11 @@ void Drawable::AddConstantBuffer(ConstantBufferBindingLocation bindingLocation, 
 		initialData				// Initial Data
 		);
 
-	switch (bindingLocation)
-	{
-	case ConstantBufferBindingLocation::COMPUTE_SHADER:
-		if (m_constantBufferArrayCS == nullptr)
-			m_constantBufferArrayCS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayCS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayCS);
-		break;
+	if (m_constantBufferArrays[(int)bindingLocation] == nullptr)
+		m_constantBufferArrays[(int)bindingLocation] = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
 
-	case ConstantBufferBindingLocation::VERTEX_SHADER:
-		if (m_constantBufferArrayVS == nullptr)
-			m_constantBufferArrayVS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayVS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayVS);
-		break;
-
-	case ConstantBufferBindingLocation::HULL_SHADER:
-		if (m_constantBufferArrayHS == nullptr)
-			m_constantBufferArrayHS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayHS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayHS);
-		break;
-
-	case ConstantBufferBindingLocation::DOMAIN_SHADER:
-		if (m_constantBufferArrayDS == nullptr)
-			m_constantBufferArrayDS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayDS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayDS);
-		break;
-
-	case ConstantBufferBindingLocation::GEOMETRY_SHADER:
-		if (m_constantBufferArrayGS == nullptr)
-			m_constantBufferArrayGS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayGS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayGS);
-		break;
-
-	case ConstantBufferBindingLocation::PIXEL_SHADER:
-		if (m_constantBufferArrayPS == nullptr)
-			m_constantBufferArrayPS = std::make_shared<ConstantBufferArray>(m_deviceResources, bindingLocation);
-		m_constantBufferArrayPS->AddBuffer(buffer);
-		AddBindable(m_constantBufferArrayPS);
-		break;
-
-	default:
-		throw DrawableException(__LINE__, __FILE__, "Unrecognized ConstantBufferBindingLocation enum value");
-	}
+	m_constantBufferArrays[(int)bindingLocation]->AddBuffer(buffer);
+	AddBindable(m_constantBufferArrays[(int)bindingLocation]);
 
 	if (recursive)
 	{

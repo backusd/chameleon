@@ -9,12 +9,12 @@
 
 enum class ConstantBufferBindingLocation
 {
-	COMPUTE_SHADER,
-	VERTEX_SHADER,
-	HULL_SHADER,
-	DOMAIN_SHADER,
-	GEOMETRY_SHADER,
-	PIXEL_SHADER
+	COMPUTE_SHADER = 0,
+	VERTEX_SHADER = 1,
+	HULL_SHADER = 2,
+	DOMAIN_SHADER = 3,
+	GEOMETRY_SHADER = 4,
+	PIXEL_SHADER = 5
 };
 
 class ConstantBufferArray : public Bindable

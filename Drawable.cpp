@@ -147,11 +147,8 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 		}
 	}
 
-
-	// This constructor is only used for the root node, so just get the root node and if there are any children,
-	// a different constructor will be used
-	//aiNode node = *scene->mRootNode;
-	ConstructFromAiNode(*scene->mRootNode, allMeshes);
+	// This constructor is only used for the root node, so just get the root node and if there are any children, a different constructor will be used
+	ConstructFromAiNode(*scene->mRootNode, allMeshes, scene->mMaterials);
 
 	// Once the rootNode is created, all meshes will have a BoundingBox, so gather each one and
 	// use those values to establish an all encapsulating BoundingBox
@@ -160,7 +157,7 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 	m_boundingBox = std::make_unique<BoundingBox>(m_deviceResources, positions);
 }
 
-Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes) :
+Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared_ptr<MoveLookController> moveLookController, std::string name, const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes, const aiMaterial* const* materials) :
 	m_deviceResources(deviceResources),
 	m_moveLookController(moveLookController),
 	m_projectionMatrix(DirectX::XMMatrixIdentity()),
@@ -187,11 +184,15 @@ Drawable::Drawable(std::shared_ptr<DeviceResources> deviceResources, std::shared
 {
 	InitializePipelineConfiguration();
 
-	ConstructFromAiNode(node, meshes);
+	ConstructFromAiNode(node, meshes, materials);
 }
 
 void Drawable::InitializePipelineConfiguration()
 {
+	// XMMatrix to hold the model-view-projection of the previous frame to allow us to test
+	// if a model-view-projection constant buffer needs to be updated
+	m_previousModelViewProjection = DirectX::XMMatrixIdentity();
+
 	// Use common defaults where possible, otherwise set to nullptr
 	SetRasterizerState("solidfill", true);
 	SetDepthStencilState("depth-enabled-depth-stencil-state", true);
@@ -200,22 +201,18 @@ void Drawable::InitializePipelineConfiguration()
 	m_vertexShader = nullptr;
 	m_pixelShader  = nullptr;
 
-	m_samplerStateArrayCS = nullptr;
-	m_samplerStateArrayVS = nullptr;
-	m_samplerStateArrayHS = nullptr;
-	m_samplerStateArrayDS = nullptr;
-	m_samplerStateArrayGS = nullptr;
-	m_samplerStateArrayPS = nullptr;
+	// Each sampler state array is specific to a different pipeline stage
+	for (int iii = (int)SamplerStateBindingLocation::COMPUTE_SHADER; iii <= (int)SamplerStateBindingLocation::PIXEL_SHADER; ++iii)
+		m_samplerStateArrays.push_back(nullptr);
 
-	m_constantBufferArrayCS = nullptr;
-	m_constantBufferArrayVS = nullptr;
-	m_constantBufferArrayHS = nullptr;
-	m_constantBufferArrayDS = nullptr;
-	m_constantBufferArrayGS = nullptr;
-	m_constantBufferArrayPS = nullptr;
+	for (int iii = (int)TextureBindingLocation::COMPUTE_SHADER; iii <= (int)TextureBindingLocation::PIXEL_SHADER; ++iii)
+		m_textureArrays.push_back(nullptr);
+
+	for (int iii = (int)ConstantBufferBindingLocation::COMPUTE_SHADER; iii <= (int)ConstantBufferBindingLocation::PIXEL_SHADER; ++iii)
+		m_constantBufferArrays.push_back(nullptr);
 }
 
-void Drawable::ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes)
+void Drawable::ConstructFromAiNode(const aiNode& node, const std::vector<std::shared_ptr<Mesh>>& meshes, const aiMaterial* const* materials)
 {
 	// Keep track of the node name
 	m_nodeName = std::string(node.mName.C_Str());
@@ -253,12 +250,119 @@ void Drawable::ConstructFromAiNode(const aiNode& node, const std::vector<std::sh
 	// NOTE: the node is NOT required to have a mesh. In the case of OBJ files, 
 	// the root node is basically an empty node that houses all the children nodes
 	if (node.mNumMeshes == 1)
+	{
 		m_mesh = meshes[node.mMeshes[0]]; // Reminder: node.mMeshes is just an int array where each int is an index into the all meshes array
+
+		// Extract the material data for the mesh -------------------------------------------------------------------------------
+
+		// Initialize a default Pixel Shader configuration
+		PhongPSConfigurationData psConfig;
+		psConfig.normalMapEnabled = FALSE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
+		psConfig.specularMapEnabled = FALSE;
+		psConfig.specularIntensity = 0.5f;
+		psConfig.specularPower = 1.0f;
+
+		// Get the diffuse texture
+		const aiMaterial& material = *materials[m_mesh->GetMaterialIndex()];
+		aiString textureFileName;
+		material.GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName);
+
+		// Create the texture
+		std::shared_ptr<Texture> texture = std::make_shared<Texture>(m_deviceResources);
+		texture->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
+
+		AddTexture(TextureBindingLocation::PIXEL_SHADER, texture, false);
+
+		// Determine if the material has a specular map. If not, just use the shininess value
+		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			std::shared_ptr<Texture> specular = std::make_shared<Texture>(m_deviceResources);
+			specular->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
+
+			AddTexture(TextureBindingLocation::PIXEL_SHADER, specular, false);
+
+			psConfig.specularMapEnabled = TRUE;
+		}
+		else
+		{
+			// Use the material shininess as the specular power
+			material.Get(AI_MATKEY_SHININESS, psConfig.specularPower);
+		}
+
+		// For some reason aiTextureType_HEIGHT is used to get the normal maps for OBJ files (not sure about other formats)
+		// even though there is an aiTextureType_NORMALS option
+		if (material.GetTexture(aiTextureType_HEIGHT, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			std::shared_ptr<Texture> normals = std::make_shared<Texture>(m_deviceResources);
+			normals->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
+
+			AddTexture(TextureBindingLocation::PIXEL_SHADER, normals, false);
+
+			psConfig.normalMapEnabled = TRUE;
+		}
+
+		if (material.GetTexture(aiTextureType_AMBIENT, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_AMBIENT not yet supported");
+
+		if (material.GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_AMBIENT_OCCLUSION not yet supported");
+
+		if (material.GetTexture(aiTextureType_BASE_COLOR, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_BASE_COLOR not yet supported");
+
+		if (material.GetTexture(aiTextureType_CLEARCOAT, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_CLEARCOAT not yet supported");
+
+		if (material.GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_DIFFUSE_ROUGHNESS not yet supported");
+
+		if (material.GetTexture(aiTextureType_DISPLACEMENT, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_DISPLACEMENT not yet supported");
+
+		if (material.GetTexture(aiTextureType_EMISSION_COLOR, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_EMISSION_COLOR not yet supported");
+
+		if (material.GetTexture(aiTextureType_EMISSIVE, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_EMISSIVE not yet supported");
+
+		if (material.GetTexture(aiTextureType_LIGHTMAP, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_LIGHTMAP not yet supported");
+
+		if (material.GetTexture(aiTextureType_METALNESS, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_METALNESS not yet supported");
+
+		if (material.GetTexture(aiTextureType_NONE, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_NONE not yet supported");
+
+		if (material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_NORMALS not yet supported");
+
+		if (material.GetTexture(aiTextureType_NORMAL_CAMERA, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_NORMAL_CAMERA not yet supported");
+
+		if (material.GetTexture(aiTextureType_OPACITY, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_OPACITY not yet supported");
+
+		if (material.GetTexture(aiTextureType_REFLECTION, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_REFLECTION not yet supported");
+
+		if (material.GetTexture(aiTextureType_SHEEN, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_SHEEN not yet supported");
+
+		if (material.GetTexture(aiTextureType_SHININESS, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_SHININESS not yet supported");
+
+		if (material.GetTexture(aiTextureType_TRANSMISSION, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_TRANSMISSION not yet supported");
+
+		if (material.GetTexture(aiTextureType_UNKNOWN, 0, &textureFileName) == aiReturn_SUCCESS)
+			throw DrawableException(__LINE__, __FILE__, "AssImp Texture Type aiTextureType_UNKNOWN not yet supported");
+	}
 
 	// Construct the children, must be sure to pass the name that represents the drawable as a whole as well as a reference
 	// to the entire list of meshes
 	for (unsigned int iii = 0; iii < node.mNumChildren; ++iii)
-		m_children.push_back(std::make_unique<Drawable>(m_deviceResources, m_moveLookController, m_name, *node.mChildren[iii], meshes));
+		m_children.push_back(std::make_unique<Drawable>(m_deviceResources, m_moveLookController, m_name, *node.mChildren[iii], meshes, materials));
 }
 
 void Drawable::GetBoundingBoxPositionsWithTransformation(const XMMATRIX& parentModelMatrix, std::vector<XMVECTOR>& positions)
@@ -304,180 +408,7 @@ void Drawable::LoadMesh(const aiMesh& mesh, const aiMaterial* const* materials, 
 
 	meshes.push_back(std::make_shared<Mesh>(m_deviceResources));
 	meshes.back()->LoadBuffers<OBJVertex>(vertices, indices);
-
-	// Load the material ==================================================================================================================
-
-	// Initialize a default Pixel Shader configuration
-	PhongPSConfigurationData psConfig;
-	psConfig.normalMapEnabled = FALSE; // Use these true/false macros because the underlying BOOL value is a 4-byte boolean
-	psConfig.specularMapEnabled = FALSE;
-	psConfig.specularIntensity = 0.5f;
-	psConfig.specularPower = 1.0f;
-
-	// Material index will be negative if there is no material for this 
-	if (mesh.mMaterialIndex >= 0)
-	{
-		// Get the diffuse texture
-		const aiMaterial& material = *materials[mesh.mMaterialIndex];
-		aiString textureFileName;
-		material.GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName);
-
-		// Create the texture
-		std::shared_ptr<Texture> texture = std::make_shared<Texture>(m_deviceResources);
-		texture->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
-
-		// Add the texture to a texture array (texture itself is not bindable)
-		std::shared_ptr<TextureArray> textureArray = std::make_shared<TextureArray>(m_deviceResources, TextureBindingLocation::PIXEL_SHADER);
-		textureArray->AddTexture(texture);
-
-		// Determine if the material has a specular map. If not, just use the shininess value
-		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			std::shared_ptr<Texture> specular = std::make_shared<Texture>(m_deviceResources);
-			specular->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
-			textureArray->AddTexture(specular);
-
-			psConfig.specularMapEnabled = TRUE;
-		}
-		else
-		{
-			// Use the material shininess as the specular power
-			material.Get(AI_MATKEY_SHININESS, psConfig.specularPower);
-		}
-
-		// For some reason aiTextureType_HEIGHT is used to get the normal maps for OBJ files (not sure about other formats)
-		// even though there is an aiTextureType_NORMALS option
-		if (material.GetTexture(aiTextureType_HEIGHT, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			std::shared_ptr<Texture> normals = std::make_shared<Texture>(m_deviceResources);
-			normals->Create(std::string("models/nanosuit-textured/") + textureFileName.C_Str());
-			textureArray->AddTexture(normals);
-
-			psConfig.normalMapEnabled = TRUE;
-		}
-
-
-
-		if (material.GetTexture(aiTextureType_AMBIENT, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_BASE_COLOR, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_CLEARCOAT, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_DISPLACEMENT, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_EMISSION_COLOR, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_EMISSIVE, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_LIGHTMAP, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_METALNESS, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_NONE, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_NORMAL_CAMERA, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_OPACITY, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_REFLECTION, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_SHEEN, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_SHININESS, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_TRANSMISSION, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-		if (material.GetTexture(aiTextureType_UNKNOWN, 0, &textureFileName) == aiReturn_SUCCESS)
-		{
-			int iii = 0;
-		}
-
-
-		meshes.back()->AddBindable(textureArray);
-
-		std::shared_ptr<SamplerStateArray> samplers = std::make_shared<SamplerStateArray>(m_deviceResources, SamplerStateBindingLocation::PIXEL_SHADER);
-		samplers->AddSamplerState("default-sampler-state");
-		meshes.back()->AddBindable(samplers);
-	}
-
-
-	// Create a PS constant buffer for the PS configuration data
-	std::shared_ptr<ConstantBuffer> specularBuffer = std::make_shared<ConstantBuffer>(m_deviceResources);
-	specularBuffer->CreateBuffer<PhongPSConfigurationData>(
-		D3D11_USAGE_DEFAULT,			// Usage: Read-only by the GPU. Not accessible via CPU. MUST be initialized at buffer creation
-		0,								// CPU Access: No CPU access
-		0,								// Misc Flags: No miscellaneous flags
-		0,								// Structured Byte Stride: Not totally sure, but I don't think this needs to be set because even though it is a structured buffer, there is only a single element
-		static_cast<void*>(&psConfig)	// Initial Data: Fill the buffer with config data
-		);
-
-	// Create a constant buffer array which will be added as a bindable
-	std::shared_ptr<ConstantBufferArray> psConstantBufferArray = std::make_shared<ConstantBufferArray>(m_deviceResources, ConstantBufferBindingLocation::PIXEL_SHADER);
-
-	// Add the material constant buffer and the lighting constant buffer
-	psConstantBufferArray->AddBuffer(specularBuffer);
-	meshes.back()->AddBindable(psConstantBufferArray);
+	meshes.back()->SetMaterialIndex(mesh.mMaterialIndex);
 }
 
 
@@ -547,60 +478,48 @@ void Drawable::SetDepthStencilState(std::string lookupName, bool recursive)
 	}
 }
 
-void Drawable::AddSamplerState(std::string lookupName, SamplerStateBindingLocation bindingLocation, bool recursive)
+void Drawable::AddSamplerState(SamplerStateBindingLocation bindingLocation, std::string lookupName, bool recursive)
 {
-	switch (bindingLocation)
-	{
-	case SamplerStateBindingLocation::COMPUTE_SHADER: 
-		if (m_samplerStateArrayCS == nullptr)
-			m_samplerStateArrayCS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
-		m_samplerStateArrayCS->AddSamplerState(lookupName);
-		AddBindable(m_samplerStateArrayCS);
-		break;
+	if (m_samplerStateArrays[(int)bindingLocation] == nullptr)
+		m_samplerStateArrays[(int)bindingLocation] = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
 
-	case SamplerStateBindingLocation::VERTEX_SHADER:
-		if (m_samplerStateArrayVS == nullptr)
-			m_samplerStateArrayVS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
-		m_samplerStateArrayVS->AddSamplerState(lookupName);
-		AddBindable(m_samplerStateArrayVS);
-		break;
-
-	case SamplerStateBindingLocation::HULL_SHADER:
-		if (m_samplerStateArrayHS == nullptr)
-			m_samplerStateArrayHS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
-		m_samplerStateArrayHS->AddSamplerState(lookupName);
-		AddBindable(m_samplerStateArrayHS);
-		break;
-
-	case SamplerStateBindingLocation::DOMAIN_SHADER:
-		if (m_samplerStateArrayDS == nullptr)
-			m_samplerStateArrayDS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
-		m_samplerStateArrayDS->AddSamplerState(lookupName);
-		AddBindable(m_samplerStateArrayDS);
-		break;
-
-	case SamplerStateBindingLocation::GEOMETRY_SHADER:
-		if (m_samplerStateArrayGS == nullptr)
-			m_samplerStateArrayGS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
-		m_samplerStateArrayGS->AddSamplerState(lookupName);
-		AddBindable(m_samplerStateArrayGS);
-		break;
-
-	case SamplerStateBindingLocation::PIXEL_SHADER:
-		if (m_samplerStateArrayPS == nullptr)
-			m_samplerStateArrayPS = std::make_shared<SamplerStateArray>(m_deviceResources, bindingLocation);
-		m_samplerStateArrayPS->AddSamplerState(lookupName);
-		AddBindable(m_samplerStateArrayPS);
-		break;
-
-	default:
-		throw DrawableException(__LINE__, __FILE__, "Unrecognized SamplerStateBindingLocation enum value");
-	}
+	m_samplerStateArrays[(int)bindingLocation]->AddSamplerState(lookupName);
+	AddBindable(m_samplerStateArrays[(int)bindingLocation]);
 
 	if (recursive)
 	{
 		for (std::unique_ptr<Drawable>& child : m_children)
-			child->AddSamplerState(lookupName, bindingLocation, true);
+			child->AddSamplerState(bindingLocation, lookupName, true);
+	}
+}
+
+void Drawable::AddTexture(TextureBindingLocation bindingLocation, std::shared_ptr<Texture> texture, bool recursive)
+{
+	if (m_textureArrays[(int)bindingLocation] == nullptr)
+		m_textureArrays[(int)bindingLocation] = std::make_shared<TextureArray>(m_deviceResources, bindingLocation);
+
+	m_textureArrays[(int)bindingLocation]->AddTexture(texture);
+	AddBindable(m_textureArrays[(int)bindingLocation]);
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->AddTexture(bindingLocation, texture, true);
+	}
+}
+
+void Drawable::AddTexture(TextureBindingLocation bindingLocation, std::string lookupName, bool recursive)
+{
+	if (m_textureArrays[(int)bindingLocation] == nullptr)
+		m_textureArrays[(int)bindingLocation] = std::make_shared<TextureArray>(m_deviceResources, bindingLocation);
+
+	m_textureArrays[(int)bindingLocation]->AddTexture(lookupName);
+	AddBindable(m_textureArrays[(int)bindingLocation]);
+
+	if (recursive)
+	{
+		for (std::unique_ptr<Drawable>& child : m_children)
+			child->AddTexture(bindingLocation, lookupName, true);
 	}
 }
 
@@ -664,28 +583,38 @@ void Drawable::UpdateRenderData(const XMMATRIX& parentModelMatrix)
 
 void Drawable::UpdateModelViewProjectionBuffer(std::shared_ptr<ConstantBuffer> constantBuffer)
 {
-	INFOMAN(m_deviceResources);
+	DirectX::XMFLOAT4X4 mvp, prev;
+	DirectX::XMStoreFloat4x4(&mvp, m_accumulatedModelMatrix * m_moveLookController->ViewMatrix() * m_moveLookController->ProjectionMatrix());
+	DirectX::XMStoreFloat4x4(&prev, m_previousModelViewProjection);	
 
-	ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
-	D3D11_MAPPED_SUBRESOURCE ms;
-	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	if (mvp._11 != prev._11 || mvp._12 != prev._12 || mvp._13 != prev._13 || mvp._14 != prev._14 || 
+		mvp._21 != prev._21 || mvp._22 != prev._22 || mvp._23 != prev._23 || mvp._24 != prev._24 ||
+		mvp._31 != prev._31 || mvp._32 != prev._32 || mvp._33 != prev._33 || mvp._34 != prev._34 ||
+		mvp._41 != prev._41 || mvp._42 != prev._42 || mvp._43 != prev._43 || mvp._44 != prev._44)
+	{
+		INFOMAN(m_deviceResources);
 
-	ID3D11Buffer* buffer = constantBuffer->GetRawBufferPointer();
+		ID3D11DeviceContext4* context = m_deviceResources->D3DDeviceContext();
+		D3D11_MAPPED_SUBRESOURCE ms;
+		ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-	GFX_THROW_INFO(
-		context->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
-	);
+		ID3D11Buffer* buffer = constantBuffer->GetRawBufferPointer();
 
-	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-	XMMATRIX model = GetPreParentTransformModelMatrix();
-	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_moveLookController->ProjectionMatrix();
-	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
-	DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), model * viewProjection);
-	DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, model)));
+		GFX_THROW_INFO(
+			context->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)
+		);
 
-	GFX_THROW_INFO_ONLY(
-		context->Unmap(buffer, 0)
-	);
+		ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
+		XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_moveLookController->ProjectionMatrix();
+
+		DirectX::XMStoreFloat4x4(&(mappedBuffer->model), m_accumulatedModelMatrix);
+		DirectX::XMStoreFloat4x4(&(mappedBuffer->modelViewProjection), m_accumulatedModelMatrix * viewProjection);
+		DirectX::XMStoreFloat4x4(&(mappedBuffer->inverseTransposeModel), DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, m_accumulatedModelMatrix)));
+
+		GFX_THROW_INFO_ONLY(
+			context->Unmap(buffer, 0)
+		);
+	}
 }
 
 
@@ -730,6 +659,9 @@ void Drawable::Draw()
 	for (std::unique_ptr<Drawable>& child : m_children)
 		child->Draw();
 
+	// Update the previous frame model-view-projection matrix
+	m_previousModelViewProjection = m_accumulatedModelMatrix * m_moveLookController->ViewMatrix() * m_moveLookController->ProjectionMatrix();
+
 
 #ifndef NDEBUG
 	// Determine if any bounding boxes need to be draw for any of the nodes
@@ -771,7 +703,6 @@ void Drawable::UpdateModelViewProjectionConstantBuffer()
 	);
 
 	ModelViewProjectionConstantBuffer* mappedBuffer = (ModelViewProjectionConstantBuffer*)ms.pData;
-	//XMMATRIX model = this->GetModelMatrix();
 	XMMATRIX model = m_accumulatedModelMatrix;
 	XMMATRIX viewProjection = m_moveLookController->ViewMatrix() * m_projectionMatrix;
 	DirectX::XMStoreFloat4x4(&(mappedBuffer->model), model);
